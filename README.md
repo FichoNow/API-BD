@@ -4,8 +4,16 @@ API desarrollada en Node.js + TypeScript.
 
 ## Requisitos
 
-- Node.js >= 20
 - npm >= 10
+- Node:
+
+1. Instala nvm en tu ordenador.
+
+2. Una vez instalado, usa:
+   nvm use <número que aparece en .nvmrc>
+
+3. Si esa versión no está instalada, ejecuta:
+   nvm install <número que aparece en .nvmrc>
 
 Comprobar versiones:
 
