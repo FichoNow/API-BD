@@ -6,7 +6,9 @@ recibe en body:
     password: String
 }
 
-devuelve:
+
+TODO OK:
+(200 OK)
 {
     AccessToken: String,
     RefreshToken: String,
@@ -14,4 +16,10 @@ devuelve:
         name: String,
         role: String
     }
+}
+
+USUARIO NO EXISTE O CONTRASEÑA INCORRECTA:
+(401 Unauthorized)
+{
+    error: "Usuario o contraseña incorrectos"
 }
