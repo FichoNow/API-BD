@@ -10,9 +10,9 @@ recibe en body:
 TODO OK:
 (200 OK)
 {
-    AccessToken: String,
-    RefreshToken: String,
-    User: {
+    accessToken: String,
+    refreshToken: String,
+    userData: {
         name: String,
         role: String
     }
