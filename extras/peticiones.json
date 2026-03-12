@@ -1,0 +1,16 @@
+POST http://localhost:3000/auth/login
+
+recibe en body: 
+{
+    email: String,
+    password: String
+}
+
+{
+    AccessToken: String,
+    RefreshToken: String,
+    User: {
+        name: String,
+        role: String
+    }
+}
