@@ -1,0 +1,24 @@
+import "dotenv/config";
+import { z } from "zod";
+
+const envSchema = z.object({
+  DATABASE_HOST: z.string().min(1),
+  DATABASE_NAME: z.string().min(1),
+  DATABASE_USER: z.string().min(1),
+  DATABASE_PASSWORD: z.string().min(1),
+  DATABASE_PORT: z.coerce.number().int().positive(),
+
+  API_PORT: z.coerce.number().int().positive(),
+
+  JWT_SECRET: z.string().min(1),
+});
+
+const parsed = envSchema.safeParse(process.env);
+
+if (!parsed.success) {
+  console.error("Error en variables de entorno:");
+  console.error(parsed.error.format());
+  process.exit(1);
+}
+
+export const env = parsed.data;

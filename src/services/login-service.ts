@@ -2,7 +2,7 @@ import {
   findUserByEmail,
   updateLastLoginAt,
 } from "../database/repositories/user-repository.js";
-import { LoginResponse } from "../types/auth/login-response-type.js";
+import { LoginResponse } from "../types/dto/enpoinds/login-response-dto.js";
 
 /**
  * Ejecuta la lógica de autenticación de un usuario.
@@ -20,33 +20,30 @@ export async function loginUser(
   password: string,
 ): Promise<LoginResponse | null> {
   // Buscamos al usuario en base de datos a partir del email recibido.
-  const user = await findUserByEmail(email);
+  const userRow = await findUserByEmail(email);
 
-  // Si no existe ningún usuario con ese email, el login falla.
-  if (!user) {
+  if (!userRow) {
     return null;
   }
 
-  // Si el usuario existe pero está inactivo, no permitimos el login.
-  if (!user.is_active) {
+  if (!userRow.is_active) {
     return null;
   }
 
   //Falta logica de hash de contraseñas
-  if (user.password_hash !== password) {
+  if (userRow.password_hash !== password) {
     return null;
   }
 
   // actualizamos la fecha del último acceso del usuario.
-  await updateLastLoginAt(user.id);
+  await updateLastLoginAt(userRow.id);
 
-  // Devolvemos únicamente los datos necesarios para la respuesta del login.
   return {
     accessToken: "123",
     refreshToken: "123",
     userData: {
-      name: user.name,
-      role: user.role,
+      name: userRow.name,
+      role: userRow.role,
     },
   };
 }

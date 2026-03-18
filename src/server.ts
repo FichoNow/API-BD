@@ -1,7 +1,8 @@
 import "dotenv/config";
 import { app } from "./app.js";
+import { env } from "./config-env.js";
 
 // Arranque del servidor :D
-app.listen(process.env.API_PORT, () => {
-  console.log(`Servidor escuchando en http:localhost:${process.env.API_PORT}`);
+app.listen(env.API_PORT, () => {
+  console.log(`Servidor escuchando en http:localhost:${env.API_PORT}`);
 });

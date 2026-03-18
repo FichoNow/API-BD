@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { loginUser } from "../../services/login-service.js";
-import { LoginBody } from "../../types/auth/login-body-type.js";
 import { AppError } from "../../types/error/app-error-type.js";
+import { LoginBody } from "../../types/dto/enpoinds/login-body-dto.js";
 
 /**
  * Controller del endpoint de login.
