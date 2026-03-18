@@ -2,7 +2,7 @@ import {
   findUserByEmail,
   updateLastLoginAt,
 } from "../database/repositories/user-repository.js";
-import { LoginResponse } from "../types/auth/login-response.js";
+import { LoginResponse } from "../types/auth/login-response-type.js";
 
 /**
  * Ejecuta la lógica de autenticación de un usuario.
