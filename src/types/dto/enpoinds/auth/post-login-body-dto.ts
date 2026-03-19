@@ -1,5 +1,5 @@
 /** Datos que llegan en el body al hacer login. */
-export interface LoginBody {
+export interface PostLoginBody {
   /** Email del usuario. */
   email: string;
   /** Contraseña del usuario. */

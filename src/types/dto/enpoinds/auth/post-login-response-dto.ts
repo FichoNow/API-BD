@@ -1,7 +1,7 @@
-import { UserRole } from "../../db/user-row-type.js";
+import { UserRole } from "../../../db/user-row-type.js";
 
 /** Lo que devuelve la API al hacer login correctamente. */
-export interface LoginResponse {
+export interface PostLoginResponse {
   /** Token de acceso JWT (corta duración). */
   accessToken: string;
   /** Token para renovar el accessToken (larga duración). */
