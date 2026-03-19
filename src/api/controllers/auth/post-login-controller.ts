@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { loginUser } from "../../../services/login-service.js";
-import { AppError } from "../../../types/error/app-error-type.js";
 import { PostLoginBody } from "../../../types/dto/enpoinds/auth/post-login-body-dto.js";
 import { PostLoginResponse } from "../../../types/dto/enpoinds/auth/post-login-response-dto.js";
+import { ResponseError } from "../../../types/express/responseType/response-error-type.js";
+import { BodyResponse } from "../../../types/express/responseType/response-type.js";
 
 /**
  * Controller del endpoint de login.
@@ -15,25 +16,28 @@ import { PostLoginResponse } from "../../../types/dto/enpoinds/auth/post-login-r
  */
 export async function loginController(
   req: Request<unknown, unknown, PostLoginBody>,
-  res: Response<PostLoginResponse>,
+  res: Response<BodyResponse<PostLoginResponse>>,
 ) {
-  const body = req.body;
+  const { email, password } = req.body;
 
   // Verificamos que email/password sean string (true: eliminamos espacios / false: mandamos vacio)
-  const cleanEmail = typeof body.email === "string" ? body.email.trim() : "";
-  const cleanPassword =
-    typeof body.password === "string" ? body.password.trim() : "";
+  const cleanEmail = typeof email === "string" ? email.trim() : "";
+  const cleanPassword = typeof password === "string" ? password.trim() : "";
 
   //email/password vacios, error
   if (!cleanEmail || !cleanPassword) {
-    throw new AppError("Cuerpo de la solicitud inválido", 400, "BAD_REQUEST");
+    throw new ResponseError(
+      "Cuerpo de la solicitud inválido",
+      400,
+      "BAD_REQUEST",
+    );
   }
 
-  const result = await loginUser(cleanEmail, cleanPassword);
+  const data = await loginUser(cleanEmail, cleanPassword);
 
-  if (!result) {
-    throw new AppError("Credenciales incorrectas", 401, "UNAUTHORIZED");
+  if (!data) {
+    throw new ResponseError("Credenciales incorrectas", 401, "UNAUTHORIZED");
   }
 
-  return res.status(200).json(result);
+  return res.status(200).json({ success: true, data });
 }

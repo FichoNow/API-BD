@@ -1,5 +1,21 @@
-import { UserRow } from "../../types/db/user-row-type.js";
+import { ResultSetHeader } from "mysql2/promise";
+import { UpdateUserRow, UserRow } from "../../types/db/user-row-type.js";
 import { pool } from "../pool.js";
+
+/**
+ * Busca un usuario en la base de datos a partir de su ID.
+ *
+ * @param userId ID del usuario que se quiere buscar.
+ * @returns El usuario encontrado o `null` si no existe.
+ */
+export async function findUserById(userId: number): Promise<UserRow | null> {
+  const [rows] = await pool.query<UserRow[]>(
+    "SELECT * FROM users WHERE id = ? LIMIT 1",
+    [userId],
+  );
+
+  return rows.length ? rows[0] : null;
+}
 
 /**
  * Busca un usuario en la base de datos a partir de su email.
@@ -33,4 +49,23 @@ export async function updateLastLoginAt(userId: number) {
     "UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?",
     [userId],
   );
+}
+
+export async function updateUserById(
+  userId: number,
+  data: UpdateUserRow,
+): Promise<boolean> {
+  const entries = Object.entries(data).filter(([, v]) => v !== undefined);
+
+  if (!entries.length) return false;
+
+  const setClause = entries.map(([key]) => `${key} = ?`).join(", ");
+  const values = [...entries.map(([, v]) => v), userId];
+
+  const [result] = await pool.query<ResultSetHeader>(
+    `UPDATE users SET ${setClause} WHERE id = ? LIMIT 1`,
+    values,
+  );
+
+  return result.affectedRows > 0;
 }

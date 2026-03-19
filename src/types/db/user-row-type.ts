@@ -18,3 +18,16 @@ export interface UserRow extends RowDataPacket {
   updated_at: Date;
   created_at: Date;
 }
+
+export type UpdateUserRow = Partial<
+  Pick<
+    UserRow,
+    | "group_id"
+    | "email"
+    | "name"
+    | "role"
+    | "job_title"
+    | "password_hash"
+    | "is_active"
+  >
+>;

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { AppError } from "../../types/error/app-error-type.js";
+import { ResponseError } from "../../types/express/responseType/response-error-type.js";
+import { BodyResponse } from "../../types/express/responseType/response-type.js";
 /**
  * Middleware global de manejo de errores.
  *
@@ -14,14 +15,15 @@ import { AppError } from "../../types/error/app-error-type.js";
 export function errorMiddleware(
   err: unknown,
   req: Request,
-  res: Response,
+  res: Response<BodyResponse>,
   next: NextFunction,
 ) {
   console.error(err);
 
-  if (err instanceof AppError) {
+  if (err instanceof ResponseError) {
     return res.status(err.statusCode).json({
       success: false,
+      data: null,
       error: {
         code: err.code,
         message: err.message,
@@ -31,6 +33,7 @@ export function errorMiddleware(
 
   return res.status(500).json({
     success: false,
+    data: null,
     error: {
       code: "INTERNAL_SERVER_ERROR",
       message: "Ha ocurrido un error inesperado",

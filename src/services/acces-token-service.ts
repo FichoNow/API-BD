@@ -1,8 +1,8 @@
 import "dotenv/config";
 import jwt from "jsonwebtoken";
-import { JwtClaims } from "../types/dto/JWT/jwt-claims-dto.js";
-import { AppError } from "../types/error/app-error-type.js";
 import { env } from "../config-env.js";
+import { ResponseError } from "../types/express/responseType/response-error-type.js";
+import { JwtClaims } from "../types/dto/JWT/jwt-claims-dto.js";
 
 /**
  * Emite un JWT con los claims del usuario.
@@ -50,18 +50,18 @@ export function validateAccesToken(token: string): JwtClaims {
     });
 
     if (typeof decoded === "string" || !decoded.jwtClaims) {
-      throw new AppError("No autorizado", 401, "INVALID_TOKEN_PAYLOAD");
+      throw new ResponseError("No autorizado", 401, "INVALID_TOKEN_PAYLOAD");
     }
 
     return decoded.jwtClaims;
   } catch (err) {
-    if (err instanceof AppError) throw err; // Por si lannzamos el error de arriba de no autorizado
+    if (err instanceof ResponseError) throw err; // Por si lanzamos el error de arriba de no autorizado
     if (err instanceof jwt.TokenExpiredError) {
-      throw new AppError("Token expirado", 401, "TOKEN_EXPIRED");
+      throw new ResponseError("Token expirado", 401, "TOKEN_EXPIRED");
     }
     if (err instanceof jwt.JsonWebTokenError) {
-      throw new AppError("Token inválido", 401, "TOKEN_INVALID");
+      throw new ResponseError("Token inválido", 401, "TOKEN_INVALID");
     }
-    throw new AppError("No autorizado", 401, "UNAUTHORIZED");
+    throw new ResponseError("No autorizado", 401, "UNAUTHORIZED");
   }
 }
