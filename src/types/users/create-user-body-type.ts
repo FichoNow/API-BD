@@ -1,5 +1,5 @@
 export interface CreateUserBodyType {
-    compaany_id: number;
+    company_id: number;
     group_id: number;
     email: string;
     name: string;
