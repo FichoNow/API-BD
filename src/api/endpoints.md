@@ -3,6 +3,7 @@
 ## POST /auth/login
 
 **Body**
+
 ```json
 {
   "email": "string",
@@ -13,6 +14,7 @@
 **Respuestas**
 
 `200 OK`
+
 ```json
 {
   "accessToken": "string",
@@ -24,7 +26,16 @@
 }
 ```
 
+{
+"success": true,
+"error": {
+"code": "OK",
+"DATA": "Cuerpo de la solicitud inválido"
+}
+}
+
 `400 Bad Request` — body vacío o campos inválidos
+
 ```json
 {
   "success": false,
@@ -36,6 +47,7 @@
 ```
 
 `401 Unauthorized` — credenciales incorrectas o usuario inactivo
+
 ```json
 {
   "success": false,
@@ -47,6 +59,7 @@
 ```
 
 `500 Internal Server Error` — error inesperado
+
 ```json
 {
   "success": false,
