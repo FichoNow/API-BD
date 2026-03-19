@@ -6,7 +6,7 @@ declare global {
   namespace Express {
     interface Request {
       /** Datos del usuario extraídos del JWT. Solo existe si la ruta pasa por el middleware de autenticación. */
-      JwtClaims?: JwtClaims;
+      jwtClaims?: JwtClaims;
     }
   }
 }

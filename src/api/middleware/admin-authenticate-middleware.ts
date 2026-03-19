@@ -12,7 +12,7 @@ import { AppError } from "../../types/error/app-error-type.js";
  * @param res - Respuesta HTTP (no se usa directamente aquí).
  * @param next - Función para pasar al siguiente middleware o al manejador de errores.
  */
-export async function privateMiddleware(
+export async function requireAdministrator(
   req: Request,
   res: Response,
   next: NextFunction,
@@ -27,9 +27,13 @@ export async function privateMiddleware(
     return next(new AppError("No autorizado", 401, "INVALID_AUTH_HEADER"));
   }
 
-  req.JwtClaims = validateAccesToken(token);
+  req.jwtClaims = validateAccesToken(token);
 
-  console.log(req.JwtClaims);
+  if (req.jwtClaims.role !== "ADMINISTRATOR") {
+    return next(new AppError("No autorizado", 401, "INVALID_AUTH_HEADER"));
+  }
+
+  console.log(req.jwtClaims);
 
   return next();
 }
