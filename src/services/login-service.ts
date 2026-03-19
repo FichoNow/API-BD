@@ -2,7 +2,7 @@ import {
   findUserByEmail,
   updateLastLoginAt,
 } from "../database/repositories/user-repository.js";
-import { LoginResponse } from "../types/dto/enpoinds/login-response-dto.js";
+import { PostLoginResponse } from "../types/dto/enpoinds/auth/post-login-response-dto.js";
 import { issueJwt } from "./acces-token-service.js";
 
 /**
@@ -19,7 +19,7 @@ import { issueJwt } from "./acces-token-service.js";
 export async function loginUser(
   email: string,
   password: string,
-): Promise<LoginResponse | null> {
+): Promise<PostLoginResponse | null> {
   // Buscamos al usuario en base de datos a partir del email recibido.
   const userRow = await findUserByEmail(email);
 
