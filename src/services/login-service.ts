@@ -43,6 +43,7 @@ export async function loginUser(
     id: userRow.id,
     companyId: userRow.company_id,
     groupId: userRow.group_id,
+    role: userRow.role,
   });
 
   return {

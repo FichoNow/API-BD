@@ -1,3 +1,5 @@
+import { UserRole } from "../../db/user-row-type.js";
+
 /** Datos del usuario que se meten dentro del JWT. */
 export type JwtClaims = {
   /** ID del usuario en la base de datos. */
@@ -6,4 +8,6 @@ export type JwtClaims = {
   companyId: number;
   /** ID del grupo al que pertenece. */
   groupId: number;
+  /** Rol del usuario en la empresa. */
+  role: UserRole;
 };
