@@ -1,25 +1,45 @@
 import { Request, Response } from "express";
-import { AppError } from "../../../types/error/app-error-type.js";
+import { updateUser } from "../../../services/update-user-service.js";
 import { UpdateUserBody } from "../../../types/dto/enpoinds/admin/patch-user-body.js";
+import { PatchUserResponse } from "../../../types/dto/enpoinds/admin/patch-user-response.js";
+import { ResponseError } from "../../../types/express/responseType/response-error-type.js";
+import { BodyResponse } from "../../../types/express/responseType/response-type.js";
 
 /**
- * Controller del endpoint de login.
+ * Controller del endpoint de actualización de usuario (PATCH /admin/users/:id).
  *
  * Su responsabilidad es:
  * 1. Recibir la petición HTTP.
- * 2. Extraer y validar los datos básicos del body (email y password).
- * 3. Delegar la lógica de autenticación al service `loginUser`.
- * 4. Devolver la respuesta HTTP correspondiente según el resultado.
+ * 2. Extraer y validar el ID del usuario desde los parámetros de la ruta.
+ * 3. Extraer los datos a actualizar del body.
+ * 4. Delegar la lógica al service `updateUser`.
+ * 5. Devolver la respuesta HTTP correspondiente según el resultado.
  */
-export async function userController(
-  req: Request<{ id: string }, any, UpdateUserBody>,
-  res: Response,
+export async function patchUserController(
+  req: Request<{ id: string }, unknown, UpdateUserBody>,
+  res: Response<BodyResponse<PatchUserResponse>>,
 ) {
   const userId = Number(req.params.id);
 
   if (!Number.isInteger(userId) || userId <= 0) {
-    throw new AppError("ID de usuario no válido", 400, "INVALID_USER_ID");
+    throw new ResponseError("ID de usuario no válido", 400, "INVALID_USER_ID");
   }
 
   const body = req.body;
+
+  if (!body || Object.keys(body).length === 0) {
+    throw new ResponseError(
+      "El cuerpo de la solicitud no puede estar vacío",
+      400,
+      "BAD_REQUEST",
+    );
+  }
+
+  const data = await updateUser(userId, body);
+
+  if (!data) {
+    throw new ResponseError("Usuario no encontrado", 404, "USER_NOT_FOUND");
+  }
+
+  return res.status(200).json({ success: true, data });
 }
