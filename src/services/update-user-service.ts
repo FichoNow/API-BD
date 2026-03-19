@@ -3,8 +3,8 @@ import {
   updateUserById,
 } from "../database/repositories/user-repository.js";
 import { UpdateUserRow } from "../types/db/user-row-type.js";
-import { UpdateUserBody } from "../types/dto/enpoinds/admin/patch-user-body.js";
-import { PatchUserResponse } from "../types/dto/enpoinds/admin/patch-user-response.js";
+import { UpdateUserBody } from "../types/dto/endpoints/admin/update-user-body.js";
+import { UpdateUserResponse } from "../types/dto/endpoints/admin/update-user-response.js";
 
 /**
  * Ejecuta la lógica de actualización de un usuario por parte de un administrador.
@@ -20,12 +20,13 @@ import { PatchUserResponse } from "../types/dto/enpoinds/admin/patch-user-respon
 export async function updateUser(
   userId: number,
   body: UpdateUserBody,
-): Promise<PatchUserResponse | null> {
+  adminCompanyId: number,
+): Promise<UpdateUserResponse | null> {
   const { password, ...rest } = body;
 
   const user = await findUserById(userId);
 
-  if (!user) {
+  if (!user || user.company_id !== adminCompanyId || user.role === "ADMINISTRATOR") {
     return null;
   }
 

@@ -1,16 +1,17 @@
+import { findCompanyById } from "../database/repositories/company-repository.js";
 import {
   findUserByEmail,
   updateLastLoginAt,
 } from "../database/repositories/user-repository.js";
-import { PostLoginResponse } from "../types/dto/enpoinds/auth/post-login-response-dto.js";
-import { issueJwt } from "./acces-token-service.js";
+import { PostLoginResponse } from "../types/dto/endpoints/auth/post-login-response.js";
+import { issueJwt } from "./access-token-service.js";
 
 /**
  * Ejecuta la lógica de autenticación de un usuario.
  *
- * Busca al usuario por email, comprueba que exista y valida su contraseña.
- * Si las credenciales son correctas, actualiza la fecha del último login
- * y devuelve la respuesta de login.
+ * Busca al usuario por email, comprueba que exista, que esté activo y valida su contraseña.
+ * También verifica que la empresa del usuario exista y esté activa.
+ * Si todo es correcto, actualiza la fecha del último login y devuelve la respuesta de login.
  *
  * @param email Email del usuario que intenta iniciar sesión.
  * @param password Contraseña recibida en la petición.
@@ -36,6 +37,12 @@ export async function loginUser(
     return null;
   }
 
+  const company = await findCompanyById(userRow.company_id);
+
+  if (!company || !company.is_active) {
+    return null;
+  }
+
   // actualizamos la fecha del último acceso del usuario.
   await updateLastLoginAt(userRow.id);
 
@@ -52,6 +59,7 @@ export async function loginUser(
     userData: {
       name: userRow.name,
       role: userRow.role,
+      companyName: company.name,
     },
   };
 }

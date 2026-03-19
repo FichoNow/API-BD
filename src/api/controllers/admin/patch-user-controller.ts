@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
 import { updateUser } from "../../../services/update-user-service.js";
-import { ResponseError } from "../../../types/express/responseType/response-error-type.js";
-import { BodyResponse } from "../../../types/express/responseType/response-type.js";
-import { UpdateUserBody } from "../../../types/dto/enpoinds/admin/patch-user-body.js";
-import { PatchUserResponse } from "../../../types/dto/enpoinds/admin/patch-user-response.js";
+import { ResponseError } from "../../../types/express/response-type.js";
+import { BodyResponse } from "../../../types/express/response-type.js";
+import { UpdateUserBody } from "../../../types/dto/endpoints/admin/update-user-body.js";
+import { UpdateUserResponse } from "../../../types/dto/endpoints/admin/update-user-response.js";
 
 /**
- * Controller del endpoint de actualización de usuario (PATCH /admin/users/:id).
+ * Controller del endpoint de actualización de usuario (PATCH /admin/user/:id).
  *
  * Su responsabilidad es:
  * 1. Recibir la petición HTTP.
@@ -17,7 +17,7 @@ import { PatchUserResponse } from "../../../types/dto/enpoinds/admin/patch-user-
  */
 export async function patchUserController(
   req: Request<{ id: string }, unknown, UpdateUserBody>,
-  res: Response<BodyResponse<PatchUserResponse>>,
+  res: Response<BodyResponse<UpdateUserResponse>>,
 ) {
   const userId = Number(req.params.id);
 
@@ -35,7 +35,9 @@ export async function patchUserController(
     );
   }
 
-  const data = await updateUser(userId, body);
+  const adminCompanyId = req.jwtClaims!.companyId;
+
+  const data = await updateUser(userId, body, adminCompanyId);
 
   if (!data) {
     throw new ResponseError("Usuario no encontrado", 404, "USER_NOT_FOUND");

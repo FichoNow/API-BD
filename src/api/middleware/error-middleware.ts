@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { ResponseError } from "../../types/express/responseType/response-error-type.js";
-import { BodyResponse } from "../../types/express/responseType/response-type.js";
+import { ResponseError } from "../../types/express/response-type.js";
+import { BodyResponse } from "../../types/express/response-type.js";
 /**
  * Middleware global de manejo de errores.
  *

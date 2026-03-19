@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
-import { validateAccesToken } from "../../services/acces-token-service.js";
-import { ResponseError } from "../../types/express/responseType/response-error-type.js";
+import { validateAccessToken } from "../../services/access-token-service.js";
+import { ResponseError } from "../../types/express/response-type.js";
 
 /**
  * Middleware que protege rutas exclusivas de administradores.
@@ -27,13 +27,14 @@ export async function requireAdministrator(
     return next(new ResponseError("No autorizado", 401, "INVALID_AUTH_HEADER"));
   }
 
-  req.jwtClaims = validateAccesToken(token);
+  const claims = validateAccessToken(token);
+  req.jwtClaims = claims;
 
-  if (req.jwtClaims.role !== "ADMINISTRATOR") {
-    return next(new ResponseError("No autorizado", 401, "INVALID_AUTH_HEADER"));
+  if (claims.role !== "ADMINISTRATOR") {
+    return next(new ResponseError("No autorizado", 403, "FORBIDDEN"));
   }
 
-  console.log(req.jwtClaims);
+  console.log(claims);
 
   return next();
 }

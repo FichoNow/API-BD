@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { loginUser } from "../../../services/login-service.js";
-import { PostLoginBody } from "../../../types/dto/enpoinds/auth/post-login-body-dto.js";
-import { PostLoginResponse } from "../../../types/dto/enpoinds/auth/post-login-response-dto.js";
-import { ResponseError } from "../../../types/express/responseType/response-error-type.js";
-import { BodyResponse } from "../../../types/express/responseType/response-type.js";
+import { PostLoginBody } from "../../../types/dto/endpoints/auth/post-login-body.js";
+import { PostLoginResponse } from "../../../types/dto/endpoints/auth/post-login-response.js";
+import { ResponseError } from "../../../types/express/response-type.js";
+import { BodyResponse } from "../../../types/express/response-type.js";
 
 /**
  * Controller del endpoint de login.

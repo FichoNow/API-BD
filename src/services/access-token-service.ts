@@ -1,23 +1,12 @@
-import "dotenv/config";
 import jwt from "jsonwebtoken";
 import { env } from "../config-env.js";
-import { ResponseError } from "../types/express/responseType/response-error-type.js";
-import { JwtClaims } from "../types/dto/JWT/jwt-claims-dto.js";
-
-/**
- * Emite un JWT con los claims del usuario.
- *
- * @param jwtClaims - Claims (información del usuario)
- * @returns Token JWT firmado (string).
- */
-export function issueJwt(jwtClaims: JwtClaims): string {
-  return generateJwt(jwtClaims);
-}
+import { ResponseError } from "../types/express/response-type.js";
+import { JwtClaims } from "../types/dto/jwt/jwt-claims-dto.js";
 
 /**
  * Genera y firma un JWT con los claims del usuario.
  *
- * @param jwtClaims - (información del usuario)
+ * @param jwtClaims - Datos del usuario que se incluyen en el token.
  * @returns Token JWT firmado.
  *
  * Configuración:
@@ -26,7 +15,7 @@ export function issueJwt(jwtClaims: JwtClaims): string {
  * - expiresIn: 15 minutos
  * - issuer / audience: metadata del token
  */
-export function generateJwt(jwtClaims: JwtClaims): string {
+export function issueJwt(jwtClaims: JwtClaims): string {
   return jwt.sign({ jwtClaims }, env.JWT_SECRET, {
     subject: jwtClaims.id.toString(),
     expiresIn: "15m",
@@ -40,9 +29,9 @@ export function generateJwt(jwtClaims: JwtClaims): string {
  *
  * @param token - Token JWT del header Authorization.
  * @returns Los claims del usuario si el token es válido.
- * @throws AppError si el token ha expirado, es inválido o no tiene el formato esperado.
+ * @throws ResponseError si el token ha expirado, es inválido o no tiene el formato esperado.
  */
-export function validateAccesToken(token: string): JwtClaims {
+export function validateAccessToken(token: string): JwtClaims {
   try {
     const decoded = jwt.verify(token, env.JWT_SECRET, {
       issuer: "Api-Fran-Jan",
@@ -55,7 +44,7 @@ export function validateAccesToken(token: string): JwtClaims {
 
     return decoded.jwtClaims;
   } catch (err) {
-    if (err instanceof ResponseError) throw err; // Por si lanzamos el error de arriba de no autorizado
+    if (err instanceof ResponseError) throw err;
     if (err instanceof jwt.TokenExpiredError) {
       throw new ResponseError("Token expirado", 401, "TOKEN_EXPIRED");
     }

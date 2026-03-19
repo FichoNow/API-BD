@@ -3,4 +3,4 @@ import { patchUserController } from "../controllers/admin/patch-user-controller.
 
 export const adminRouter = Router();
 
-adminRouter.patch("/user", patchUserController);
+adminRouter.patch("/user/:id", patchUserController);

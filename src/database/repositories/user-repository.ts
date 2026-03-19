@@ -51,6 +51,16 @@ export async function updateLastLoginAt(userId: number) {
   );
 }
 
+/**
+ * Actualiza los campos de un usuario en la base de datos.
+ *
+ * Construye dinámicamente el SET de la query a partir de los campos presentes en `data`.
+ * Si no hay ningún campo, devuelve `false` sin ejecutar ninguna query.
+ *
+ * @param userId ID del usuario a actualizar.
+ * @param data Campos a actualizar. Solo se incluyen los que estén definidos.
+ * @returns `true` si se actualizó alguna fila, `false` si no.
+ */
 export async function updateUserById(
   userId: number,
   data: UpdateUserRow,
