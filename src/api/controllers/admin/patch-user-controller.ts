@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { updateUser } from "../../../services/update-user-service.js";
-import { UpdateUserBody } from "../../../types/dto/enpoinds/admin/patch-user-body.js";
-import { PatchUserResponse } from "../../../types/dto/enpoinds/admin/patch-user-response.js";
 import { ResponseError } from "../../../types/express/responseType/response-error-type.js";
 import { BodyResponse } from "../../../types/express/responseType/response-type.js";
+import { UpdateUserBody } from "../../../types/dto/enpoinds/admin/patch-user-body.js";
+import { PatchUserResponse } from "../../../types/dto/enpoinds/admin/patch-user-response.js";
 
 /**
  * Controller del endpoint de actualización de usuario (PATCH /admin/users/:id).
