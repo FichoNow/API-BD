@@ -3,6 +3,7 @@ import {
   updateLastLoginAt,
 } from "../database/repositories/user-repository.js";
 import { LoginResponse } from "../types/dto/enpoinds/login-response-dto.js";
+import { issueJwt } from "./acces-token-service.js";
 
 /**
  * Ejecuta la lógica de autenticación de un usuario.
@@ -38,8 +39,14 @@ export async function loginUser(
   // actualizamos la fecha del último acceso del usuario.
   await updateLastLoginAt(userRow.id);
 
+  const accessToken = issueJwt({
+    id: userRow.id,
+    companyId: userRow.company_id,
+    groupId: userRow.group_id,
+  });
+
   return {
-    accessToken: "123",
+    accessToken,
     refreshToken: "123",
     userData: {
       name: userRow.name,
