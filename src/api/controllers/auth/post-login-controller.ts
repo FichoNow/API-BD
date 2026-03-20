@@ -39,5 +39,5 @@ export async function loginController(
     throw new ResponseError("Credenciales incorrectas", 401, "UNAUTHORIZED");
   }
 
-  return res.status(200).json({ success: true, data });
+  return res.status(200).json({ data });
 }

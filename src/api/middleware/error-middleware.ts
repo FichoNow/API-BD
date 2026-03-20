@@ -22,7 +22,6 @@ export function errorMiddleware(
 
   if (err instanceof ResponseError) {
     return res.status(err.statusCode).json({
-      success: false,
       data: null,
       error: {
         code: err.code,
@@ -32,7 +31,6 @@ export function errorMiddleware(
   }
 
   return res.status(500).json({
-    success: false,
     data: null,
     error: {
       code: "INTERNAL_SERVER_ERROR",

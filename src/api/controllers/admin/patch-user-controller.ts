@@ -43,5 +43,5 @@ export async function patchUserController(
     throw new ResponseError("Usuario no encontrado", 404, "USER_NOT_FOUND");
   }
 
-  return res.status(200).json({ success: true, data });
+  return res.status(200).json({ data });
 }

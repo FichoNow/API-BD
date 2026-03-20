@@ -2,11 +2,10 @@
  * Estructura genérica de respuesta de la API.
  *
  * Todas las respuestas, tanto de éxito como de error, siguen este formato.
- * En caso de éxito, `success` es `true` y `data` contiene el resultado.
- * En caso de error, `success` es `false` y `error` contiene el código y mensaje.
+ * En caso de éxito, `data` contiene el resultado.
+ * En caso de error, `error` contiene el código y mensaje.
  */
 export interface BodyResponse<T = null> {
-  success: boolean;
   data: T;
   error?: Pick<ResponseError, "code" | "message">;
 }
