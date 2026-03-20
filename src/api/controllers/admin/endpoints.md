@@ -5,6 +5,7 @@
 Actualiza los datos de un usuario con rol `USER`.
 
 **Reglas de negocio**
+
 - El administrador debe estar autenticado con rol `ADMINISTRATOR`.
 - El usuario a editar debe pertenecer a la misma empresa que el administrador.
 - No se puede editar a un usuario con rol `ADMINISTRATOR`.
@@ -19,10 +20,10 @@ Authorization: Bearer <accessToken>
 **Params**
 
 | Parámetro | Tipo   | Descripción             |
-|-----------|--------|-------------------------|
+| --------- | ------ | ----------------------- |
 | `id`      | number | ID del usuario a editar |
 
-**Body** *(al menos un campo requerido)*
+**Body** _(al menos un campo requerido)_
 
 ```json
 {
@@ -42,7 +43,6 @@ Authorization: Bearer <accessToken>
 
 ```json
 {
-  "success": true,
   "data": {
     "id": "number",
     "name": "string",
@@ -60,22 +60,21 @@ Authorization: Bearer <accessToken>
 
 ```json
 {
-  "success": false,
   "error": {
     "code": "INVALID_USER_ID" | "BAD_REQUEST",
-    "message": "string"
+    "message": "El ID del usuario no es válido"
   }
 }
 ```
 
 `401 Unauthorized` — token ausente o inválido
+Lanzado por el middleware de autenticación, antes de llegar al controller.
 
 ```json
 {
-  "success": false,
   "error": {
     "code": "MISSING_AUTH_HEADER" | "INVALID_AUTH_HEADER" | "TOKEN_EXPIRED" | "TOKEN_INVALID",
-    "message": "string"
+    "message": "El token ha expirado"
   }
 }
 ```
@@ -84,7 +83,6 @@ Authorization: Bearer <accessToken>
 
 ```json
 {
-  "success": false,
   "error": {
     "code": "FORBIDDEN",
     "message": "No autorizado"
@@ -96,22 +94,9 @@ Authorization: Bearer <accessToken>
 
 ```json
 {
-  "success": false,
   "error": {
     "code": "USER_NOT_FOUND",
     "message": "Usuario no encontrado"
-  }
-}
-```
-
-`500 Internal Server Error` — error inesperado del servidor
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "INTERNAL_SERVER_ERROR",
-    "message": "Ha ocurrido un error inesperado"
   }
 }
 ```
