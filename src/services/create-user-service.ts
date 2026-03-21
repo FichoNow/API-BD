@@ -1,5 +1,5 @@
-import { createUser, findUserByEmail, findUSerByEmail } from "../database/repositories/user-repository.js";
-import { CreateUserBodyType } from "../types/auth/create-user-body-type.js";
+import { createUser, findUserByEmail } from "../database/repositories/user-repository.js";
+import { CreateUserBodyType } from "../types/users/create-user-body-type.js";
 import { CreateUserResponseType } from "../types/users/create-user-response-type.js";
 import {hashPassword } from "./password-hash-service.js";
 
