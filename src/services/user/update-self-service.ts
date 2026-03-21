@@ -49,9 +49,7 @@ export async function updateSelf(
   }
 
   return {
-    id: updatedUser.id,
     name: updatedUser.name,
     email: updatedUser.email,
-    updated_at: updatedUser.updated_at,
   };
 }

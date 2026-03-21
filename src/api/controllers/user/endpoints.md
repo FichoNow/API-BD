@@ -32,10 +32,8 @@ Authorization: Bearer <accessToken>
 ```json
 {
   "data": {
-    "id": "number",
     "name": "string",
-    "email": "string",
-    "updated_at": "string"
+    "email": "string"
   }
 }
 ```

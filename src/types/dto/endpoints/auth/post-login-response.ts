@@ -8,7 +8,7 @@ export interface PostLoginResponse {
   /** Token para renovar el accessToken (larga duración). */
   refreshToken: string;
   /** Datos básicos del usuario para usarlos en androidStudio. */
-  userData: Pick<UserRow, "name" | "role"> & {
+  userData: Pick<UserRow, "name" | "role" | "email"> & {
     companyName: Pick<CompanyRow, "name">["name"];
   };
 }

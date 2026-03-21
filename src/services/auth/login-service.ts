@@ -59,6 +59,7 @@ export async function loginUser(
     userData: {
       name: userRow.name,
       role: userRow.role,
+      email: userRow.email,
       companyName: company.name,
     },
   };

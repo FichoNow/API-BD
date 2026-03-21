@@ -33,6 +33,7 @@ Autentica a un usuario y devuelve los tokens de acceso junto con sus datos bási
     "userData": {
       "name": "string",
       "role": "USER" | "ADMINISTRATOR",
+      "email": "string",
       "companyName": "string"
     }
   }
