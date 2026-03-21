@@ -1,9 +1,9 @@
-import { findCompanyById } from "../database/repositories/company-repository.js";
+import { findCompanyById } from "../../database/repositories/company-repository.js";
 import {
   findUserByEmail,
   updateLastLoginAt,
-} from "../database/repositories/user-repository.js";
-import { PostLoginResponse } from "../types/dto/endpoints/auth/post-login-response.js";
+} from "../../database/repositories/user-repository.js";
+import { PostLoginResponse } from "../../types/dto/endpoints/auth/post-login-response.js";
 import { issueJwt } from "./access-token-service.js";
 
 /**

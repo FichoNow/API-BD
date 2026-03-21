@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { loginUser } from "../../../services/login-service.js";
+import { loginUser } from "../../../services/auth/login-service.js";
 import { PostLoginBody } from "../../../types/dto/endpoints/auth/post-login-body.js";
 import { PostLoginResponse } from "../../../types/dto/endpoints/auth/post-login-response.js";
 import { ResponseError } from "../../../types/express/response-type.js";

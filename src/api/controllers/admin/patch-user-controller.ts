@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { updateUser } from "../../../services/update-user-service.js";
+import { updateUser } from "../../../services/admin/update-user-service.js";
 import { ResponseError } from "../../../types/express/response-type.js";
 import { BodyResponse } from "../../../types/express/response-type.js";
 import { UpdateUserBody } from "../../../types/dto/endpoints/admin/update-user-body.js";

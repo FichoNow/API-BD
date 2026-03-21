@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { validateAccessToken } from "../../services/access-token-service.js";
+import { validateAccessToken } from "../../services/auth/access-token-service.js";
 import { ResponseError } from "../../types/express/response-type.js";
 
 /**

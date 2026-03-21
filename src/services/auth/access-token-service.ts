@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
-import { env } from "../config-env.js";
-import { ResponseError } from "../types/express/response-type.js";
-import { JwtClaims } from "../types/dto/jwt/jwt-claims-dto.js";
+import { env } from "../../config-env.js";
+import { ResponseError } from "../../types/express/response-type.js";
+import { JwtClaims } from "../../types/dto/jwt/jwt-claims-dto.js";
 
 /**
  * Genera y firma un JWT con los claims del usuario.

@@ -1,10 +1,10 @@
 import {
   findUserById,
   updateUserById,
-} from "../database/repositories/user-repository.js";
-import { UpdateUserRow } from "../types/db/user-row-type.js";
-import { UpdateUserBody } from "../types/dto/endpoints/admin/update-user-body.js";
-import { UpdateUserResponse } from "../types/dto/endpoints/admin/update-user-response.js";
+} from "../../database/repositories/user-repository.js";
+import { UpdateUserRow } from "../../types/db/user-row-type.js";
+import { UpdateUserBody } from "../../types/dto/endpoints/admin/update-user-body.js";
+import { UpdateUserResponse } from "../../types/dto/endpoints/admin/update-user-response.js";
 
 /**
  * Ejecuta la lógica de actualización de un usuario por parte de un administrador.
