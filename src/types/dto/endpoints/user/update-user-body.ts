@@ -1,10 +1,17 @@
+import * as z from "zod";
+import { createZodObject } from "../../../../helpers/zod-helper.js";
 import { UserRow } from "../../../db/user-row-type.js";
 
-export type UpdateSelfBody = Partial<
-  Pick<
-    UserRow,
-    | "email"
-    | "name"
-    | "password"
-  >
->;
+type UpdateSelfBodyRow = Partial<Pick<UserRow, "email" | "name">> & {
+  password?: string;
+};
+
+export type UpdateSelfBody = UpdateSelfBodyRow;
+
+export const UpdateSelfBodySchema = createZodObject<UpdateSelfBodyRow>({
+  email: z.email().trim().toLowerCase().optional(),
+  name: z.string().trim().optional(),
+  password: z.string().optional(),
+}).refine((body) => Object.values(body).some((v) => v !== undefined), {
+  message: "El cuerpo de la solicitud no puede estar vacío.",
+});

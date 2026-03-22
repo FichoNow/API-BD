@@ -4,6 +4,7 @@ import {
   updateLastLoginAt,
 } from "../../database/repositories/user-repository.js";
 import { PostLoginResponse } from "../../types/dto/endpoints/auth/post-login-response.js";
+import { verifyPassword } from "../password-hash-service.js";
 import { issueJwt } from "./access-token-service.js";
 
 /**
@@ -32,8 +33,9 @@ export async function loginUser(
     return null;
   }
 
-  //Falta logica de hash de contraseñas
-  if (userRow.password_hash !== password) {
+  const isValidPassword = await verifyPassword(password, userRow.password_hash);
+
+  if (!isValidPassword) {
     return null;
   }
 

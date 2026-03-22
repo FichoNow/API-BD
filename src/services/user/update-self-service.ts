@@ -4,6 +4,7 @@ import {
 } from "../../database/repositories/user-repository.js";
 import { UpdateUserRow } from "../../types/db/user-row-type.js";
 import { UpdateSelfBody } from "../../types/dto/endpoints/user/update-user-body.js";
+import { hashPassword } from "../password-hash-service.js";
 import { UpdateSelfResponse } from "../../types/dto/endpoints/user/update-user-response.js";
 
 /**
@@ -32,8 +33,7 @@ export async function updateSelf(
   const dataToUpdate: UpdateUserRow = { ...rest };
 
   if (password !== undefined) {
-    // falta hashear la contraseña
-    dataToUpdate.password_hash = password;
+    dataToUpdate.password_hash = await hashPassword(password);
   }
 
   const updated = await updateUserById(userId, dataToUpdate);

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { updateSelf } from "../../../services/user/update-self-service.js";
 import { ResponseError, BodyResponse } from "../../../types/express/response-type.js";
-import { UpdateSelfBody } from "../../../types/dto/endpoints/user/update-user-body.js";
+import { UpdateSelfBody, UpdateSelfBodySchema } from "../../../types/dto/endpoints/user/update-user-body.js";
 import { UpdateSelfResponse } from "../../../types/dto/endpoints/user/update-user-response.js";
 
 /**
@@ -20,17 +20,13 @@ export async function patchSelfController(
 ) {
   const userId = req.jwtClaims!.id;
 
-  const body = req.body;
+  const parsed = UpdateSelfBodySchema.safeParse(req.body);
 
-  if (!body || Object.keys(body).length === 0) {
-    throw new ResponseError(
-      "El cuerpo de la solicitud no puede estar vacío",
-      400,
-      "BAD_REQUEST",
-    );
+  if (!parsed.success) {
+    throw new ResponseError("El cuerpo de la solicitud no puede estar vacío", 400, "BAD_REQUEST");
   }
 
-  const data = await updateSelf(userId, body);
+  const data = await updateSelf(userId, parsed.data as UpdateSelfBody);
 
   if (!data) {
     throw new ResponseError("Usuario no encontrado", 404, "USER_NOT_FOUND");

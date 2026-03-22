@@ -4,6 +4,7 @@ import {
 } from "../../database/repositories/user-repository.js";
 import { UpdateUserRow } from "../../types/db/user-row-type.js";
 import { UpdateUserBody } from "../../types/dto/endpoints/admin/update-user-body.js";
+import { hashPassword } from "../password-hash-service.js";
 import { UpdateUserResponse } from "../../types/dto/endpoints/admin/update-user-response.js";
 
 /**
@@ -15,6 +16,7 @@ import { UpdateUserResponse } from "../../types/dto/endpoints/admin/update-user-
  *
  * @param userId ID del usuario a actualizar.
  * @param body Campos a actualizar recibidos del body de la petición.
+ * @param adminCompanyId ID de la empresa del administrador que realiza la petición.
  * @returns Los datos actualizados del usuario, o `null` si no existe.
  */
 export async function updateUser(
@@ -33,8 +35,7 @@ export async function updateUser(
   const dataToUpdate: UpdateUserRow = { ...rest };
 
   if (password !== undefined) {
-    // falta hashear la contraseña
-    dataToUpdate.password_hash = password;
+    dataToUpdate.password_hash = await hashPassword(password);
   }
 
   const updated = await updateUserById(userId, dataToUpdate);

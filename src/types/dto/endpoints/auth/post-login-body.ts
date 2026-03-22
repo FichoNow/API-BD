@@ -1,7 +1,12 @@
-/** Datos que llegan en el body al hacer login. */
-export interface PostLoginBody {
-  /** Email del usuario. */
+import * as z from "zod";
+import { createZodObject } from "../../../../helpers/zod-helper.js";
+
+export type PostLoginBody = {
   email: string;
-  /** Contraseña del usuario. */
   password: string;
-}
+};
+
+export const PostLoginBodySchema = createZodObject<PostLoginBody>({
+  email: z.email().trim().toLowerCase(),
+  password: z.string(),
+});

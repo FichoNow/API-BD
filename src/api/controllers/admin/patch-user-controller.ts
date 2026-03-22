@@ -2,7 +2,10 @@ import { Request, Response } from "express";
 import { updateUser } from "../../../services/admin/update-user-service.js";
 import { ResponseError } from "../../../types/express/response-type.js";
 import { BodyResponse } from "../../../types/express/response-type.js";
-import { UpdateUserBody } from "../../../types/dto/endpoints/admin/update-user-body.js";
+import {
+  UpdateUserBody,
+  UpdateUserBodySchema,
+} from "../../../types/dto/endpoints/admin/update-user-body.js";
 import { UpdateUserResponse } from "../../../types/dto/endpoints/admin/update-user-response.js";
 
 /**
@@ -25,9 +28,9 @@ export async function patchUserController(
     throw new ResponseError("ID de usuario no válido", 400, "INVALID_USER_ID");
   }
 
-  const body = req.body;
+  const parsed = UpdateUserBodySchema.safeParse(req.body);
 
-  if (!body || Object.keys(body).length === 0) {
+  if (!parsed.success) {
     throw new ResponseError(
       "El cuerpo de la solicitud no puede estar vacío",
       400,
@@ -37,7 +40,11 @@ export async function patchUserController(
 
   const adminCompanyId = req.jwtClaims!.companyId;
 
-  const data = await updateUser(userId, body, adminCompanyId);
+  const data = await updateUser(
+    userId,
+    parsed.data as UpdateUserBody,
+    adminCompanyId,
+  );
 
   if (!data) {
     throw new ResponseError("Usuario no encontrado", 404, "USER_NOT_FOUND");

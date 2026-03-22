@@ -1,9 +1,7 @@
-import { ResultSetHeader } from "mysql2";
 import { ResultSetHeader } from "mysql2/promise";
 import { UpdateUserRow, UserRow } from "../../types/db/user-row-type.js";
 
 import { pool } from "../pool.js";
-
 
 export interface CreateUserRepositoryInput {
   company_id: number;
@@ -13,7 +11,7 @@ export interface CreateUserRepositoryInput {
   role: "USER" | "ADMINISTRATOR";
   job_title: string;
   password_hash: string;
-  is_active: number;
+  is_active: boolean;
 }
 
 export interface CreatedUserRepositoryResult {
@@ -24,9 +22,8 @@ export interface CreatedUserRepositoryResult {
   name: string;
   role: "USER" | "ADMINISTRATOR";
   job_title: string;
-  is_active: number;
+  is_active: boolean;
 }
-
 
 /**
  * Busca un usuario en la base de datos a partir de su ID.
@@ -69,6 +66,7 @@ export async function findUserByEmail(email: string): Promise<UserRow | null> {
  * correctamente, para registrar cuándo fue su último acceso al sistema.
  *
  * @param userId ID del usuario cuyo último login se quiere actualizar.
+ * @returns Promise que resuelve cuando la actualización se ha completado.
  */
 export async function updateLastLoginAt(userId: number) {
   await pool.query(
@@ -79,14 +77,16 @@ export async function updateLastLoginAt(userId: number) {
 
 /**
  * Insertar un usuario nuevo en la base de datos.
- * 
+ *
  * Esta función solo guarda los datos recibidos.
  * La contraseña ya debe venir hasheada desde el service.
- * 
- * @params userData Datos del usuario a crear.
- * @return Datos básicos del usuario creado.
+ *
+ * @param userDate Datos del usuario a crear.
+ * @returns Datos básicos del usuario creado.
  */
-export async function createUser(userDate: CreateUserRepositoryInput, ): Promise<CreatedUserRepositoryResult> {
+export async function createUser(
+  userDate: CreateUserRepositoryInput,
+): Promise<CreatedUserRepositoryResult> {
   const [result] = await pool.query<ResultSetHeader>(
     `INSERT INTO users (
       company_id,
@@ -102,16 +102,16 @@ export async function createUser(userDate: CreateUserRepositoryInput, ): Promise
       )
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       `,
-      [
-        userDate.company_id,
-        userDate.group_id,
-        userDate.email,
-        userDate.name,
-        userDate.role,
-        userDate.job_title,
-        userDate.password_hash,
-        userDate.is_active,
-      ],
+    [
+      userDate.company_id,
+      userDate.group_id,
+      userDate.email,
+      userDate.name,
+      userDate.role,
+      userDate.job_title,
+      userDate.password_hash,
+      userDate.is_active,
+    ],
   );
 
   return {
@@ -124,8 +124,9 @@ export async function createUser(userDate: CreateUserRepositoryInput, ): Promise
     job_title: userDate.job_title,
     is_active: userDate.is_active,
   };
-  
- * Actualiza los campos de un usuario en la base de datos.
+}
+
+/** Actualiza los campos de un usuario en la base de datos.
  *
  * Construye dinámicamente el SET de la query a partir de los campos presentes en `data`.
  * Si no hay ningún campo, devuelve `false` sin ejecutar ninguna query.

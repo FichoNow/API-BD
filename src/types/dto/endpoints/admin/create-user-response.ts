@@ -1,13 +1,13 @@
 import { UserRow } from "../../../db/user-row-type.js";
 
-export type UpdateUserResponse = Pick<
+export type CreateUserResponse = Pick<
   UserRow,
   | "id"
-  | "name"
+  | "company_id"
+  | "group_id"
   | "email"
+  | "name"
   | "role"
   | "job_title"
-  | "group_id"
   | "is_active"
-  | "updated_at"
 >;
