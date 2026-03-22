@@ -1,5 +1,7 @@
 import { ResultSetHeader } from "mysql2";
-import { DbUser } from "../../types/db/db-user-type.js";
+import { ResultSetHeader } from "mysql2/promise";
+import { UpdateUserRow, UserRow } from "../../types/db/user-row-type.js";
+
 import { pool } from "../pool.js";
 
 
@@ -27,26 +29,37 @@ export interface CreatedUserRepositoryResult {
 
 
 /**
+ * Busca un usuario en la base de datos a partir de su ID.
+ *
+ * @param userId ID del usuario que se quiere buscar.
+ * @returns El usuario encontrado o `null` si no existe.
+ */
+export async function findUserById(userId: number): Promise<UserRow | null> {
+  const [rows] = await pool.query<UserRow[]>(
+    "SELECT * FROM users WHERE id = ? LIMIT 1",
+    [userId],
+  );
+
+  return rows.length ? rows[0] : null;
+}
+
+/**
  * Busca un usuario en la base de datos a partir de su email.
  *
  * Ejecuta una consulta SQL sobre la tabla `users` filtrando por el email recibido.
- * Si existe un usuario con ese email, devuelve sus datos en formato `DbUser`.
+ * Si existe un usuario con ese email, devuelve sus datos en formato `UserRow`.
  * Si no se encuentra ningún usuario, devuelve `null`.
  *
  * @param email Email del usuario que se quiere buscar.
  * @returns El usuario encontrado o `null` si no existe.
  */
-export async function findUserByEmail(email: string): Promise<DbUser | null> {
-  const [rows] = await pool.query<DbUser[]>(
-    "SELECT id, email, name, role, password_hash, is_active FROM users WHERE email = ? LIMIT 1",
+export async function findUserByEmail(email: string): Promise<UserRow | null> {
+  const [rows] = await pool.query<UserRow[]>(
+    "SELECT * FROM users WHERE email = ? LIMIT 1",
     [email],
   );
 
-  if (!rows.length) {
-    return null;
-  }
-
-  return rows[0];
+  return rows.length ? rows[0] : null;
 }
 
 /**
@@ -111,4 +124,31 @@ export async function createUser(userDate: CreateUserRepositoryInput, ): Promise
     job_title: userDate.job_title,
     is_active: userDate.is_active,
   };
+  
+ * Actualiza los campos de un usuario en la base de datos.
+ *
+ * Construye dinámicamente el SET de la query a partir de los campos presentes en `data`.
+ * Si no hay ningún campo, devuelve `false` sin ejecutar ninguna query.
+ *
+ * @param userId ID del usuario a actualizar.
+ * @param data Campos a actualizar. Solo se incluyen los que estén definidos.
+ * @returns `true` si se actualizó alguna fila, `false` si no.
+ */
+export async function updateUserById(
+  userId: number,
+  data: UpdateUserRow,
+): Promise<boolean> {
+  const entries = Object.entries(data).filter(([, v]) => v !== undefined);
+
+  if (!entries.length) return false;
+
+  const setClause = entries.map(([key]) => `${key} = ?`).join(", ");
+  const values = [...entries.map(([, v]) => v), userId];
+
+  const [result] = await pool.query<ResultSetHeader>(
+    `UPDATE users SET ${setClause} WHERE id = ? LIMIT 1`,
+    values,
+  );
+
+  return result.affectedRows > 0;
 }
