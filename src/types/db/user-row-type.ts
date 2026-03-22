@@ -16,3 +16,16 @@ export type UpdateUserRow = Partial<
     | "is_active"
   >
 >;
+
+export type CreateUserRow = Pick<
+  UserData,
+  | "company_id"
+  | "group_id"
+  | "email"
+  | "name"
+  | "role"
+  | "job_title"
+  | "password_hash"
+  | "is_active"
+>;
+

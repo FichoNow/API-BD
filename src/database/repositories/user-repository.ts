@@ -1,29 +1,7 @@
 import { ResultSetHeader } from "mysql2/promise";
-import { UpdateUserRow, UserRow } from "../../types/db/user-row-type.js";
+import { CreateUserRow, UpdateUserRow, UserRow } from "../../types/db/user-row-type.js";
 
 import { pool } from "../pool.js";
-
-export interface CreateUserRepositoryInput {
-  company_id: number;
-  group_id: number;
-  email: string;
-  name: string;
-  role: "USER" | "ADMINISTRATOR";
-  job_title: string;
-  password_hash: string;
-  is_active: boolean;
-}
-
-export interface CreatedUserRepositoryResult {
-  id: number;
-  company_id: number;
-  group_id: number;
-  email: string;
-  name: string;
-  role: "USER" | "ADMINISTRATOR";
-  job_title: string;
-  is_active: boolean;
-}
 
 /**
  * Busca un usuario en la base de datos a partir de su ID.
@@ -84,9 +62,7 @@ export async function updateLastLoginAt(userId: number) {
  * @param userData Datos del usuario a crear.
  * @returns Datos básicos del usuario creado.
  */
-export async function createUser(
-  userData: CreateUserRepositoryInput,
-): Promise<CreatedUserRepositoryResult> {
+export async function createUser(userData: CreateUserRow): Promise<number> {
   const [result] = await pool.query<ResultSetHeader>(
     `INSERT INTO users (
       company_id,
@@ -114,16 +90,7 @@ export async function createUser(
     ],
   );
 
-  return {
-    id: result.insertId,
-    company_id: userData.company_id,
-    group_id: userData.group_id,
-    email: userData.email,
-    name: userData.name,
-    role: userData.role,
-    job_title: userData.job_title,
-    is_active: userData.is_active,
-  };
+  return result.insertId;
 }
 
 /** Actualiza los campos de un usuario en la base de datos.

@@ -1,5 +1,6 @@
 import {
   createUser,
+  findUserById,
   findUserByEmail,
 } from "../../database/repositories/user-repository.js";
 import { findGroupById } from "../../database/repositories/work-group-repository.js";
@@ -14,6 +15,8 @@ import { ResponseError } from "../../types/express/response-type.js";
  * genera el hash de la contraseña y crea el usuario en base de datos.
  * Devuelve los datos del usuario creado.
  * @param body Datos del nuevo usuario a crear.
+ * @param companyId ID de la empresa del administrador autenticado (extraído del JWT). Se usa para
+ *   asegurarse de que el grupo asignado pertenece a la misma empresa y para asociar el nuevo usuario a ella.
  * @returns Los datos del usuario creado.
  */
 export const createUserService = async (
@@ -38,7 +41,7 @@ export const createUserService = async (
 
   const passwordHash = await hashPassword(body.password);
 
-  const newUser = await createUser({
+  const createdId = await createUser({
     company_id: companyId,
     group_id: body.group_id,
     email: body.email,
@@ -48,6 +51,12 @@ export const createUserService = async (
     password_hash: passwordHash,
     is_active: body.is_active,
   });
+
+  const newUser = await findUserById(createdId);
+
+  if (!newUser) {
+    throw new ResponseError("Error al crear el usuario.", 500, "USER_NOT_FOUND");
+  }
 
   return {
     id: newUser.id,
