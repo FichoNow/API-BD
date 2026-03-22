@@ -28,9 +28,9 @@ export const createUserService = async (
   }
 
   // Comprobamos si ya existe el usuario con ese email.
-  const existeUSer = await findUserByEmail(body.email);
+  const existingUser = await findUserByEmail(body.email);
 
-  if (existeUSer) {
+  if (existingUser) {
     throw new ResponseError("Ya existe un usuario con ese email.", 409, "EMAIL_ALREADY_EXISTS");
   }
 

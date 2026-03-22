@@ -5,7 +5,7 @@ import { UpdateSelfBody, UpdateSelfBodySchema } from "../../../types/dto/endpoin
 import { UpdateSelfResponse } from "../../../types/dto/endpoints/user/update-user-response.js";
 
 /**
- * Controller del endpoint de actualización del propio perfil (PATCH /user/me).
+ * Controller del endpoint de actualización del propio perfil (PATCH /user/update).
  *
  * Su responsabilidad es:
  * 1. Recibir la petición HTTP.

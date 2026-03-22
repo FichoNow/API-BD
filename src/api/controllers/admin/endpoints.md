@@ -7,6 +7,8 @@ Crea un nuevo usuario con rol `USER` o `ADMINISTRATOR`.
 **Reglas de negocio**
 
 - El administrador debe estar autenticado con rol `ADMINISTRATOR`.
+- El usuario se crea automáticamente en la empresa (`company_id`) a la que pertenece el administrador autenticado — no se puede especificar otra empresa.
+- El `group_id` debe pertenecer a esa misma empresa.
 - El email no puede estar ya registrado en el sistema.
 
 **Headers**

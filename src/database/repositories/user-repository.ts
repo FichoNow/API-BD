@@ -81,11 +81,11 @@ export async function updateLastLoginAt(userId: number) {
  * Esta función solo guarda los datos recibidos.
  * La contraseña ya debe venir hasheada desde el service.
  *
- * @param userDate Datos del usuario a crear.
+ * @param userData Datos del usuario a crear.
  * @returns Datos básicos del usuario creado.
  */
 export async function createUser(
-  userDate: CreateUserRepositoryInput,
+  userData: CreateUserRepositoryInput,
 ): Promise<CreatedUserRepositoryResult> {
   const [result] = await pool.query<ResultSetHeader>(
     `INSERT INTO users (
@@ -103,26 +103,26 @@ export async function createUser(
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       `,
     [
-      userDate.company_id,
-      userDate.group_id,
-      userDate.email,
-      userDate.name,
-      userDate.role,
-      userDate.job_title,
-      userDate.password_hash,
-      userDate.is_active,
+      userData.company_id,
+      userData.group_id,
+      userData.email,
+      userData.name,
+      userData.role,
+      userData.job_title,
+      userData.password_hash,
+      userData.is_active,
     ],
   );
 
   return {
     id: result.insertId,
-    company_id: userDate.company_id,
-    group_id: userDate.group_id,
-    email: userDate.email,
-    name: userDate.name,
-    role: userDate.role,
-    job_title: userDate.job_title,
-    is_active: userDate.is_active,
+    company_id: userData.company_id,
+    group_id: userData.group_id,
+    email: userData.email,
+    name: userData.name,
+    role: userData.role,
+    job_title: userData.job_title,
+    is_active: userData.is_active,
   };
 }
 

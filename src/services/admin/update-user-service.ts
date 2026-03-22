@@ -1,11 +1,13 @@
 import {
   findUserById,
+  findUserByEmail,
   updateUserById,
 } from "../../database/repositories/user-repository.js";
 import { UpdateUserRow } from "../../types/db/user-row-type.js";
 import { UpdateUserBody } from "../../types/dto/endpoints/admin/update-user-body.js";
 import { hashPassword } from "../password-hash-service.js";
 import { UpdateUserResponse } from "../../types/dto/endpoints/admin/update-user-response.js";
+import { ResponseError } from "../../types/express/response-type.js";
 
 /**
  * Ejecuta la lógica de actualización de un usuario por parte de un administrador.
@@ -30,6 +32,13 @@ export async function updateUser(
 
   if (!user || user.company_id !== adminCompanyId || user.role === "ADMINISTRATOR") {
     return null;
+  }
+
+  if (rest.email) {
+    const emailTaken = await findUserByEmail(rest.email);
+    if (emailTaken && emailTaken.id !== userId) {
+      throw new ResponseError("Ya existe un usuario con ese email.", 409, "EMAIL_ALREADY_EXISTS");
+    }
   }
 
   const dataToUpdate: UpdateUserRow = { ...rest };
