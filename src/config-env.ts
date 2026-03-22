@@ -11,6 +11,7 @@ const envSchema = z.object({
   API_PORT: z.coerce.number().int().positive(),
 
   JWT_SECRET: z.string().min(1),
+  JWT_ACCESS_EXPIRES_IN: z.coerce.number().int().positive().default(900),
 });
 
 const parsed = envSchema.safeParse(process.env);

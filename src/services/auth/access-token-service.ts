@@ -12,13 +12,13 @@ import { JwtClaims } from "../../types/dto/jwt/jwt-claims-dto.js";
  * Configuración:
  * - payload: { jwtClaims }
  * - subject: jwtClaims.id  //ID del usuario
- * - expiresIn: 15 minutos
+ * - expiresIn: JWT_ACCESS_EXPIRES_IN segundos (por defecto 900 = 15 minutos)
  * - issuer / audience: metadata del token
  */
 export function issueJwt(jwtClaims: JwtClaims): string {
   return jwt.sign({ jwtClaims }, env.JWT_SECRET, {
     subject: jwtClaims.id.toString(),
-    expiresIn: "15m",
+    expiresIn: env.JWT_ACCESS_EXPIRES_IN,
     issuer: "Api-Fran-Jan",
     audience: "FichajeApp-client",
   });
