@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { loginUser } from "../../../services/auth/login-service.js";
-import { PostLoginBody, PostLoginBodySchema } from "../../../types/dto/endpoints/auth/post-login-body.js";
-import { PostLoginResponse } from "../../../types/dto/endpoints/auth/post-login-response.js";
+import { PostLoginBody, PostLoginBodySchema } from "../../../types/dto/auth/post-login-body.js";
+import { PostLoginResponse } from "../../../types/dto/auth/post-login-response.js";
 import { ResponseError } from "../../../types/express/response-type.js";
 import { BodyResponse } from "../../../types/express/response-type.js";
 

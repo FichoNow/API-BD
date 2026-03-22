@@ -1,9 +1,9 @@
 import * as z from "zod";
-import { createZodObject } from "../../../../helpers/zod-helper.js";
-import { UserRow } from "../../../db/user-row-type.js";
+import { createZodObject } from "../../../helpers/zod-helper.js";
+import { UserData } from "../../models/user.js";
 
 export type CreateUserBody = Pick<
-  UserRow,
+  UserData,
   "group_id" | "email" | "name" | "role" | "job_title" | "is_active"
 > & { password: string };
 

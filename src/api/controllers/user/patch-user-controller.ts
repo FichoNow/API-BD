@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import { updateSelf } from "../../../services/user/update-self-service.js";
 import { ResponseError, BodyResponse } from "../../../types/express/response-type.js";
-import { UpdateSelfBody, UpdateSelfBodySchema } from "../../../types/dto/endpoints/user/update-user-body.js";
-import { UpdateSelfResponse } from "../../../types/dto/endpoints/user/update-user-response.js";
+import { UpdateSelfBody, UpdateSelfBodySchema } from "../../../types/dto/user/update-user-body.js";
+import { UpdateSelfResponse } from "../../../types/dto/user/update-user-response.js";
 
 /**
  * Controller del endpoint de actualización del propio perfil (PATCH /user/update).

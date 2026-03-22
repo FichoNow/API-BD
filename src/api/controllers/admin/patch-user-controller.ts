@@ -5,8 +5,8 @@ import { BodyResponse } from "../../../types/express/response-type.js";
 import {
   UpdateUserBody,
   UpdateUserBodySchema,
-} from "../../../types/dto/endpoints/admin/update-user-body.js";
-import { UpdateUserResponse } from "../../../types/dto/endpoints/admin/update-user-response.js";
+} from "../../../types/dto/admin/update-user-body.js";
+import { UpdateUserResponse } from "../../../types/dto/admin/update-user-response.js";
 
 /**
  * Controller del endpoint de actualización de usuario (PATCH /admin/user/:id).
@@ -38,7 +38,7 @@ export async function patchUserController(
     );
   }
 
-  const adminCompanyId = req.jwtClaims!.companyId;
+  const adminCompanyId = req.jwtClaims!.company_id;
 
   const data = await updateUser(
     userId,

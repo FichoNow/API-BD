@@ -1,8 +1,8 @@
 import * as z from "zod";
-import { createZodObject } from "../../../../helpers/zod-helper.js";
-import { UserRow } from "../../../db/user-row-type.js";
+import { createZodObject } from "../../../helpers/zod-helper.js";
+import { UserData } from "../../models/user.js";
 
-type UpdateSelfBodyRow = Partial<Pick<UserRow, "email" | "name">> & {
+type UpdateSelfBodyRow = Partial<Pick<UserData, "email" | "name">> & {
   password?: string;
 };
 

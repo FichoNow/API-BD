@@ -1,0 +1,18 @@
+/** Roles posibles de un usuario en el sistema. */
+export type UserRole = "USER" | "ADMINISTRATOR";
+
+/** Forma pura de los datos de un usuario, sin index signature de RowDataPacket. */
+export interface UserData {
+  id: number;
+  company_id: number;
+  group_id: number;
+  email: string;
+  name: string;
+  role: UserRole;
+  job_title: string;
+  password_hash: string;
+  is_active: boolean;
+  last_login_at: Date;
+  updated_at: Date;
+  created_at: Date;
+}

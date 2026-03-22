@@ -3,8 +3,8 @@ import {
   findUserByEmail,
 } from "../../database/repositories/user-repository.js";
 import { findGroupById } from "../../database/repositories/work-group-repository.js";
-import { CreateUserBody } from "../../types/dto/endpoints/admin/create-user-body.js";
-import { CreateUserResponse } from "../../types/dto/endpoints/admin/create-user-response.js";
+import { CreateUserBody } from "../../types/dto/admin/create-user-body.js";
+import { CreateUserResponse } from "../../types/dto/admin/create-user-response.js";
 import { hashPassword } from "../password-hash-service.js";
 import { ResponseError } from "../../types/express/response-type.js";
 

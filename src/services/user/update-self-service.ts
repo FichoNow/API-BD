@@ -4,9 +4,9 @@ import {
   updateUserById,
 } from "../../database/repositories/user-repository.js";
 import { UpdateUserRow } from "../../types/db/user-row-type.js";
-import { UpdateSelfBody } from "../../types/dto/endpoints/user/update-user-body.js";
+import { UpdateSelfBody } from "../../types/dto/user/update-user-body.js";
 import { hashPassword } from "../password-hash-service.js";
-import { UpdateSelfResponse } from "../../types/dto/endpoints/user/update-user-response.js";
+import { UpdateSelfResponse } from "../../types/dto/user/update-user-response.js";
 import { ResponseError } from "../../types/express/response-type.js";
 
 /**

@@ -1,8 +1,9 @@
 import * as z from "zod";
-import { createZodObject } from "../../../../helpers/zod-helper.js";
+import { createZodObject } from "../../../helpers/zod-helper.js";
+import { UserData } from "../../models/user.js";
 
 export type PostLoginBody = {
-  email: string;
+  email: UserData["email"];
   password: string;
 };
 

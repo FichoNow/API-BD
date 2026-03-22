@@ -3,7 +3,7 @@ import {
   findUserByEmail,
   updateLastLoginAt,
 } from "../../database/repositories/user-repository.js";
-import { PostLoginResponse } from "../../types/dto/endpoints/auth/post-login-response.js";
+import { PostLoginResponse } from "../../types/dto/auth/post-login-response.js";
 import { verifyPassword } from "../password-hash-service.js";
 import { issueJwt } from "./access-token-service.js";
 
@@ -50,8 +50,8 @@ export async function loginUser(
 
   const accessToken = issueJwt({
     id: userRow.id,
-    companyId: userRow.company_id,
-    groupId: userRow.group_id,
+    company_id: userRow.company_id,
+    group_id: userRow.group_id,
     role: userRow.role,
   });
 

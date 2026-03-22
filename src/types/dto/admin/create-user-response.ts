@@ -1,7 +1,7 @@
-import { UserRow } from "../../../db/user-row-type.js";
+import { UserData } from "../../models/user.js";
 
 export type CreateUserResponse = Pick<
-  UserRow,
+  UserData,
   | "id"
   | "company_id"
   | "group_id"
