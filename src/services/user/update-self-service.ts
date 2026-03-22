@@ -5,7 +5,7 @@ import {
 } from "../../database/repositories/user-repository.js";
 import { UpdateUserRow } from "../../types/db/user-row-type.js";
 import { UpdateSelfBody } from "../../types/dto/user/update-user-body.js";
-import { hashPassword } from "../password-hash-service.js";
+import { hashPassword } from "../auth/password-hash-service.js";
 import { UpdateSelfResponse } from "../../types/dto/user/update-user-response.js";
 import { ResponseError } from "../../types/express/response-type.js";
 
@@ -35,7 +35,11 @@ export async function updateSelf(
   if (rest.email) {
     const emailTaken = await findUserByEmail(rest.email);
     if (emailTaken && emailTaken.id !== userId) {
-      throw new ResponseError("Ya existe un usuario con ese email.", 409, "EMAIL_ALREADY_EXISTS");
+      throw new ResponseError(
+        "Ya existe un usuario con ese email.",
+        409,
+        "EMAIL_ALREADY_EXISTS",
+      );
     }
   }
 

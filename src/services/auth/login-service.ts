@@ -4,7 +4,7 @@ import {
   updateLastLoginAt,
 } from "../../database/repositories/user-repository.js";
 import { PostLoginResponse } from "../../types/dto/auth/post-login-response.js";
-import { verifyPassword } from "../password-hash-service.js";
+import { verifyPassword } from "./password-hash-service.js";
 import { issueJwt } from "./access-token-service.js";
 
 /**
@@ -22,7 +22,6 @@ export async function loginUser(
   email: string,
   password: string,
 ): Promise<PostLoginResponse | null> {
-  // Buscamos al usuario en base de datos a partir del email recibido.
   const userRow = await findUserByEmail(email);
 
   if (!userRow) {
@@ -45,7 +44,6 @@ export async function loginUser(
     return null;
   }
 
-  // actualizamos la fecha del último acceso del usuario.
   await updateLastLoginAt(userRow.id);
 
   const accessToken = issueJwt({
