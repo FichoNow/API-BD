@@ -1,5 +1,6 @@
 import { UserData } from "../../models/user.js";
 
+/** Lo que devuelve la API al crear un usuario correctamente. */
 export type CreateUserResponse = Pick<
   UserData,
   | "id"

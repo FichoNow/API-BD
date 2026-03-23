@@ -4,6 +4,7 @@ import { UserData } from "../models/user.js";
 /** Representa una fila de la tabla `users` tal como la devuelve la base de datos. */
 export interface UserRow extends RowDataPacket, UserData {}
 
+/** Campos actualizables de la tabla `users`. Usado por el repository al hacer UPDATE. */
 export type UpdateUserRow = Partial<
   Pick<
     UserData,
@@ -17,6 +18,7 @@ export type UpdateUserRow = Partial<
   >
 >;
 
+/** Campos necesarios para insertar un nuevo usuario en la tabla `users`. */
 export type CreateUserRow = Pick<
   UserData,
   | "company_id"

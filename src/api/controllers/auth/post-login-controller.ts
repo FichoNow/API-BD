@@ -18,6 +18,7 @@ export async function loginController(
   req: Request<unknown, unknown, PostLoginBody>,
   res: Response<BodyResponse<PostLoginResponse>>,
 ) {
+  console.log("[LOGIN] Body recibido:", req.body);
   const parsed = PostLoginBodySchema.safeParse(req.body);
 
   if (!parsed.success) {
@@ -25,10 +26,6 @@ export async function loginController(
   }
 
   const data = await loginUser(parsed.data.email, parsed.data.password);
-
-  if (!data) {
-    throw new ResponseError("Credenciales incorrectas", 401, "UNAUTHORIZED");
-  }
 
   return res.status(200).json({ data });
 }

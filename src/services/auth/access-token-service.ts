@@ -48,9 +48,6 @@ export function validateAccessToken(token: string): JwtClaims {
     if (err instanceof jwt.TokenExpiredError) {
       throw new ResponseError("Token expirado", 401, "TOKEN_EXPIRED");
     }
-    if (err instanceof jwt.JsonWebTokenError) {
-      throw new ResponseError("Token inválido", 401, "TOKEN_INVALID");
-    }
     throw new ResponseError("No autorizado", 401, "UNAUTHORIZED");
   }
 }

@@ -1,5 +1,7 @@
 # Admin Endpoints
 
+> Todos los endpoints de este grupo requieren autenticación con un access token válido y rol `ADMINISTRATOR`.
+
 ## POST /admin/user
 
 Crea un nuevo usuario con rol `USER` o `ADMINISTRATOR`.
@@ -22,7 +24,7 @@ Authorization: Bearer <accessToken>
 ```json
 {
   "group_id": "number",
-  "email": "string EMAIL valido",
+  "email": "string EMAIL válido",
   "name": "string",
   "role": "USER" | "ADMINISTRATOR",
   "job_title": "string",
@@ -56,18 +58,7 @@ Authorization: Bearer <accessToken>
 {
   "error": {
     "code": "BAD_REQUEST",
-    "message": "El cuerpo de la solicitud es invalido"
-  }
-}
-```
-
-`409 Conflict` — el email ya está registrado
-
-```json
-{
-  "error": {
-    "code": "EMAIL_ALREADY_EXISTS",
-    "message": "Ya existe un usuario con ese email."
+    "message": "Cuerpo de la solicitud inválido"
   }
 }
 ```
@@ -95,6 +86,28 @@ Lanzado por el middleware de autenticación, antes de llegar al controller.
 }
 ```
 
+`404 Not Found` — el group_id no existe o no pertenece a la empresa del administrador
+
+```json
+{
+  "error": {
+    "code": "GROUP_NOT_FOUND",
+    "message": "Grupo no encontrado."
+  }
+}
+```
+
+`409 Conflict` — el email ya está registrado
+
+```json
+{
+  "error": {
+    "code": "EMAIL_ALREADY_EXISTS",
+    "message": "Ya existe un usuario con ese email."
+  }
+}
+```
+
 ---
 
 ## PATCH /admin/user/:id
@@ -107,6 +120,9 @@ Actualiza los datos de un usuario con rol `USER`.
 - El usuario a editar debe pertenecer a la misma empresa que el administrador.
 - No se puede editar a un usuario con rol `ADMINISTRATOR`.
 - Los dos casos anteriores devuelven el mismo `404` intencionadamente (no se da pistas sobre si el usuario existe).
+- Si se envía un nuevo email, no puede estar ya registrado por otro usuario.
+- Al menos un campo debe estar presente en el body.
+- La nueva contraseña no se compara con la anterior — se sobreescribe directamente.
 
 **Headers**
 
@@ -153,13 +169,13 @@ Authorization: Bearer <accessToken>
 }
 ```
 
-`400 Bad Request` — ID inválido o body vacío
+`400 Bad Request` — ID inválido, body vacío o sin campos reconocidos
 
 ```json
 {
   "error": {
-    "code": "INVALID_USER_ID" | "BAD_REQUEST",
-    "message": "El ID del usuario no es válido"
+    "code": "INVALID_USER_ID" | "BAD_REQUEST" | "NO_FIELDS_TO_UPDATE",
+    "message": "No hay campos para actualizar."
   }
 }
 ```
@@ -194,6 +210,17 @@ Lanzado por el middleware de autenticación, antes de llegar al controller.
   "error": {
     "code": "USER_NOT_FOUND",
     "message": "Usuario no encontrado"
+  }
+}
+```
+
+`409 Conflict` — el email ya está registrado por otro usuario
+
+```json
+{
+  "error": {
+    "code": "EMAIL_ALREADY_EXISTS",
+    "message": "Ya existe un usuario con ese email."
   }
 }
 ```

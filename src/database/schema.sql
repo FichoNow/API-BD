@@ -2,6 +2,7 @@ CREATE DATABASE IF NOT EXISTS BD_Jan_Fran;
 USE BD_Jan_Fran;
 
 /* ============= Borrado de tablas (al principio, no al final) =============*/
+DROP TABLE IF EXISTS refresh_tokens;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS work_groups;
 DROP TABLE IF EXISTS companies;
@@ -59,7 +60,20 @@ CREATE TABLE users (
         FOREIGN KEY (group_id) REFERENCES work_groups(id)
 );
 
-
+/* ============= Tabla refresh_tokens =============*/
+CREATE TABLE refresh_tokens (
+    id INT NOT NULL AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    token_hash VARCHAR(255) NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_refresh_tokens_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE,
+    UNIQUE KEY uq_refresh_tokens_token_hash (token_hash),
+    KEY idx_refresh_tokens_user_id (user_id)
+);
 
 /* ============= Inserts de prueba =============*/
 INSERT INTO companies (
@@ -76,7 +90,7 @@ INSERT INTO work_groups (name, company_id) VALUES
 INSERT INTO users (company_id, group_id, email, name, role, job_title, password_hash, is_active)
 VALUES
 -- Usuario base de pruebas        (contraseña: 1)
-(1, 1, 'a@1', 'Test User', 'ADMINISTRATOR', 'Testing', '$argon2id$v=19$m=65536,t=3,p=4$lwHkTFUHxERk1xMTMe+E/g$CLpJFWRY32Cbl7CB6W6DGK3RQA/MHKDmhGhrmcYMbN8', 1),
+(1, 1, 'a@a.com', 'Test User', 'ADMINISTRATOR', 'Testing', '$argon2id$v=19$m=65536,t=3,p=4$lwHkTFUHxERk1xMTMe+E/g$CLpJFWRY32Cbl7CB6W6DGK3RQA/MHKDmhGhrmcYMbN8', 1),
 
 -- Usuarios normales
 (1, 1, 'admin@empresa.com', 'Bruce Wayne', 'ADMINISTRATOR', 'Director', '$argon2id$v=19$m=65536,t=3,p=4$jLlSe5qff/xYfJBNS7VQjQ$QZ+DQWdRb2Cic+XL4egs8iDLO41O3bD6HbMrG1sJWXI', 1),  -- contraseña: bat123
