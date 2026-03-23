@@ -32,7 +32,7 @@ export async function patchUserController(
 
   if (!parsed.success) {
     throw new ResponseError(
-      "El cuerpo de la solicitud no puede estar vacío",
+      "Cuerpo de la solicitud inválido",
       400,
       "BAD_REQUEST",
     );
@@ -45,10 +45,6 @@ export async function patchUserController(
     parsed.data as UpdateUserBody,
     adminCompanyId,
   );
-
-  if (!data) {
-    throw new ResponseError("Usuario no encontrado", 404, "USER_NOT_FOUND");
-  }
 
   return res.status(200).json({ data });
 }

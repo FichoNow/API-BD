@@ -1,5 +1,9 @@
 import { ResultSetHeader } from "mysql2/promise";
-import { CreateUserRow, UpdateUserRow, UserRow } from "../../types/db/user-row-type.js";
+import {
+  CreateUserRow,
+  UpdateUserRow,
+  UserRow,
+} from "../../types/db/user-row-type.js";
 
 import { pool } from "../pool.js";
 
@@ -59,10 +63,10 @@ export async function updateLastLoginAt(userId: number) {
  * Esta función solo guarda los datos recibidos.
  * La contraseña ya debe venir hasheada desde el service.
  *
- * @param userData Datos del usuario a crear.
+ * @param data Datos del usuario a crear.
  * @returns Datos básicos del usuario creado.
  */
-export async function createUser(userData: CreateUserRow): Promise<number> {
+export async function createUser(data: CreateUserRow): Promise<number> {
   const [result] = await pool.query<ResultSetHeader>(
     `INSERT INTO users (
       company_id,
@@ -79,14 +83,14 @@ export async function createUser(userData: CreateUserRow): Promise<number> {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       `,
     [
-      userData.company_id,
-      userData.group_id,
-      userData.email,
-      userData.name,
-      userData.role,
-      userData.job_title,
-      userData.password_hash,
-      userData.is_active,
+      data.company_id,
+      data.group_id,
+      data.email,
+      data.name,
+      data.role,
+      data.job_title,
+      data.password_hash,
+      data.is_active,
     ],
   );
 
@@ -107,8 +111,6 @@ export async function updateUserById(
   data: UpdateUserRow,
 ): Promise<boolean> {
   const entries = Object.entries(data).filter(([, v]) => v !== undefined);
-
-  if (!entries.length) return false;
 
   const setClause = entries.map(([key]) => `${key} = ?`).join(", ");
   const values = [...entries.map(([, v]) => v), userId];

@@ -6,6 +6,8 @@ import {
 import { PostLoginResponse } from "../../types/dto/auth/post-login-response.js";
 import { verifyPassword } from "./password-hash-service.js";
 import { issueJwt } from "./access-token-service.js";
+import { issueRefreshToken } from "./refresh-token-service.js";
+import { ResponseError } from "../../types/express/response-type.js";
 
 /**
  * Ejecuta la lógica de autenticación de un usuario.
@@ -21,27 +23,27 @@ import { issueJwt } from "./access-token-service.js";
 export async function loginUser(
   email: string,
   password: string,
-): Promise<PostLoginResponse | null> {
+): Promise<PostLoginResponse> {
   const userRow = await findUserByEmail(email);
 
   if (!userRow) {
-    return null;
+    throw new ResponseError("Credenciales incorrectas", 401, "UNAUTHORIZED");
   }
 
   if (!userRow.is_active) {
-    return null;
+    throw new ResponseError("Credenciales incorrectas", 401, "UNAUTHORIZED");
   }
 
   const isValidPassword = await verifyPassword(password, userRow.password_hash);
 
   if (!isValidPassword) {
-    return null;
+    throw new ResponseError("Credenciales incorrectas", 401, "UNAUTHORIZED");
   }
 
   const company = await findCompanyById(userRow.company_id);
 
   if (!company || !company.is_active) {
-    return null;
+    throw new ResponseError("Credenciales incorrectas", 401, "UNAUTHORIZED");
   }
 
   await updateLastLoginAt(userRow.id);
@@ -53,9 +55,11 @@ export async function loginUser(
     role: userRow.role,
   });
 
+  const refreshToken = await issueRefreshToken(userRow.id);
+
   return {
     accessToken,
-    refreshToken: "123",
+    refreshToken,
     userData: {
       name: userRow.name,
       role: userRow.role,

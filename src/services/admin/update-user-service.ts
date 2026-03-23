@@ -19,13 +19,13 @@ import { ResponseError } from "../../types/express/response-type.js";
  * @param userId ID del usuario a actualizar.
  * @param body Campos a actualizar recibidos del body de la petición.
  * @param adminCompanyId ID de la empresa del administrador que realiza la petición.
- * @returns Los datos actualizados del usuario, o `null` si no existe.
+ * @returns Los datos actualizados del usuario.
  */
 export async function updateUser(
   userId: number,
   body: UpdateUserBody,
   adminCompanyId: number,
-): Promise<UpdateUserResponse | null> {
+): Promise<UpdateUserResponse> {
   const { password, ...rest } = body;
 
   const user = await findUserById(userId);
@@ -35,7 +35,7 @@ export async function updateUser(
     user.company_id !== adminCompanyId ||
     user.role === "ADMINISTRATOR"
   ) {
-    return null;
+    throw new ResponseError("Usuario no encontrado", 404, "USER_NOT_FOUND");
   }
 
   if (rest.email) {
@@ -55,16 +55,24 @@ export async function updateUser(
     dataToUpdate.password_hash = await hashPassword(password);
   }
 
+  if (Object.keys(dataToUpdate).length === 0) {
+    throw new ResponseError(
+      "No hay campos para actualizar.",
+      400,
+      "NO_FIELDS_TO_UPDATE",
+    );
+  }
+
   const updated = await updateUserById(userId, dataToUpdate);
 
   if (!updated) {
-    return null;
+    throw new ResponseError("Error al actualizar el usuario.", 500, "UPDATE_FAILED");
   }
 
   const updatedUser = await findUserById(userId);
 
   if (!updatedUser) {
-    return null;
+    throw new ResponseError("Error al obtener el usuario actualizado.", 500, "USER_NOT_FOUND");
   }
 
   return {

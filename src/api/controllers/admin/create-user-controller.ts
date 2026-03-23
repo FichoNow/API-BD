@@ -27,7 +27,7 @@ export async function createUserController(
 
   if (!parsed.success) {
     throw new ResponseError(
-      "El cuerpo de la solicitud es invalido",
+      "Cuerpo de la solicitud inválido",
       400,
       "BAD_REQUEST",
     );

@@ -19,10 +19,10 @@ import { ResponseError } from "../../types/express/response-type.js";
  *   asegurarse de que el grupo asignado pertenece a la misma empresa y para asociar el nuevo usuario a ella.
  * @returns Los datos del usuario creado.
  */
-export const createUserService = async (
+export async function createUserService(
   body: CreateUserBody,
   companyId: number,
-): Promise<CreateUserResponse> => {
+): Promise<CreateUserResponse> {
   const group = await findGroupById(body.group_id);
 
   if (!group || group.company_id !== companyId) {
@@ -55,7 +55,11 @@ export const createUserService = async (
   const newUser = await findUserById(createdId);
 
   if (!newUser) {
-    throw new ResponseError("Error al crear el usuario.", 500, "USER_NOT_FOUND");
+    throw new ResponseError(
+      "Error al crear el usuario.",
+      500,
+      "USER_NOT_FOUND",
+    );
   }
 
   return {
@@ -68,4 +72,4 @@ export const createUserService = async (
     job_title: newUser.job_title,
     is_active: newUser.is_active,
   };
-};
+}

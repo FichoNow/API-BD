@@ -1,5 +1,6 @@
 import { UserData } from "../../models/user.js";
 
+/** Lo que devuelve la API al actualizar un usuario correctamente (usado por el admin). */
 export type UpdateUserResponse = Pick<
   UserData,
   | "id"
