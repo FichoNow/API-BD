@@ -105,6 +105,9 @@ components:
             accessToken:
               type: string
               description: Nuevo JWT de corta duración.
+            refreshToken:
+              type: string
+              description: Nuevo refresh token (el anterior queda invalidado).
 
     LogoutResponse:
       type: object
@@ -327,7 +330,7 @@ paths:
         - El refresh token debe existir en la base de datos y no haber expirado.
         - El usuario asociado debe existir y tener `is_active = true`.
         - La empresa del usuario debe existir y tener `is_active = true`.
-        - El refresh token **no se invalida** al usarlo — puede generar múltiples access tokens mientras viva.
+        - El refresh token **se invalida** al usarlo (rotación de token) — se emite un nuevo refresh token junto con el nuevo access token.
       requestBody:
         required: true
         content:
@@ -340,7 +343,7 @@ paths:
                   type: string
       responses:
         "200":
-          description: Nuevo access token generado correctamente.
+          description: Tokens renovados correctamente. Devuelve nuevo access token y nuevo refresh token.
           content:
             application/json:
               schema:
