@@ -1,6 +1,5 @@
 import {
   createUser,
-  findUserById,
   findUserByEmail,
 } from "../../database/repositories/user-repository.js";
 import { findGroupById } from "../../database/repositories/work-group-repository.js";
@@ -52,24 +51,14 @@ export async function createUserService(
     is_active: body.is_active,
   });
 
-  const newUser = await findUserById(createdId);
-
-  if (!newUser) {
-    throw new ResponseError(
-      "Error al crear el usuario.",
-      500,
-      "USER_NOT_FOUND",
-    );
-  }
-
   return {
-    id: newUser.id,
-    company_id: newUser.company_id,
-    group_id: newUser.group_id,
-    email: newUser.email,
-    name: newUser.name,
-    role: newUser.role,
-    job_title: newUser.job_title,
-    is_active: newUser.is_active,
+    id: createdId,
+    company_id: companyId,
+    group_id: body.group_id,
+    email: body.email,
+    name: body.name,
+    role: body.role,
+    job_title: body.job_title,
+    is_active: body.is_active,
   };
 }

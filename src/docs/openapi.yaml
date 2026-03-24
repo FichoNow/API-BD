@@ -156,6 +156,41 @@ components:
               type: boolean
               example: true
 
+    CreateUsersResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 12
+              company_id:
+                type: integer
+                example: 1
+              group_id:
+                type: integer
+                example: 3
+              email:
+                type: string
+                format: email
+                example: nuevo@empresa.com
+              name:
+                type: string
+                example: Ana López
+              role:
+                type: string
+                enum: [USER, ADMINISTRATOR]
+                example: USER
+              job_title:
+                type: string
+                example: Desarrolladora Backend
+              is_active:
+                type: boolean
+                example: true
+
     UpdateUserResponse:
       type: object
       properties:
@@ -591,6 +626,109 @@ paths:
                 error:
                   code: USER_NOT_FOUND
                   message: Error al crear el usuario.
+
+  /admin/users:
+    post:
+      tags: [Admin]
+      summary: Crear usuarios en bulk
+      description: |
+        Crea entre 2 y 50 usuarios en una sola petición.
+
+        **Reglas de negocio**
+        - Todos los usuarios se crean en la empresa (`company_id`) del administrador autenticado.
+        - Cada `group_id` debe pertenecer a esa misma empresa.
+        - Ningún email puede estar ya registrado en el sistema.
+        - Las validaciones se ejecutan **todas antes de crear** — si hay errores, no se crea ningún usuario y se devuelven todos los mensajes de error en el campo `message`, separados por saltos de línea.
+        - Los usuarios válidos se crean en paralelo.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              minItems: 2
+              maxItems: 50
+              items:
+                type: object
+                required: [group_id, email, name, role, job_title, password, is_active]
+                properties:
+                  group_id:
+                    type: integer
+                    example: 3
+                  email:
+                    type: string
+                    format: email
+                    example: nuevo@empresa.com
+                  name:
+                    type: string
+                    example: Ana López
+                  role:
+                    type: string
+                    enum: [USER, ADMINISTRATOR]
+                  job_title:
+                    type: string
+                    example: Desarrolladora Backend
+                  password:
+                    type: string
+                    example: contraseñaSegura789
+                  is_active:
+                    type: boolean
+                    example: true
+      responses:
+        "201":
+          description: Todos los usuarios creados correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateUsersResponse"
+        "400":
+          description: Body inválido, campos faltantes, o array fuera del rango permitido (menos de 2 o más de 50 elementos).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BAD_REQUEST
+                  message: Cuerpo de la solicitud inválido
+        "401":
+          description: Token ausente o inválido. Lanzado por el middleware antes de llegar al controller.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "403":
+          description: Token válido pero el usuario no tiene rol ADMINISTRATOR.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: FORBIDDEN
+                  message: No autorizado
+        "409":
+          description: |
+            Uno o más usuarios no pasaron validación. No se ha creado ningún usuario.
+            El campo `message` contiene todos los errores encontrados, uno por línea.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BULK_USER_VALIDATION_ERROR
+                  message: "El grupo del usuario a@empresa.com no existe.\nYa existe un usuario con el email b@empresa.com."
 
   /admin/user/{id}:
     patch:
