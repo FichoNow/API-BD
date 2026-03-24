@@ -15,6 +15,7 @@ export type UpdateUserRow = Partial<
     | "job_title"
     | "password_hash"
     | "is_active"
+    | "must_change_password"
   >
 >;
 
@@ -29,5 +30,6 @@ export type CreateUserRow = Pick<
   | "job_title"
   | "password_hash"
   | "is_active"
+  | "must_change_password"
 >;
 

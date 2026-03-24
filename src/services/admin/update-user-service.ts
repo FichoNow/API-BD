@@ -53,6 +53,7 @@ export async function updateUser(
 
   if (password !== undefined) {
     dataToUpdate.password_hash = await hashPassword(password);
+    dataToUpdate.must_change_password = true;
   }
 
   if (Object.keys(dataToUpdate).length === 0) {
@@ -83,6 +84,7 @@ export async function updateUser(
     job_title: updatedUser.job_title,
     group_id: updatedUser.group_id,
     is_active: updatedUser.is_active,
+    must_change_password: updatedUser.must_change_password,
     updated_at: updatedUser.updated_at,
   };
 }

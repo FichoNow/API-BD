@@ -65,6 +65,7 @@ export async function loginUser(
       role: userRow.role,
       email: userRow.email,
       companyName: company.name,
+      must_change_password: userRow.must_change_password,
     },
   };
 }

@@ -47,6 +47,7 @@ export async function updateSelf(
 
   if (password !== undefined) {
     dataToUpdate.password_hash = await hashPassword(password);
+    dataToUpdate.must_change_password = false;
   }
 
   if (Object.keys(dataToUpdate).length === 0) {

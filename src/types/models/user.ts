@@ -12,6 +12,7 @@ export interface UserData {
   job_title: string;
   password_hash: string;
   is_active: boolean;
+  must_change_password: boolean;
   last_login_at: Date;
   updated_at: Date;
   created_at: Date;

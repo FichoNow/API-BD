@@ -11,4 +11,5 @@ export type CreateUserResponse = Pick<
   | "role"
   | "job_title"
   | "is_active"
+  | "must_change_password"
 >;

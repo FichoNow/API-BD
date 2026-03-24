@@ -5,7 +5,7 @@ import { UserData } from "../../models/user.js";
 export interface PostLoginResponse {
   accessToken: string;
   refreshToken: string;
-  userData: Pick<UserData, "name" | "role" | "email"> & {
+  userData: Pick<UserData, "name" | "role" | "email" | "must_change_password"> & {
     companyName: CompanyData["name"];
   };
 }
