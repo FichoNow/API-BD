@@ -536,6 +536,7 @@ paths:
         - El usuario se crea automáticamente en la empresa (`company_id`) a la que pertenece el administrador autenticado — no se puede especificar otra empresa.
         - El `group_id` debe pertenecer a esa misma empresa.
         - El email no puede estar ya registrado en el sistema.
+        - `must_change_password` se activa a `true` automáticamente al crear el usuario — deberá cambiar su contraseña en el primer acceso.
       security:
         - bearerAuth: []
       requestBody:
@@ -657,6 +658,7 @@ paths:
         - Ningún email puede estar ya registrado en el sistema.
         - Las validaciones se ejecutan **todas antes de crear** — si hay errores, no se crea ningún usuario y se devuelven todos los mensajes de error en el campo `message`, separados por saltos de línea.
         - Los usuarios válidos se crean en paralelo.
+        - `must_change_password` se activa a `true` automáticamente en todos los usuarios creados — deberán cambiar su contraseña en el primer acceso.
       security:
         - bearerAuth: []
       requestBody:
