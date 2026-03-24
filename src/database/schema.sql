@@ -91,9 +91,9 @@ INSERT INTO work_groups (name, company_id) VALUES
 INSERT INTO users (company_id, group_id, email, name, role, job_title, password_hash, is_active)
 VALUES
 -- Usuario base de pruebas        (contraseña: 1)
-(1, 1, 'a@a.com', 'Test User', 'ADMINISTRATOR', 'Testing', '$argon2id$v=19$m=65536,t=3,p=4$lwHkTFUHxERk1xMTMe+E/g$CLpJFWRY32Cbl7CB6W6DGK3RQA/MHKDmhGhrmcYMbN8', 1),
+(1, 1, 'a@a.com', 'Test User', 'ADMINISTRATOR', 'Testing', '$argon2id$v=19$m=65536,t=3,p=4$lwHkTFUHxERk1xMTMe+E/g$CLpJFWRY32Cbl7CB6W6DGK3RQA/MHKDmhGhrmcYMbN8', TRUE),
 
 -- Usuarios normales
-(1, 1, 'admin@empresa.com', 'Bruce Wayne', 'ADMINISTRATOR', 'Director', '$argon2id$v=19$m=65536,t=3,p=4$jLlSe5qff/xYfJBNS7VQjQ$QZ+DQWdRb2Cic+XL4egs8iDLO41O3bD6HbMrG1sJWXI', 1),  -- contraseña: bat123
-(1, 2, 'empleado1@empresa.com', 'Clark Kent', 'USER', 'Analista', '$argon2id$v=19$m=65536,t=3,p=4$ql52pJF3lKWsPmNYGuUHtA$52P8spHNtonUU1F6Aa9oRYeAnr0s4EOokGcCKxf6NPc', 1),       -- contraseña: super123
-(1, 2, 'empleado2@empresa.com', 'Diana Prince', 'USER', 'Recursos Humanos', '$argon2id$v=19$m=65536,t=3,p=4$pNgjMOQmz1TngKB8UqOvHw$uKkOsHNWuaYD+Z+6SOd0Jv4FEiy5q3JsYMcWesbN+1c', 1); -- contraseña: wonder123
+(1, 1, 'admin@empresa.com', 'Bruce Wayne', 'ADMINISTRATOR', 'Director', '$argon2id$v=19$m=65536,t=3,p=4$jLlSe5qff/xYfJBNS7VQjQ$QZ+DQWdRb2Cic+XL4egs8iDLO41O3bD6HbMrG1sJWXI', TRUE),  -- contraseña: bat123
+(1, 2, 'empleado1@empresa.com', 'Clark Kent', 'USER', 'Analista', '$argon2id$v=19$m=65536,t=3,p=4$ql52pJF3lKWsPmNYGuUHtA$52P8spHNtonUU1F6Aa9oRYeAnr0s4EOokGcCKxf6NPc', TRUE),       -- contraseña: super123
+(1, 2, 'empleado2@empresa.com', 'Diana Prince', 'USER', 'Recursos Humanos', '$argon2id$v=19$m=65536,t=3,p=4$pNgjMOQmz1TngKB8UqOvHw$uKkOsHNWuaYD+Z+6SOd0Jv4FEiy5q3JsYMcWesbN+1c', TRUE); -- contraseña: wonder123
