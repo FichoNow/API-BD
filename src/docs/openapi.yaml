@@ -91,6 +91,10 @@ components:
                 companyName:
                   type: string
                   example: Gimbernat S.A.
+                must_change_password:
+                  type: boolean
+                  description: Si es `true`, la app debe mostrar al usuario un popup para que cambie su contraseña.
+                  example: false
 
     RefreshResponse:
       type: object
@@ -155,6 +159,10 @@ components:
             is_active:
               type: boolean
               example: true
+            must_change_password:
+              type: boolean
+              description: Indica que el usuario debe cambiar su contraseña en el próximo acceso.
+              example: true
 
     CreateUsersResponse:
       type: object
@@ -190,6 +198,10 @@ components:
               is_active:
                 type: boolean
                 example: true
+              must_change_password:
+                type: boolean
+                description: Indica que el usuario debe cambiar su contraseña en el próximo acceso.
+                example: true
 
     UpdateUserResponse:
       type: object
@@ -220,6 +232,10 @@ components:
             is_active:
               type: boolean
               example: false
+            must_change_password:
+              type: boolean
+              description: Indica si el usuario debe cambiar su contraseña en el próximo acceso. Se activa automáticamente cuando el administrador cambia la contraseña del usuario.
+              example: true
             updated_at:
               type: string
               format: date-time
@@ -367,6 +383,7 @@ paths:
         - Al menos un campo debe estar presente en el body.
         - Si se envía un nuevo email, no puede estar ya registrado por otro usuario.
         - La nueva contraseña **no se compara con la anterior** — se sobreescribe directamente.
+        - Si se envía una nueva contraseña, `must_change_password` se desactiva a `false` automáticamente.
       security:
         - bearerAuth: []
       requestBody:
@@ -744,6 +761,7 @@ paths:
         - Si se envía un nuevo email, no puede estar ya registrado por otro usuario.
         - Al menos un campo debe estar presente en el body.
         - La nueva contraseña **no se compara con la anterior** — se sobreescribe directamente.
+        - Si se envía una nueva contraseña, `must_change_password` se activa a `true` automáticamente — el usuario deberá cambiarla en su próximo acceso.
       security:
         - bearerAuth: []
       parameters:

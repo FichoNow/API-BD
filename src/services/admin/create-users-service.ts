@@ -73,6 +73,7 @@ export async function createUsersService(
         job_title: u.job_title,
         password_hash: passwordHash,
         is_active: u.is_active,
+        must_change_password: true,
       });
 
       return {
@@ -84,6 +85,7 @@ export async function createUsersService(
         role: u.role,
         job_title: u.job_title,
         is_active: u.is_active,
+        must_change_password: true,
       };
     }),
   );

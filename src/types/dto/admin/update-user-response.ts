@@ -10,5 +10,6 @@ export type UpdateUserResponse = Pick<
   | "job_title"
   | "group_id"
   | "is_active"
+  | "must_change_password"
   | "updated_at"
 >;

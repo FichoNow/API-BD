@@ -49,6 +49,7 @@ export async function createUserService(
     job_title: body.job_title,
     password_hash: passwordHash,
     is_active: body.is_active,
+    must_change_password: true,
   });
 
   return {
@@ -60,5 +61,6 @@ export async function createUserService(
     role: body.role,
     job_title: body.job_title,
     is_active: body.is_active,
+    must_change_password: true,
   };
 }
