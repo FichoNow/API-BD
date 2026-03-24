@@ -2,8 +2,9 @@ import crypto from "crypto";
 import { env } from "../../config-env.js";
 import {
   createRefreshToken,
-  deleteRefreshTokenByHash,
   findRefreshTokenByHash,
+  findRefreshTokenByUserId,
+  updateRefreshTokenByUserId,
 } from "../../database/repositories/refresh-token-repository.js";
 import { ResponseError } from "../../types/express/response-type.js";
 import { UserRow } from "../../types/db/user-row-type.js";
@@ -25,11 +26,20 @@ export async function issueRefreshToken(userId: number): Promise<string> {
   const tokenHash = hashRefreshToken(refreshToken);
   const expiresAt = getRefreshTokenExpiresAt();
 
-  await createRefreshToken({
-    user_id: userId,
-    token_hash: tokenHash,
-    expires_at: expiresAt,
-  });
+  const oldRefreshToken = await findRefreshTokenByUserId(userId);
+
+  if (!oldRefreshToken) {
+    await createRefreshToken({
+      user_id: userId,
+      token_hash: tokenHash,
+      expires_at: expiresAt,
+    });
+  } else {
+    await updateRefreshTokenByUserId(userId, {
+      token_hash: tokenHash,
+      expires_at: expiresAt,
+    });
+  }
 
   return refreshToken;
 }
@@ -84,9 +94,6 @@ export async function rotateRefreshToken(
   refreshToken: string,
 ): Promise<{ userData: UserRow; newRefreshToken: string }> {
   const userData = await validateRefreshToken(refreshToken);
-
-  const tokenHash = hashRefreshToken(refreshToken);
-  await deleteRefreshTokenByHash(tokenHash);
 
   const newRefreshToken = await issueRefreshToken(userData.id);
 

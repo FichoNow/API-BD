@@ -37,6 +37,32 @@ export async function findRefreshTokenByHash(
   return rows.length ? rows[0] : null;
 }
 
+export async function findRefreshTokenByUserId(
+  userId: number,
+): Promise<RefreshTokenRow | null> {
+  const [rows] = await pool.query<RefreshTokenRow[]>(
+    `SELECT *
+     FROM refresh_tokens
+     WHERE user_id = ?
+     LIMIT 1`,
+    [userId],
+  );
+
+  return rows.length ? rows[0] : null;
+}
+
+export async function updateRefreshTokenByUserId(
+  userId: number,
+  data: Pick<CreateRefreshTokenRow, "token_hash" | "expires_at">,
+): Promise<void> {
+  await pool.query<ResultSetHeader>(
+    `UPDATE refresh_tokens
+     SET token_hash = ?, expires_at = ?
+     WHERE user_id = ?`,
+    [data.token_hash, data.expires_at, userId],
+  );
+}
+
 export async function deleteRefreshTokenByHash(
   tokenHash: string,
 ): Promise<boolean> {
