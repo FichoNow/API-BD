@@ -19,12 +19,16 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@types/swagger-ui-express": "^4.1.8",
+    "@types/yamljs": "^0.2.34",
     "argon2": "^0.44.0",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "express-rate-limit": "^8.3.1",
     "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.19.1",
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0",
     "zod": "^4.3.6"
   }
 }

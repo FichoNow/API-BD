@@ -1,0 +1,723 @@
+openapi: 3.0.3
+
+info:
+  title: FichajeApp API
+  version: 1.0.0
+  description: API REST para la gestión de fichajes y usuarios.
+
+tags:
+  - name: Auth
+    description: Endpoints públicos de autenticación (sin token requerido).
+  - name: User
+    description: Endpoints del usuario autenticado. Requieren `Authorization: Bearer <accessToken>`.
+  - name: Admin
+    description: >
+      Endpoints de administración. Requieren `Authorization: Bearer <accessToken>`
+      y que el usuario tenga rol `ADMINISTRATOR`.
+      Todas las acciones se realizan automáticamente en el contexto de la empresa
+      a la que pertenece el administrador autenticado — no se puede operar sobre otras empresas.
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    # ── Respuestas de error ──────────────────
+
+    ErrorResponse:
+      type: object
+      properties:
+        data:
+          nullable: true
+          example: null
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: BAD_REQUEST
+            message:
+              type: string
+              example: Cuerpo de la solicitud inválido
+
+    InternalServerError:
+      type: object
+      properties:
+        data:
+          nullable: true
+          example: null
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: INTERNAL_SERVER_ERROR
+            message:
+              type: string
+              example: Ha ocurrido un error inesperado
+
+    # ── Respuestas de éxito ──────────────────
+
+    LoginResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            accessToken:
+              type: string
+              description: JWT de corta duración para autenticar peticiones.
+            refreshToken:
+              type: string
+              description: Token de larga duración para renovar el access token.
+            userData:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Juan García
+                role:
+                  type: string
+                  enum: [USER, ADMINISTRATOR]
+                  example: USER
+                email:
+                  type: string
+                  format: email
+                  example: usuario@empresa.com
+                companyName:
+                  type: string
+                  example: Gimbernat S.A.
+
+    RefreshResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            accessToken:
+              type: string
+              description: Nuevo JWT de corta duración.
+
+    LogoutResponse:
+      type: object
+      properties:
+        data:
+          nullable: true
+          example: null
+
+    UpdateSelfResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            name:
+              type: string
+              example: Juan García
+            email:
+              type: string
+              format: email
+              example: usuario@empresa.com
+
+    CreateUserResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 12
+            company_id:
+              type: integer
+              example: 1
+            group_id:
+              type: integer
+              example: 3
+            email:
+              type: string
+              format: email
+              example: nuevo@empresa.com
+            name:
+              type: string
+              example: Ana López
+            role:
+              type: string
+              enum: [USER, ADMINISTRATOR]
+              example: USER
+            job_title:
+              type: string
+              example: Desarrolladora Backend
+            is_active:
+              type: boolean
+              example: true
+
+    UpdateUserResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 7
+            name:
+              type: string
+              example: Nuevo Nombre
+            email:
+              type: string
+              format: email
+              example: nuevo@email.com
+            role:
+              type: string
+              enum: [USER, ADMINISTRATOR]
+              example: USER
+            job_title:
+              type: string
+              example: Senior Developer
+            group_id:
+              type: integer
+              example: 2
+            is_active:
+              type: boolean
+              example: false
+            updated_at:
+              type: string
+              format: date-time
+              example: "2025-03-24T10:30:00.000Z"
+
+paths:
+
+  # ─────────────────────────────────────────
+  # AUTH
+  # ─────────────────────────────────────────
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login
+      description: |
+        Autentica a un usuario y devuelve los tokens de acceso junto con sus datos básicos.
+
+        **Reglas de negocio**
+        - El usuario debe existir y tener `is_active = true`.
+        - La empresa del usuario debe existir y tener `is_active = true`.
+        - La contraseña debe coincidir con el hash almacenado.
+        - Todos los casos de error anteriores devuelven el mismo `401` intencionadamente — no se dan pistas sobre qué falló.
+        - Limitado a **10 intentos por IP cada 15 minutos** para prevenir ataques de fuerza bruta.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: usuario@empresa.com
+                password:
+                  type: string
+                  example: "miContraseña123"
+      responses:
+        "200":
+          description: Login correcto. Devuelve access token, refresh token y datos básicos del usuario.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "400":
+          description: Body vacío, email o password ausentes, o email con formato inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BAD_REQUEST
+                  message: Cuerpo de la solicitud inválido
+        "401":
+          description: Credenciales incorrectas, usuario inactivo o empresa inactiva.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: UNAUTHORIZED
+                  message: Credenciales incorrectas
+        "429":
+          description: Demasiados intentos desde la misma IP (más de 10 en 15 minutos).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: Demasiados intentos. Inténtalo de nuevo en 15 minutos.
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Renovar access token
+      description: |
+        Emite un nuevo access token a partir de un refresh token válido.
+
+        **Reglas de negocio**
+        - El refresh token debe existir en la base de datos y no haber expirado.
+        - El usuario asociado debe existir y tener `is_active = true`.
+        - La empresa del usuario debe existir y tener `is_active = true`.
+        - El refresh token **no se invalida** al usarlo — puede generar múltiples access tokens mientras viva.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        "200":
+          description: Nuevo access token generado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefreshResponse"
+        "400":
+          description: Body vacío o refreshToken ausente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BAD_REQUEST
+                  message: Cuerpo de la solicitud inválido
+        "401":
+          description: Token no encontrado, expirado, usuario inactivo o empresa inactiva.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: TOKEN_EXPIRED
+                  message: Token inválido
+
+  # ─────────────────────────────────────────
+  # USER
+  # ─────────────────────────────────────────
+
+  /user/update:
+    patch:
+      tags: [User]
+      summary: Actualizar perfil propio
+      description: |
+        Actualiza los datos del propio perfil del usuario autenticado.
+
+        **Reglas de negocio**
+        - Al menos un campo debe estar presente en el body.
+        - Si se envía un nuevo email, no puede estar ya registrado por otro usuario.
+        - La nueva contraseña **no se compara con la anterior** — se sobreescribe directamente.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Al menos uno de los campos es obligatorio.
+              properties:
+                name:
+                  type: string
+                  example: Juan García
+                email:
+                  type: string
+                  format: email
+                  example: nuevo@email.com
+                password:
+                  type: string
+                  example: nuevaContraseña456
+      responses:
+        "200":
+          description: Perfil actualizado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateSelfResponse"
+        "400":
+          description: Body vacío o sin campos reconocidos.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: NO_FIELDS_TO_UPDATE
+                  message: No hay campos para actualizar.
+        "401":
+          description: Token ausente o inválido. Lanzado por el middleware antes de llegar al controller.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "404":
+          description: Usuario no encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: USER_NOT_FOUND
+                  message: Usuario no encontrado
+        "409":
+          description: El email ya está registrado por otro usuario.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: EMAIL_ALREADY_EXISTS
+                  message: Ya existe un usuario con ese email.
+        "500":
+          description: |
+            Error interno inesperado. Posibles causas reales:
+            - `UPDATE_FAILED` — el update en BD devolvió un resultado inesperado.
+            - `USER_NOT_FOUND` — el usuario se actualizó correctamente pero no pudo recuperarse justo después (caso extremadamente raro).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError"
+              example:
+                data: null
+                error:
+                  code: UPDATE_FAILED
+                  message: Error al actualizar el usuario.
+
+  /user/logout:
+    delete:
+      tags: [User]
+      summary: Logout
+      description: |
+        Cierra la sesión del usuario eliminando su refresh token de la base de datos.
+
+        **Reglas de negocio**
+        - Si el refresh token no existe (ya fue eliminado o nunca fue válido), se responde igualmente con `200` — no se expone información sobre el estado del token.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        "200":
+          description: Sesión cerrada correctamente (o token ya inexistente).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogoutResponse"
+        "400":
+          description: Body vacío o refreshToken ausente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BAD_REQUEST
+                  message: Cuerpo de la solicitud inválido
+        "401":
+          description: Token ausente o inválido. Lanzado por el middleware antes de llegar al controller.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+
+  # ─────────────────────────────────────────
+  # ADMIN
+  # ─────────────────────────────────────────
+
+  /admin/user:
+    post:
+      tags: [Admin]
+      summary: Crear usuario
+      description: |
+        Crea un nuevo usuario con rol `USER` o `ADMINISTRATOR`.
+
+        **Reglas de negocio**
+        - El usuario se crea automáticamente en la empresa (`company_id`) a la que pertenece el administrador autenticado — no se puede especificar otra empresa.
+        - El `group_id` debe pertenecer a esa misma empresa.
+        - El email no puede estar ya registrado en el sistema.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [group_id, email, name, role, job_title, password, is_active]
+              properties:
+                group_id:
+                  type: integer
+                  example: 3
+                email:
+                  type: string
+                  format: email
+                  example: nuevo@empresa.com
+                name:
+                  type: string
+                  example: Ana López
+                role:
+                  type: string
+                  enum: [USER, ADMINISTRATOR]
+                job_title:
+                  type: string
+                  example: Desarrolladora Backend
+                password:
+                  type: string
+                  example: contraseñaSegura789
+                is_active:
+                  type: boolean
+                  example: true
+      responses:
+        "201":
+          description: Usuario creado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateUserResponse"
+        "400":
+          description: Body inválido o campos faltantes.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BAD_REQUEST
+                  message: Cuerpo de la solicitud inválido
+        "401":
+          description: Token ausente o inválido. Lanzado por el middleware antes de llegar al controller.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "403":
+          description: Token válido pero el usuario no tiene rol ADMINISTRATOR.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: FORBIDDEN
+                  message: No autorizado
+        "404":
+          description: El group_id no existe o no pertenece a la empresa del administrador.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: GROUP_NOT_FOUND
+                  message: Grupo no encontrado.
+        "409":
+          description: El email ya está registrado en el sistema.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: EMAIL_ALREADY_EXISTS
+                  message: Ya existe un usuario con ese email.
+        "500":
+          description: |
+            Error interno inesperado. Posibles causas reales:
+            - `USER_NOT_FOUND` — el usuario se creó correctamente en BD pero no pudo recuperarse justo después (caso extremadamente raro).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError"
+              example:
+                data: null
+                error:
+                  code: USER_NOT_FOUND
+                  message: Error al crear el usuario.
+
+  /admin/user/{id}:
+    patch:
+      tags: [Admin]
+      summary: Editar usuario
+      description: |
+        Actualiza los datos de un usuario con rol `USER`.
+
+        **Reglas de negocio**
+        - El usuario a editar debe pertenecer a la misma empresa que el administrador.
+        - No se puede editar a un usuario con rol `ADMINISTRATOR`.
+        - Los dos casos anteriores devuelven el mismo `404` intencionadamente — no se dan pistas sobre si el usuario existe.
+        - Si se envía un nuevo email, no puede estar ya registrado por otro usuario.
+        - Al menos un campo debe estar presente en el body.
+        - La nueva contraseña **no se compara con la anterior** — se sobreescribe directamente.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del usuario a editar.
+          schema:
+            type: integer
+            example: 7
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Al menos uno de los campos es obligatorio.
+              properties:
+                name:
+                  type: string
+                  example: Nuevo Nombre
+                email:
+                  type: string
+                  format: email
+                  example: nuevo@email.com
+                password:
+                  type: string
+                role:
+                  type: string
+                  enum: [USER, ADMINISTRATOR]
+                job_title:
+                  type: string
+                  example: Senior Developer
+                group_id:
+                  type: integer
+                  example: 2
+                is_active:
+                  type: boolean
+                  example: false
+      responses:
+        "200":
+          description: Usuario actualizado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateUserResponse"
+        "400":
+          description: ID inválido, body vacío o sin campos reconocidos.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: INVALID_USER_ID
+                  message: ID de usuario no válido
+        "401":
+          description: Token ausente o inválido. Lanzado por el middleware antes de llegar al controller.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "403":
+          description: Token válido pero el usuario no tiene rol ADMINISTRATOR.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: FORBIDDEN
+                  message: No autorizado
+        "404":
+          description: Usuario no encontrado, pertenece a otra empresa, o tiene rol ADMINISTRATOR.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: USER_NOT_FOUND
+                  message: Usuario no encontrado
+        "409":
+          description: El email ya está registrado por otro usuario.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: EMAIL_ALREADY_EXISTS
+                  message: Ya existe un usuario con ese email.
+        "500":
+          description: |
+            Error interno inesperado. Posibles causas reales:
+            - `UPDATE_FAILED` — el update en BD devolvió un resultado inesperado.
+            - `USER_NOT_FOUND` — el usuario se actualizó correctamente pero no pudo recuperarse justo después (caso extremadamente raro).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError"
+              example:
+                data: null
+                error:
+                  code: UPDATE_FAILED
+                  message: Error al actualizar el usuario.
