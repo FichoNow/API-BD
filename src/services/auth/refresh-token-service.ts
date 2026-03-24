@@ -2,6 +2,7 @@ import crypto from "crypto";
 import { env } from "../../config-env.js";
 import {
   createRefreshToken,
+  deleteRefreshTokenByHash,
   findRefreshTokenByHash,
 } from "../../database/repositories/refresh-token-repository.js";
 import { ResponseError } from "../../types/express/response-type.js";
@@ -68,6 +69,28 @@ export async function validateRefreshToken(
   }
 
   return dataUser;
+}
+
+/**
+ * Valida un refresh token, lo borra (rotation) y emite uno nuevo.
+ *
+ * Si el token no existe en BD significa que ya fue usado o es inválido —
+ * en ambos casos se devuelve 401, lo que detecta reuso de tokens robados.
+ *
+ * @param refreshToken - Token del cliente.
+ * @returns Datos del usuario validado y el nuevo refresh token en claro.
+ */
+export async function rotateRefreshToken(
+  refreshToken: string,
+): Promise<{ userData: UserRow; newRefreshToken: string }> {
+  const userData = await validateRefreshToken(refreshToken);
+
+  const tokenHash = hashRefreshToken(refreshToken);
+  await deleteRefreshTokenByHash(tokenHash);
+
+  const newRefreshToken = await issueRefreshToken(userData.id);
+
+  return { userData, newRefreshToken };
 }
 
 /**

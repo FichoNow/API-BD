@@ -19,12 +19,16 @@ export async function requireAdministrator(
 ) {
   const header = req.header("Authorization");
   if (!header) {
-    return next(new ResponseError("No autorizado", 401, "MISSING_AUTH_HEADER"));
+    return next(
+      new ResponseError("Token inválido", 401, "MISSING_AUTH_HEADER"),
+    );
   }
 
   const [scheme, token] = header.split(" ");
   if (scheme !== "Bearer" || !token) {
-    return next(new ResponseError("No autorizado", 401, "INVALID_AUTH_HEADER"));
+    return next(
+      new ResponseError("Token inválido", 401, "INVALID_AUTH_HEADER"),
+    );
   }
 
   const claims = validateAccessToken(token);

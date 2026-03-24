@@ -39,7 +39,7 @@ export function validateAccessToken(token: string): JwtClaims {
     });
 
     if (typeof decoded === "string" || !decoded.jwtClaims) {
-      throw new ResponseError("No autorizado", 401, "INVALID_TOKEN_PAYLOAD");
+      throw new ResponseError("Token inválido", 401, "INVALID_TOKEN_PAYLOAD");
     }
 
     return decoded.jwtClaims;
@@ -48,6 +48,6 @@ export function validateAccessToken(token: string): JwtClaims {
     if (err instanceof jwt.TokenExpiredError) {
       throw new ResponseError("Token expirado", 401, "TOKEN_EXPIRED");
     }
-    throw new ResponseError("No autorizado", 401, "UNAUTHORIZED");
+    throw new ResponseError("Token inválido", 401, "UNAUTHORIZED");
   }
 }
