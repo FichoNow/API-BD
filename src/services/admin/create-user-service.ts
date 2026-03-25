@@ -46,7 +46,6 @@ export async function createUserService(
     email: body.email,
     name: body.name,
     role: body.role,
-    job_title: body.job_title,
     password_hash: passwordHash,
     is_active: body.is_active,
     must_change_password: true,
@@ -59,7 +58,6 @@ export async function createUserService(
     email: body.email,
     name: body.name,
     role: body.role,
-    job_title: body.job_title,
     is_active: body.is_active,
     must_change_password: true,
   };

@@ -81,7 +81,6 @@ export async function updateUser(
     name: updatedUser.name,
     email: updatedUser.email,
     role: updatedUser.role,
-    job_title: updatedUser.job_title,
     group_id: updatedUser.group_id,
     is_active: updatedUser.is_active,
     must_change_password: updatedUser.must_change_password,

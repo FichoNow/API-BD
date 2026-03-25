@@ -2,14 +2,11 @@
 export interface CompanyData {
   id: number;
   name: string;
-  vat_number: string;
+  cif_nif: string;
   email: string;
-  phone: string;
-  address_line1: string;
+  address_line: string;
   city: string;
-  region: string;
   postal_code: string;
-  country_code: string;
   is_active: boolean;
   created_at: Date;
   updated_at: Date;

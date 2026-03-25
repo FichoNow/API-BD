@@ -74,14 +74,13 @@ export async function createUser(data: CreateUserRow): Promise<number> {
       email,
       name,
       role,
-      job_title,
       password_hash,
       is_active,
       must_change_password,
       created_at,
       updated_at
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       `,
     [
       data.company_id,
@@ -89,7 +88,6 @@ export async function createUser(data: CreateUserRow): Promise<number> {
       data.email,
       data.name,
       data.role,
-      data.job_title,
       data.password_hash,
       data.is_active,
       data.must_change_password,

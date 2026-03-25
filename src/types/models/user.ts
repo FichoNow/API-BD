@@ -9,7 +9,6 @@ export interface UserData {
   email: string;
   name: string;
   role: UserRole;
-  job_title: string;
   password_hash: string;
   is_active: boolean;
   must_change_password: boolean;

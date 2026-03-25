@@ -7,7 +7,6 @@ export type UpdateUserResponse = Pick<
   | "name"
   | "email"
   | "role"
-  | "job_title"
   | "group_id"
   | "is_active"
   | "must_change_password"
