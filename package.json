@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "clean": "rimraf dist",
-    "build": "npm run clean && tsc",
+    "build": "npm run clean && tsc && node -e \"const fs=require('fs');fs.mkdirSync('dist/docs',{recursive:true});fs.copyFileSync('src/docs/openapi.yaml','dist/docs/openapi.yaml')\"",
     "start": "node dist/server.js",
     "dev": "tsx src/server.ts"
   },
