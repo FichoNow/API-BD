@@ -32,7 +32,6 @@ CREATE TABLE work_groups (
     id INT NOT NULL AUTO_INCREMENT,
     name VARCHAR(120) NOT NULL,
     company_id INT NOT NULL,
-    primary_user_id INT NULL,
     PRIMARY KEY (id),
     UNIQUE KEY uq_groups_company_name (company_id, name),
     CONSTRAINT fk_groups_company
