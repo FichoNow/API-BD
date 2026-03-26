@@ -78,13 +78,16 @@ CREATE TABLE refresh_tokens (
 CREATE TABLE projects (
     id INT NOT NULL AUTO_INCREMENT,
     company_id INT NOT NULL,
+    group_id INT NULL,
     name VARCHAR(150) NOT NULL,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     UNIQUE KEY uq_projects_company_name (company_id, name),
     CONSTRAINT fk_projects_company
-        FOREIGN KEY (company_id) REFERENCES companies(id)
+        FOREIGN KEY (company_id) REFERENCES companies(id),
+    CONSTRAINT fk_projects_group
+        FOREIGN KEY (group_id) REFERENCES work_groups(id)
 );
 
 /* ============= Tabla fichajes =============*/
@@ -135,3 +138,11 @@ VALUES
 (1, 1, 'admin@empresa.com', 'Bruce Wayne', 'ADMINISTRATOR', '$argon2id$v=19$m=65536,t=3,p=4$jLlSe5qff/xYfJBNS7VQjQ$QZ+DQWdRb2Cic+XL4egs8iDLO41O3bD6HbMrG1sJWXI', TRUE),  -- contraseña: bat123
 (1, 2, 'empleado1@empresa.com', 'Clark Kent', 'USER', '$argon2id$v=19$m=65536,t=3,p=4$ql52pJF3lKWsPmNYGuUHtA$52P8spHNtonUU1F6Aa9oRYeAnr0s4EOokGcCKxf6NPc', TRUE),       -- contraseña: super123
 (1, 2, 'empleado2@empresa.com', 'Diana Prince', 'USER', '$argon2id$v=19$m=65536,t=3,p=4$pNgjMOQmz1TngKB8UqOvHw$uKkOsHNWuaYD+Z+6SOd0Jv4FEiy5q3JsYMcWesbN+1c', TRUE); -- contraseña: wonder123
+
+INSERT INTO projects (company_id, group_id, name, is_active) VALUES
+(1, NULL, 'Proyecto Global Empresa', TRUE),
+(1, NULL, 'Consultoría Interna', TRUE),
+(1, 1,    'Desarrollo Web', TRUE),
+(1, 1,    'App Móvil', TRUE),
+(1, 2,    'Infraestructura Cloud', TRUE),
+(1, 2,    'Soporte Técnico', FALSE);
