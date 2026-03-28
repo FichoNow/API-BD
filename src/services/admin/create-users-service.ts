@@ -28,11 +28,15 @@ export async function createUsersService(
   const validationErrors: string[] = [];
 
   for (const user of body) {
-    let group = groupCache.get(user.group_id);
+    let group: WorkGroupRow | null | undefined = undefined;
 
-    if (group === undefined) {
-      group = await findGroupById(user.group_id);
-      groupCache.set(user.group_id, group ?? null);
+    if (user.group_id !== null) {
+      group = groupCache.get(user.group_id);
+
+      if (group === undefined) {
+        group = await findGroupById(user.group_id);
+        groupCache.set(user.group_id, group ?? null);
+      }
     }
 
     if (!group || group.company_id !== companyId) {
