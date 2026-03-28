@@ -31,7 +31,7 @@ export async function refreshController(
     );
   }
 
-  const data = await refreshUser(parsed.data.refreshToken);
+  const data = await refreshUser(parsed.data as PostRefreshBody);
 
   return res.status(200).json({ data });
 }

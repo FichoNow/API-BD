@@ -3,10 +3,10 @@ import { updateUser } from "../../../services/admin/update-user-service.js";
 import { ResponseError } from "../../../types/express/response-type.js";
 import { BodyResponse } from "../../../types/express/response-type.js";
 import {
-  UpdateUserBody,
-  UpdateUserBodySchema,
-} from "../../../types/dto/admin/update-user-body.js";
-import { UpdateUserResponse } from "../../../types/dto/admin/update-user-response.js";
+  PatchUserBody,
+  PatchUserBodySchema,
+} from "../../../types/dto/admin/patch-user-body.js";
+import { PatchUserResponse } from "../../../types/dto/admin/patch-user-response.js";
 
 /**
  * Controller del endpoint de actualización de usuario (PATCH /admin/user/:id).
@@ -19,8 +19,8 @@ import { UpdateUserResponse } from "../../../types/dto/admin/update-user-respons
  * 5. Devolver la respuesta HTTP correspondiente según el resultado.
  */
 export async function patchUserController(
-  req: Request<{ id: string }, unknown, UpdateUserBody>,
-  res: Response<BodyResponse<UpdateUserResponse>>,
+  req: Request<{ id: string }, unknown, PatchUserBody>,
+  res: Response<BodyResponse<PatchUserResponse>>,
 ) {
   const userId = Number(req.params.id);
 
@@ -28,7 +28,7 @@ export async function patchUserController(
     throw new ResponseError("ID de usuario no válido", 400, "INVALID_USER_ID");
   }
 
-  const parsed = UpdateUserBodySchema.safeParse(req.body);
+  const parsed = PatchUserBodySchema.safeParse(req.body);
 
   if (!parsed.success) {
     throw new ResponseError(
@@ -42,7 +42,7 @@ export async function patchUserController(
 
   const data = await updateUser(
     userId,
-    parsed.data as UpdateUserBody,
+    parsed.data as PatchUserBody,
     adminCompanyId,
   );
 

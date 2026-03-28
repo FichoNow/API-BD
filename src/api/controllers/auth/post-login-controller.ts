@@ -25,7 +25,7 @@ export async function loginController(
     throw new ResponseError("Cuerpo de la solicitud inválido", 400, "BAD_REQUEST");
   }
 
-  const data = await loginUser(parsed.data.email, parsed.data.password);
+  const data = await loginUser(parsed.data as PostLoginBody);
 
   return res.status(200).json({ data });
 }

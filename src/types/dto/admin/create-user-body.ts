@@ -10,7 +10,7 @@ export type CreateUserBody = Pick<
 
 /** Schema de validación del body de creación de usuario. */
 export const CreateUserBodySchema = createZodObject<CreateUserBody>({
-  group_id: z.number(),
+  group_id: z.number().nullable(),
   email: z.email().trim().toLowerCase(),
   name: z.string().trim(),
   role: z.enum(["USER", "ADMINISTRATOR"]),

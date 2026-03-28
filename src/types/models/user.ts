@@ -5,7 +5,7 @@ export type UserRole = "USER" | "ADMINISTRATOR";
 export interface UserData {
   id: number;
   company_id: number;
-  group_id: number;
+  group_id: number | null;
   email: string;
   name: string;
   role: UserRole;

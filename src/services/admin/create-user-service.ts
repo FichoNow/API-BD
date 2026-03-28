@@ -22,10 +22,12 @@ export async function createUserService(
   body: CreateUserBody,
   companyId: number,
 ): Promise<CreateUserResponse> {
-  const group = await findGroupById(body.group_id);
+  if (body.group_id) {
+    const group = await findGroupById(body.group_id);
 
-  if (!group || group.company_id !== companyId) {
-    throw new ResponseError("Grupo no encontrado.", 404, "GROUP_NOT_FOUND");
+    if (!group || group.company_id !== companyId) {
+      throw new ResponseError("Grupo no encontrado.", 404, "GROUP_NOT_FOUND");
+    }
   }
 
   const existingUser = await findUserByEmail(body.email);

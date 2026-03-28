@@ -3,6 +3,7 @@ import {
   findUserByEmail,
   updateLastLoginAt,
 } from "../../database/repositories/user-repository.js";
+import { PostLoginBody } from "../../types/dto/auth/post-login-body.js";
 import { PostLoginResponse } from "../../types/dto/auth/post-login-response.js";
 import { verifyPassword } from "./password-hash-service.js";
 import { issueJwt } from "./access-token-service.js";
@@ -21,10 +22,9 @@ import { ResponseError } from "../../types/express/response-type.js";
  * @returns Los datos de login si la autenticación es correcta, o `null` si falla.
  */
 export async function loginUser(
-  email: string,
-  password: string,
+  body: PostLoginBody,
 ): Promise<PostLoginResponse> {
-  const userRow = await findUserByEmail(email);
+  const userRow = await findUserByEmail(body.email);
 
   if (!userRow) {
     throw new ResponseError("Credenciales incorrectas", 401, "UNAUTHORIZED");
@@ -34,7 +34,7 @@ export async function loginUser(
     throw new ResponseError("Credenciales incorrectas", 401, "UNAUTHORIZED");
   }
 
-  const isValidPassword = await verifyPassword(password, userRow.password_hash);
+  const isValidPassword = await verifyPassword(body.password, userRow.password_hash);
 
   if (!isValidPassword) {
     throw new ResponseError("Credenciales incorrectas", 401, "UNAUTHORIZED");

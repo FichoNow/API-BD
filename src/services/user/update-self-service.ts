@@ -4,9 +4,9 @@ import {
   updateUserById,
 } from "../../database/repositories/user-repository.js";
 import { UpdateUserRow } from "../../types/db/user-row-type.js";
-import { UpdateSelfBody } from "../../types/dto/user/update-user-body.js";
+import { PatchSelfBody } from "../../types/dto/user/patch-self-body.js";
 import { hashPassword } from "../auth/password-hash-service.js";
-import { UpdateSelfResponse } from "../../types/dto/user/update-user-response.js";
+import { PatchSelfResponse } from "../../types/dto/user/patch-self-response.js";
 import { ResponseError } from "../../types/express/response-type.js";
 
 /**
@@ -22,8 +22,8 @@ import { ResponseError } from "../../types/express/response-type.js";
  */
 export async function updateSelf(
   userId: number,
-  body: UpdateSelfBody,
-): Promise<UpdateSelfResponse> {
+  body: PatchSelfBody,
+): Promise<PatchSelfResponse> {
   const { password, ...rest } = body;
 
   const user = await findUserById(userId);

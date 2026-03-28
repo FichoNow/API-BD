@@ -35,7 +35,7 @@ export async function createUserController(
 
   const companyId = req.jwtClaims!.company_id;
 
-  const data = await createUserService(parsed.data, companyId);
+  const data = await createUserService(parsed.data as CreateUserBody, companyId);
 
   res.status(201).json({ data });
 }

@@ -3,10 +3,11 @@ import {
   findUserByEmail,
   updateUserById,
 } from "../../database/repositories/user-repository.js";
+import { findGroupById } from "../../database/repositories/work-group-repository.js";
 import { UpdateUserRow } from "../../types/db/user-row-type.js";
-import { UpdateUserBody } from "../../types/dto/admin/update-user-body.js";
+import { PatchUserBody } from "../../types/dto/admin/patch-user-body.js";
 import { hashPassword } from "../auth/password-hash-service.js";
-import { UpdateUserResponse } from "../../types/dto/admin/update-user-response.js";
+import { PatchUserResponse } from "../../types/dto/admin/patch-user-response.js";
 import { ResponseError } from "../../types/express/response-type.js";
 
 /**
@@ -23,9 +24,9 @@ import { ResponseError } from "../../types/express/response-type.js";
  */
 export async function updateUser(
   userId: number,
-  body: UpdateUserBody,
+  body: PatchUserBody,
   adminCompanyId: number,
-): Promise<UpdateUserResponse> {
+): Promise<PatchUserResponse> {
   const { password, ...rest } = body;
 
   const user = await findUserById(userId);
@@ -36,6 +37,14 @@ export async function updateUser(
     user.role === "ADMINISTRATOR"
   ) {
     throw new ResponseError("Usuario no encontrado", 404, "USER_NOT_FOUND");
+  }
+
+  if (rest.group_id) {
+    const group = await findGroupById(rest.group_id);
+
+    if (!group || group.company_id !== adminCompanyId) {
+      throw new ResponseError("Grupo no encontrado.", 404, "GROUP_NOT_FOUND");
+    }
   }
 
   if (rest.email) {

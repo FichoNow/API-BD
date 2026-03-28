@@ -1,11 +1,12 @@
+import { PostRefreshBody } from "../../types/dto/auth/post-refresh-body.js";
 import { PostRefreshResponse } from "../../types/dto/auth/post-refresh-response.js";
 import { issueJwt } from "./access-token-service.js";
 import { rotateRefreshToken } from "./refresh-token-service.js";
 
 export async function refreshUser(
-  refreshToken: string,
+  body: PostRefreshBody,
 ): Promise<PostRefreshResponse> {
-  const { userData, newRefreshToken } = await rotateRefreshToken(refreshToken);
+  const { userData, newRefreshToken } = await rotateRefreshToken(body.refreshToken);
 
   const accessToken = issueJwt({
     id: userData.id,

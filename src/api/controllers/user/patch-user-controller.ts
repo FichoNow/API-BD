@@ -5,10 +5,10 @@ import {
   BodyResponse,
 } from "../../../types/express/response-type.js";
 import {
-  UpdateSelfBody,
-  UpdateSelfBodySchema,
-} from "../../../types/dto/user/update-user-body.js";
-import { UpdateSelfResponse } from "../../../types/dto/user/update-user-response.js";
+  PatchSelfBody,
+  PatchSelfBodySchema,
+} from "../../../types/dto/user/patch-self-body.js";
+import { PatchSelfResponse } from "../../../types/dto/user/patch-self-response.js";
 
 /**
  * Controller del endpoint de actualización del propio perfil (PATCH /user/update).
@@ -21,12 +21,12 @@ import { UpdateSelfResponse } from "../../../types/dto/user/update-user-response
  * 5. Devolver la respuesta HTTP correspondiente según el resultado.
  */
 export async function patchSelfController(
-  req: Request<unknown, unknown, UpdateSelfBody>,
-  res: Response<BodyResponse<UpdateSelfResponse>>,
+  req: Request<unknown, unknown, PatchSelfBody>,
+  res: Response<BodyResponse<PatchSelfResponse>>,
 ) {
   const userId = req.jwtClaims!.id;
 
-  const parsed = UpdateSelfBodySchema.safeParse(req.body);
+  const parsed = PatchSelfBodySchema.safeParse(req.body);
 
   if (!parsed.success) {
     throw new ResponseError(
@@ -36,7 +36,7 @@ export async function patchSelfController(
     );
   }
 
-  const data = await updateSelf(userId, parsed.data as UpdateSelfBody);
+  const data = await updateSelf(userId, parsed.data as PatchSelfBody);
 
   return res.status(200).json({ data });
 }
