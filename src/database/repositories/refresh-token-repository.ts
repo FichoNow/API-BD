@@ -73,3 +73,14 @@ export async function deleteRefreshTokenByHash(
 
   return result.affectedRows > 0;
 }
+
+export async function deleteRefreshTokenByUserId(
+  userId: number,
+): Promise<boolean> {
+  const [result] = await pool.query<ResultSetHeader>(
+    `DELETE FROM refresh_tokens WHERE user_id = ?`,
+    [userId],
+  );
+
+  return result.affectedRows > 0;
+}

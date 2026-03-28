@@ -5,7 +5,8 @@ import { createUsersController } from "../controllers/admin/create-users-control
 
 export const adminRouter = Router();
 
-adminRouter.patch("/user/:id", patchUserController);
+adminRouter.patch("/user/:id", patchUserController); // Editar a un usurio
 
-adminRouter.post("/user", createUserController);
-adminRouter.post("/users", createUsersController);
+adminRouter.post("/user", createUserController); // Crear un usuario
+
+adminRouter.post("/users", createUsersController); // Crear varios usuarios

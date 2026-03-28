@@ -4,5 +4,6 @@ import { logoutController } from "../controllers/user/delete-logout-controller.j
 
 export const userRouter = Router();
 
-userRouter.patch("/update", patchSelfController);
-userRouter.delete("/logout", logoutController);
+userRouter.patch("/update", patchSelfController); // Actualizar el propio cliente
+
+userRouter.delete("/logout", logoutController); // Logout de la cuenta del cliente

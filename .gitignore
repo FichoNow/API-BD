@@ -42,6 +42,7 @@ Desktop.ini
 # ===============================
 # IDEs / Editors
 # ===============================
+.claude/
 .vscode/*
 !.vscode/settings.json
 !.vscode/extensions.json

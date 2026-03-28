@@ -1,7 +1,5 @@
-import { deleteRefreshTokenByHash } from "../../database/repositories/refresh-token-repository.js";
-import { hashRefreshToken } from "./refresh-token-service.js";
+import { deleteRefreshTokenByUserId } from "../../database/repositories/refresh-token-repository.js";
 
-export async function logoutUser(refreshToken: string): Promise<void> {
-  const tokenHash = hashRefreshToken(refreshToken);
-  await deleteRefreshTokenByHash(tokenHash);
+export async function logoutUser(userId: number): Promise<void> {
+  await deleteRefreshTokenByUserId(userId);
 }
