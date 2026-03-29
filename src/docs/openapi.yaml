@@ -9,7 +9,11 @@ tags:
   - name: Auth
     description: Endpoints públicos de autenticación (sin token requerido).
   - name: User
-    description: Endpoints del usuario autenticado. Requieren `Authorization: Bearer <accessToken>`.
+    description: |
+      Endpoints del usuario autenticado. Requieren `Authorization: Bearer <accessToken>`.
+
+      El `id` del usuario **nunca se pasa como parámetro** — se extrae automáticamente del payload del access token.
+      Todas las acciones se aplican al usuario propietario del token.
   - name: Admin
     description: >
       Endpoints de administración. Requieren `Authorization: Bearer <accessToken>`
@@ -283,6 +287,75 @@ components:
             is_active:
               type: boolean
               example: false
+
+    PostFichajeResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 42
+            user_id:
+              type: integer
+              example: 3
+            clock_in:
+              type: string
+              format: date-time
+              example: "2026-03-29T08:30:00.000Z"
+            created_at:
+              type: string
+              format: date-time
+              example: "2026-03-29T08:30:01.000Z"
+
+    PatchClockOutResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 42
+            clock_out:
+              type: string
+              format: date-time
+              example: "2026-03-29T17:00:00.000Z"
+
+    PatchClockInModifiedResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 42
+            clock_in:
+              type: string
+              format: date-time
+              example: "2026-03-29T08:45:00.000Z"
+            clock_in_modified:
+              type: boolean
+              example: true
+
+    PatchClockOutModifiedResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 42
+            clock_out:
+              type: string
+              format: date-time
+              example: "2026-03-29T17:15:00.000Z"
+            clock_out_modified:
+              type: boolean
+              example: true
 
 paths:
 
@@ -1130,3 +1203,326 @@ paths:
                 error:
                   code: UPDATE_FAILED
                   message: Error al actualizar el proyecto.
+
+  # ─────────────────────────────────────────
+  # FICHAJES
+  # ─────────────────────────────────────────
+
+  /user/fichaje:
+    post:
+      tags: [User]
+      summary: Iniciar fichaje
+      description: |
+        Registra la entrada de un nuevo fichaje para el usuario autenticado.
+
+        **Formato de fechas**
+        Todos los campos de fecha/hora deben enviarse en formato **ISO 8601 UTC**:
+        `"YYYY-MM-DDTHH:mm:ss.sssZ"`
+        Ejemplo: `"2026-03-29T08:30:00.000Z"`
+
+        **Reglas de negocio**
+        - `clock_in` es la fecha y hora exacta de entrada.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [clock_in]
+              properties:
+                clock_in:
+                  type: string
+                  format: date-time
+                  description: Fecha y hora de entrada en formato ISO 8601 UTC.
+                  example: "2026-03-29T08:30:00.000Z"
+      responses:
+        "201":
+          description: Fichaje creado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostFichajeResponse"
+        "400":
+          description: Body inválido o `clock_in` ausente o con formato incorrecto.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BAD_REQUEST
+                  message: Cuerpo de la solicitud inválido
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+
+  /user/fichaje/{id}/clock-out:
+    patch:
+      tags: [User]
+      summary: Registrar salida
+      description: |
+        Registra la hora de salida de un fichaje existente. Este es el **flujo normal** de cierre de jornada.
+
+        **Formato de fechas**
+        Todos los campos de fecha/hora deben enviarse en formato **ISO 8601 UTC**:
+        `"YYYY-MM-DDTHH:mm:ss.sssZ"`
+        Ejemplo: `"2026-03-29T17:00:00.000Z"`
+
+        **Reglas de negocio**
+        - El fichaje debe pertenecer al usuario autenticado.
+        - `clock_out` puede ser de un día distinto al de `clock_in` (turnos nocturnos).
+        - `clock_out` debe ser **posterior** a `clock_in`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del fichaje al que se le registra la salida.
+          schema:
+            type: integer
+            example: 42
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [clock_out]
+              properties:
+                clock_out:
+                  type: string
+                  format: date-time
+                  description: Fecha y hora de salida en formato ISO 8601 UTC. Puede ser un día distinto al de la entrada.
+                  example: "2026-03-29T17:00:00.000Z"
+      responses:
+        "200":
+          description: Salida registrada correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatchClockOutResponse"
+        "400":
+          description: |
+            Alguno de estos casos:
+            - ID inválido, body ausente o `clock_out` con formato incorrecto (`BAD_REQUEST`).
+            - `clock_out` no es posterior a `clock_in` (`INVALID_CLOCK_OUT`).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: INVALID_CLOCK_OUT
+                  message: La hora de salida debe ser posterior a la hora de entrada.
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "404":
+          description: Fichaje no encontrado o no pertenece al usuario autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: FICHAJE_NOT_FOUND
+                  message: Fichaje no encontrado.
+
+  /user/fichaje/{id}/clock-in/modified:
+    patch:
+      tags: [User]
+      summary: Corregir hora de entrada
+      description: |
+        Corrige la hora de entrada de un fichaje ya existente. Se usa cuando el usuario se ha equivocado al fichar.
+
+        **Formato del campo `clock_in`**
+        Debe enviarse en formato **ISO 8601 UTC** con la **fecha original** del fichaje y la **hora corregida**:
+        `"YYYY-MM-DDTHH:mm:ss.sssZ"`
+        Ejemplo: `"2026-03-29T08:45:00.000Z"`
+
+        > La fecha (año, mes, día) debe coincidir con la del fichaje original.
+        > Solo se cambia la hora — si necesitas corregir también el día, no uses este endpoint.
+
+        **Reglas de negocio**
+        - El fichaje debe pertenecer al usuario autenticado.
+        - Si el fichaje ya tiene `clock_out`, el nuevo `clock_in` debe ser **anterior** a él.
+        - El campo `clock_in_modified` se marca como `true` automáticamente para dejar constancia de que fue editado a posteriori.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del fichaje a corregir.
+          schema:
+            type: integer
+            example: 42
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [clock_in]
+              properties:
+                clock_in:
+                  type: string
+                  format: date-time
+                  description: >
+                    Fecha y hora corregida de entrada en formato ISO 8601 UTC.
+                    Debe mantener la misma fecha (año/mes/día) que el fichaje original — solo se corrige la hora.
+                  example: "2026-03-29T08:45:00.000Z"
+      responses:
+        "200":
+          description: Hora de entrada corregida correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatchClockInModifiedResponse"
+        "400":
+          description: |
+            Alguno de estos casos:
+            - ID inválido, body ausente o `clock_in` con formato incorrecto (`BAD_REQUEST`).
+            - El nuevo `clock_in` no es anterior al `clock_out` existente (`INVALID_CLOCK_IN`).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: INVALID_CLOCK_IN
+                  message: La hora de entrada debe ser anterior a la hora de salida.
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "404":
+          description: Fichaje no encontrado o no pertenece al usuario autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: FICHAJE_NOT_FOUND
+                  message: Fichaje no encontrado.
+
+  /user/fichaje/{id}/clock-out/modified:
+    patch:
+      tags: [User]
+      summary: Corregir hora de salida
+      description: |
+        Corrige la hora de salida de un fichaje ya existente. Se usa cuando el usuario se ha equivocado al fichar la salida.
+
+        **Formato del campo `clock_out`**
+        Debe enviarse en formato **ISO 8601 UTC**:
+        `"YYYY-MM-DDTHH:mm:ss.sssZ"`
+        Ejemplo: `"2026-03-29T17:15:00.000Z"`
+
+        > A diferencia de la corrección de entrada, aquí **sí puedes cambiar el día** — los turnos nocturnos pueden terminar al día siguiente.
+
+        **Reglas de negocio**
+        - El fichaje debe pertenecer al usuario autenticado.
+        - El fichaje debe tener una hora de salida ya registrada — no se puede usar este endpoint si aún no se ha hecho `clock-out`.
+        - El nuevo `clock_out` debe ser **posterior** a `clock_in`.
+        - El campo `clock_out_modified` se marca como `true` automáticamente para dejar constancia de que fue editado a posteriori.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del fichaje a corregir.
+          schema:
+            type: integer
+            example: 42
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [clock_out]
+              properties:
+                clock_out:
+                  type: string
+                  format: date-time
+                  description: >
+                    Fecha y hora corregida de salida en formato ISO 8601 UTC.
+                    Puede ser un día distinto al de la entrada (turnos nocturnos).
+                  example: "2026-03-29T17:15:00.000Z"
+      responses:
+        "200":
+          description: Hora de salida corregida correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatchClockOutModifiedResponse"
+        "400":
+          description: |
+            Alguno de estos casos:
+            - ID inválido, body ausente o `clock_out` con formato incorrecto (`BAD_REQUEST`).
+            - El fichaje no tiene hora de salida registrada aún (`CLOCK_OUT_NOT_SET`).
+            - El nuevo `clock_out` no es posterior a `clock_in` (`INVALID_CLOCK_OUT`).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: CLOCK_OUT_NOT_SET
+                  message: El fichaje no tiene hora de salida registrada.
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "404":
+          description: Fichaje no encontrado o no pertenece al usuario autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: FICHAJE_NOT_FOUND
+                  message: Fichaje no encontrado.

@@ -96,6 +96,8 @@ CREATE TABLE fichajes (
     user_id INT NOT NULL,
     clock_in DATETIME NOT NULL,
     clock_out DATETIME NULL DEFAULT NULL,
+    clock_in_modified BOOLEAN NOT NULL DEFAULT FALSE,
+    clock_out_modified BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     CONSTRAINT fk_fichajes_user

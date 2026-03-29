@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { logoutUser } from "../../../services/auth/logout-service.js";
+import { logoutUser } from "../../../services/user/logout-service.js";
 import { BodyResponse } from "../../../types/express/response-type.js";
 
 export async function logoutController(
