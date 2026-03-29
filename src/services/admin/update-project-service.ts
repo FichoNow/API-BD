@@ -48,7 +48,11 @@ export async function updateProjectService(
     }
   }
 
-  const updated = await updateProjectById(projectId, body);
+  const updated = await updateProjectById(projectId, {
+    group_id: body.group_id,
+    name: body.name,
+    is_active: body.is_active,
+  });
 
   if (!updated) {
     throw new ResponseError("Error al actualizar el proyecto.", 500, "UPDATE_FAILED");
