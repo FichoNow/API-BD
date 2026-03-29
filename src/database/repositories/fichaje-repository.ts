@@ -64,3 +64,19 @@ export async function updateClockOutModifiedById(
 
   return result.affectedRows > 0;
 }
+
+export async function findFichajesByUserId(
+  userId: number,
+  limit: number,
+): Promise<FichajeRow[]> {
+  const[rows] = await pool.query<FichajeRow[]>(
+    `SELECT *
+     FROM fichajes
+     WHERE user_id = ?
+     ORDER BY clock_in DESC
+     LIMIT ?`,
+     [userId, limit],
+  );
+
+  return rows;
+}
