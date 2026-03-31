@@ -1,22 +1,18 @@
 import { findFichajeById, updateClockOutModifiedById } from "../../database/repositories/fichaje-repository.js";
 import { PatchClockOutModifiedBody } from "../../types/dto/user/patch-clock-out-modified-body.js";
-import { PatchClockOutModifiedResponse } from "../../types/dto/user/patch-clock-out-modified-response.js";
 import { ResponseError } from "../../types/express/response-type.js";
 
 /**
  * Lógica de negocio para corregir la hora de salida de un fichaje.
- * Comprueba que el fichaje existe, pertenece al usuario y ya tiene clock_out registrado.
- * Actualiza el clock_out y marca clock_out_modified como true.
  * @param fichajeId ID del fichaje a actualizar.
  * @param body Datos de la corrección (clock_out).
  * @param userId ID del usuario autenticado (extraído del JWT).
- * @returns Los datos actualizados del fichaje.
  */
 export async function updateClockOutModifiedService(
   fichajeId: number,
   body: PatchClockOutModifiedBody,
   userId: number,
-): Promise<PatchClockOutModifiedResponse> {
+): Promise<null> {
   const fichaje = await findFichajeById(fichajeId);
 
   if (!fichaje || fichaje.user_id !== userId) {
@@ -40,9 +36,5 @@ export async function updateClockOutModifiedService(
     clock_out_modified: true,
   });
 
-  return {
-    id: fichajeId,
-    clock_out: body.clock_out,
-    clock_out_modified: true,
-  };
+  return null;
 }

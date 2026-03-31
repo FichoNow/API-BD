@@ -288,6 +288,13 @@ components:
               type: boolean
               example: false
 
+    NullResponse:
+      type: object
+      properties:
+        data:
+          nullable: true
+          example: null
+
     PostFichajeResponse:
       type: object
       properties:
@@ -297,65 +304,27 @@ components:
             id:
               type: integer
               example: 42
-            user_id:
-              type: integer
-              example: 3
-            clock_in:
-              type: string
-              format: date-time
-              example: "2026-03-29T08:30:00.000Z"
-            created_at:
-              type: string
-              format: date-time
-              example: "2026-03-29T08:30:01.000Z"
 
-    PatchClockOutResponse:
+    GetFichajesResponse:
       type: object
       properties:
         data:
-          type: object
-          properties:
-            id:
-              type: integer
-              example: 42
-            clock_out:
-              type: string
-              format: date-time
-              example: "2026-03-29T17:00:00.000Z"
-
-    PatchClockInModifiedResponse:
-      type: object
-      properties:
-        data:
-          type: object
-          properties:
-            id:
-              type: integer
-              example: 42
-            clock_in:
-              type: string
-              format: date-time
-              example: "2026-03-29T08:45:00.000Z"
-            clock_in_modified:
-              type: boolean
-              example: true
-
-    PatchClockOutModifiedResponse:
-      type: object
-      properties:
-        data:
-          type: object
-          properties:
-            id:
-              type: integer
-              example: 42
-            clock_out:
-              type: string
-              format: date-time
-              example: "2026-03-29T17:15:00.000Z"
-            clock_out_modified:
-              type: boolean
-              example: true
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 42
+              clock_in:
+                type: string
+                format: date-time
+                example: "2026-03-29T08:30:00.000Z"
+              clock_out:
+                type: string
+                format: date-time
+                nullable: true
+                example: "2026-03-29T17:00:00.000Z"
 
 paths:
 
@@ -1312,7 +1281,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PatchClockOutResponse"
+                $ref: "#/components/schemas/NullResponse"
         "400":
           description: |
             Alguno de estos casos:
@@ -1400,7 +1369,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PatchClockInModifiedResponse"
+                $ref: "#/components/schemas/NullResponse"
         "400":
           description: |
             Alguno de estos casos:
@@ -1488,7 +1457,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PatchClockOutModifiedResponse"
+                $ref: "#/components/schemas/NullResponse"
         "400":
           description: |
             Alguno de estos casos:
@@ -1526,3 +1495,34 @@ paths:
                 error:
                   code: FICHAJE_NOT_FOUND
                   message: Fichaje no encontrado.
+
+  /user/fichajes:
+    get:
+      tags: [User]
+      summary: Obtener fichajes
+      description: |
+        Devuelve los últimos 20 fichajes del usuario autenticado, ordenados por `clock_in` descendente.
+
+        **Reglas de negocio**
+        - Solo se devuelven los fichajes del usuario propietario del token.
+        - Se devuelven como máximo 20 registros.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Lista de fichajes obtenida correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetFichajesResponse"
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado

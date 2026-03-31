@@ -8,11 +8,10 @@ import {
   ResponseError,
 } from "../../../types/express/response-type.js";
 import { updateClockInModifiedService } from "../../../services/user/update-clock-in-modified-service.js";
-import { PatchClockInModifiedResponse } from "../../../types/dto/user/patch-clock-in-modified-response.js";
 
 export async function patchClockInModifiedController(
   req: Request<{ id: string }, unknown, PatchClockInModifiedBody>,
-  res: Response<BodyResponse<PatchClockInModifiedResponse>>,
+  res: Response<BodyResponse<null>>,
 ) {
   const fichajeId = Number(req.params.id);
 

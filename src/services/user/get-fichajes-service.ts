@@ -3,7 +3,6 @@ import { GetFichajesResponse } from "../../types/dto/user/get-fichajes-response.
 
 /**
  * Lógica de negocio para obtener los fichajes del usuario autenticado.
- * Devuelve los fichajes ordenados por clock_in descendente y limitados.
  * @param userId ID del usuario autenticado.
  * @returns Lista de fichajes del usuario.
  */
@@ -14,11 +13,7 @@ export async function getFichajesService(
 
   return fichajes.map((fichaje) => ({
     id: fichaje.id,
-    user_id: fichaje.user_id,
     clock_in: fichaje.clock_in,
     clock_out: fichaje.clock_out,
-    clock_in_modified: fichaje.clock_in_modified,
-    clock_out_modified: fichaje.clock_out_modified,
-    created_at: fichaje.created_at,
   }));
 }
