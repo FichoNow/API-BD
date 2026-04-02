@@ -31,7 +31,7 @@ export async function patchClockOutController(
 
   const userId = req.jwtClaims!.id;
 
-  const data = await updateClockOutService(fichajeId, parsed.data, userId);
+  await updateClockOutService(fichajeId, parsed.data, userId);
 
-  res.status(200).json({ data });
+  res.status(200).json({ data: null });
 }

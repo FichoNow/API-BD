@@ -12,7 +12,7 @@ export async function updateClockInModifiedService(
   fichajeId: number,
   body: PatchClockInModifiedBody,
   userId: number,
-): Promise<null> {
+): Promise<void> {
   const fichaje = await findFichajeById(fichajeId);
 
   if (!fichaje || fichaje.user_id !== userId) {
@@ -28,6 +28,4 @@ export async function updateClockInModifiedService(
   }
 
   await updateClockInById(fichajeId, { clock_in: body.clock_in, clock_in_modified: true });
-
-  return null;
 }

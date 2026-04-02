@@ -31,7 +31,7 @@ export async function patchClockInModifiedController(
 
   const userId = req.jwtClaims!.id;
 
-  const data = await updateClockInModifiedService(fichajeId, parsed.data, userId);
+  await updateClockInModifiedService(fichajeId, parsed.data, userId);
 
-  res.status(200).json({ data });
+  res.status(200).json({ data: null });
 }

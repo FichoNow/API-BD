@@ -80,3 +80,12 @@ export async function findFichajesByUserId(
 
   return rows;
 }
+
+export async function deleteFichajeById(fichajeId: number): Promise<boolean> {
+  const [result] = await pool.query<ResultSetHeader>(
+    "DELETE FROM fichajes WHERE id = ? LIMIT 1",
+    [fichajeId],
+  );
+
+  return result.affectedRows > 0;
+}
