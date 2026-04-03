@@ -7,6 +7,7 @@ import { patchClockOutModifiedController } from "../controllers/user/patch-clock
 import { patchClockInModifiedController } from "../controllers/user/patch-clock-in-modified-controller.js";
 import { getFichajesController } from "../controllers/user/get-fichajes-controller.js";
 import { deleteFichajeController } from "../controllers/user/delete-fichaje-controller.js";
+import { postFichajeEntryController } from "../controllers/user/post-fichaje-entry-controller.js";
 
 export const userRouter = Router();
 
@@ -24,3 +25,5 @@ userRouter.patch("/fichaje/:id/clock-in/modified", patchClockInModifiedControlle
 userRouter.patch("/fichaje/:id/clock-out/modified", patchClockOutModifiedController); // Corregir la hora de salida de un fichaje
 
 userRouter.get("/fichajes", getFichajesController); // Obtener los fichajes del usuario autenticado.
+
+userRouter.post("/fichajes/:id/entries", postFichajeEntryController);   // Crear un bloque de proyecto dentro de un fichaje.
