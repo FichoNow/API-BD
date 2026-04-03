@@ -4,30 +4,30 @@ import {
     CreateFichajeEntryRow,
     UpdateFichajeEntryEndRow,
  } from "../../types/db/fichaje-entry-row-type.js";
- import { pool } from "../pool.js";
+import { pool } from "../pool.js";
 
- export async function findFichajeEntryById(
+export async function findFichajeEntryById(
     entryId: number,
- ): Promise<FichajeEntryRow | null> {
+): Promise<FichajeEntryRow | null> {
     const [rows] = await pool.query<FichajeEntryRow[]>(
         "SELECT * FROM fichaje_entries WHERE id = ? LIMIT 1", [entryId],
     );
 
     return rows.length ? rows[0] : null;
- }
+}
 
- export async function createFichajeEntry(
+export async function createFichajeEntry(
     data: CreateFichajeEntryRow,
- ): Promise<number> {
+): Promise<number> {
     const [result] = await pool.query<ResultSetHeader>(
         "INSERT INTO fichaje_entries (fichaje_id, project_id, started_at) VALUES (?, ?, ?)",
         [data.fichaje_id, data.project_id, data.started_at],
     );
 
     return result.insertId;
- }
+}
 
- export async function updateFichajeEntryEndById(
+export async function updateFichajeEntryEndById(
   entryId: number,
   data: UpdateFichajeEntryEndRow,
 ): Promise<boolean> {
@@ -37,4 +37,18 @@ import {
   );
 
   return result.affectedRows > 0;
+}
+
+export async function findFichajeEntriesByFichajeId(
+   fichajeId: number,
+): Promise<FichajeEntryRow[]> {
+   const [rows] = await pool.query<FichajeEntryRow[]>(
+      `SELECT *
+     FROM fichaje_entries
+     WHERE fichaje_id = ?
+     ORDER BY started_at ASC`,
+     [fichajeId],
+   );
+
+   return rows;
 }
