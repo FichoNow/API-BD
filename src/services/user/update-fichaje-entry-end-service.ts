@@ -18,24 +18,26 @@ import { ResponseError } from "../../types/express/response-type.js";
  * @returns Los datos de la entry cerrada.
  */
 export async function updateFichajeEntryEndService(
-    fichajeId: number,
-    entryId: number,
-    body: PatchFichajeEntryEndBody,
-    userId: number,
-): Promise<null> {
-    const fichaje = await findFichajeById(fichajeId);
+  fichajeId: number,
+  entryId: number,
+  body: PatchFichajeEntryEndBody,
+  userId: number,
+): Promise<void> {
+  const fichaje = await findFichajeById(fichajeId);
 
-    if(!fichaje || fichaje.user_id !== userId){
-        throw new ResponseError("Fichaje no encontrado.", 404, "FICHAJE_NOT FOUND");
-    }
+  if (!fichaje || fichaje.user_id !== userId) {
+    throw new ResponseError("Fichaje no encontrado.", 404, "FICHAJE_NOT FOUND");
+  }
 
-    const entry = await findFichajeEntryById(entryId);
+  const entry = await findFichajeEntryById(entryId);
 
-    if(!entry || entry.fichaje_id !== fichajeId){
-        throw new ResponseError("Entry no encontrada.", 404, "FICHAJE_ENTRY_NOT_FOUND");
-    }
+  if (!entry || entry.fichaje_id !== fichajeId) {
+    throw new ResponseError(
+      "Entry no encontrada.",
+      404,
+      "FICHAJE_ENTRY_NOT_FOUND",
+    );
+  }
 
-    await updateFichajeEntryEndById(entryId, { ended_at: body.ended_at });
-
-    return null;
+  await updateFichajeEntryEndById(entryId, { ended_at: body.ended_at });
 }
