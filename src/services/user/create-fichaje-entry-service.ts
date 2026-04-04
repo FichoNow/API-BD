@@ -36,10 +36,5 @@ export async function createFichajeEntryService(
         started_at: body.started_at,
     });
 
-    return {
-        id: createdId,
-        fichaje_id: fichajeId,
-        project_id: body.project_id,
-        started_at: body.started_at,
-    };
+    return { id: createdId };
 }

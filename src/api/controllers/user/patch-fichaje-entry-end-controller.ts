@@ -8,8 +8,6 @@ import {
     ResponseError,
 } from "../../../types/express/response-type.js";
 import { updateFichajeEntryEndService } from "../../../services/user/update-fichaje-entry-end-service.js";
-import { PatchFichajeEntryEndResponse } from "../../../types/dto/user/patch-fichaje-entry-end-response.js";
-
 export async function patchFichajeEntryEndController(
     req: Request<{ id: string; entryId: string }, unknown, PatchFichajeEntryEndBody>,
     res: Response<BodyResponse<PatchFichajeEntryEndResponse>>,

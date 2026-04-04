@@ -4,7 +4,6 @@ import {
   updateFichajeEntryEndById,
 } from "../../database/repositories/fichaje-entry-repository.js";
 import { PatchFichajeEntryEndBody } from "../../types/dto/user/patch-fichaje-entry-end-body.js";
-import { PatchFichajeEntryEndResponse } from "../../types/dto/user/patch-fichaje-entry-end-response.js";
 import { ResponseError } from "../../types/express/response-type.js";
 
 /**
@@ -23,7 +22,7 @@ export async function updateFichajeEntryEndService(
     entryId: number,
     body: PatchFichajeEntryEndBody,
     userId: number,
-): Promise<PatchFichajeEntryEndResponse> {
+): Promise<null> {
     const fichaje = await findFichajeById(fichajeId);
 
     if(!fichaje || fichaje.user_id !== userId){
@@ -38,8 +37,5 @@ export async function updateFichajeEntryEndService(
 
     await updateFichajeEntryEndById(entryId, { ended_at: body.ended_at });
 
-    return {
-        id: entryId,
-        ended_at: body.ended_at,
-    };
+    return null;
 }
