@@ -1,5 +1,5 @@
 import { findFichajeById } from "../database/repositories/fichaje-repository.js";
-import { FichajeRowType } from "../types/db/fichaje-row-type.js";
+import { FichajeRow } from "../types/db/fichaje-row-type.js";
 import { ResponseError } from "../types/express/response-type.js";
 
 /**
@@ -9,7 +9,7 @@ import { ResponseError } from "../types/express/response-type.js";
 export async function verifyFichajeOwnership(
   fichajeId: number,
   userId: number,
-): Promise<FichajeRowType> {
+): Promise<FichajeRow> {
   const fichaje = await findFichajeById(fichajeId);
 
   if (!fichaje || fichaje.user_id !== userId) {
