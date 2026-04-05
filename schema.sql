@@ -10,6 +10,7 @@ DROP TABLE IF EXISTS group_schedule_assignments;
 DROP TABLE IF EXISTS work_schedule_template_days;
 DROP TABLE IF EXISTS work_schedule_templates;
 
+DROP TABLE IF EXISTS fichaje_breaks;
 DROP TABLE IF EXISTS fichaje_entries;
 DROP TABLE IF EXISTS fichajes;
 DROP TABLE IF EXISTS projects;
@@ -132,6 +133,18 @@ CREATE TABLE fichaje_entries (
         ON DELETE CASCADE,
     CONSTRAINT fk_fichaje_entries_project
         FOREIGN KEY (project_id) REFERENCES projects(id)
+        ON DELETE CASCADE
+);
+
+/* ============= Tabla fichaje_breaks =============*/
+CREATE TABLE fichaje_breaks (
+    id INT NOT NULL AUTO_INCREMENT,
+    fichaje_id INT NOT NULL,
+    started_at DATETIME NOT NULL,
+    ended_at DATETIME NULL DEFAULT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_fichaje_breaks_fichaje
+        FOREIGN KEY (fichaje_id) REFERENCES fichajes(id)
         ON DELETE CASCADE
 );
 
@@ -326,10 +339,11 @@ INSERT INTO work_groups (name, company_id) VALUES
 ('Dirección', 1),
 ('Operaciones', 1);
 
-INSERT INTO users (company_id, group_id, email, name, role, is_active) VALUES
-(1, 1, 'admin@empresa.com', 'Admin', 'ADMINISTRATOR', TRUE),
-(1, 2, 'empleado1@empresa.com', 'Empleado Uno', 'USER', TRUE),
-(1, 2, 'empleado2@empresa.com', 'Empleado Dos', 'USER', TRUE);
+-- Contraseñas: admin → '1' | empleado1 → 'password123' | empleado2 → 'password123'
+INSERT INTO users (company_id, group_id, email, name, role, is_active, password_hash) VALUES
+(1, 1, 'admin@empresa.com',     'Admin',        'ADMINISTRATOR', TRUE, '$argon2id$v=19$m=65536,t=3,p=4$lpu2IkLFjApNUpwvlcj8gw$ailSD22G2mxIbBCroN2XC/uHAPWfNnsYPhqPahd4Qyk'),
+(1, 2, 'empleado1@empresa.com', 'Empleado Uno', 'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$BceHtK70GVXGUHFdIjlLeQ$22lGigeJ/Q9lzELEevPzKbqkLHiocSCUk1rQN+XoSgs'),
+(1, 2, 'empleado2@empresa.com', 'Empleado Dos', 'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$UMbRhJqUylJwjEimExOt9A$t8FPm6DSlJdrKnxt/vbXmW03zeI9RhMsJ7CAJPsRWQ4');
 
 /* Proyectos */
 INSERT INTO projects (company_id, group_id, name, is_active) VALUES

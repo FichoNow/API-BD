@@ -12,6 +12,9 @@ import { patchFichajeEntryEndController } from "../controllers/user/fichaje-entr
 import { patchFichajeEntryStartController } from "../controllers/user/fichaje-entries/patch-fichaje-entry-start-controller.js";
 import { getFichajeEntriesController } from "../controllers/user/fichaje-entries/get-fichaje-entries-controller.js";
 import { getProjectsController } from "../controllers/user/projects/get-projects-controller.js";
+import { postFichajeBreakController } from "../controllers/user/fichaje-breaks/post-fichaje-break-controller.js";
+import { patchFichajeBreakEndController } from "../controllers/user/fichaje-breaks/patch-fichaje-break-end-controller.js";
+import { getFichajeBreaksController } from "../controllers/user/fichaje-breaks/get-fichaje-breaks-controller.js";
 
 export const userRouter = Router();
 
@@ -38,3 +41,7 @@ userRouter.patch("/fichajes/:id/entries/:entryId/start", patchFichajeEntryStartC
 userRouter.get("/fichajes/:id/entries", getFichajeEntriesController);   // Obtener las entries de un fichaje concreto.
 
 userRouter.get("/projects", getProjectsController);   // Obtener los proyectos visibles para el usuario autenticado.
+
+userRouter.post("/fichajes/:id/breaks", postFichajeBreakController);            // Iniciar un descanso dentro de un fichaje.
+userRouter.patch("/fichajes/:id/breaks/:breakId/end", patchFichajeBreakEndController); // Cerrar el descanso activo.
+userRouter.get("/fichajes/:id/breaks", getFichajeBreaksController);             // Obtener los descansos de un fichaje.

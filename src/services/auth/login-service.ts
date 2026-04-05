@@ -34,6 +34,10 @@ export async function loginUser(
     throw new ResponseError("Credenciales incorrectas", 401, "UNAUTHORIZED");
   }
 
+  if (!userRow.password_hash) {
+    throw new ResponseError("Credenciales incorrectas", 401, "UNAUTHORIZED");
+  }
+
   const isValidPassword = await verifyPassword(body.password, userRow.password_hash);
 
   if (!isValidPassword) {
