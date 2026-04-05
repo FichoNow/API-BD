@@ -4,7 +4,7 @@ import { getFichajesService } from "../../../services/user/get-fichajes-service.
 import { GetFichajesResponse } from "../../../types/dto/user/get-fichajes-response.js";
 
 export async function getFichajesController(
-  req: Request<unknown, unknown, unknown>,
+  req: Request,
   res: Response<BodyResponse<GetFichajesResponse>>,
 ) {
   const userId = req.jwtClaims!.id;

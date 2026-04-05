@@ -326,6 +326,58 @@ components:
                 nullable: true
                 example: "2026-03-29T17:00:00.000Z"
 
+    PostFichajeEntryResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 7
+
+    GetFichajeEntriesResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 7
+              fichaje_id:
+                type: integer
+                example: 42
+              project_id:
+                type: integer
+                example: 3
+              started_at:
+                type: string
+                format: date-time
+                example: "2026-03-29T08:30:00.000Z"
+              ended_at:
+                type: string
+                format: date-time
+                nullable: true
+                example: "2026-03-29T10:00:00.000Z"
+
+    GetProjectsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 3
+              name:
+                type: string
+                example: Proyecto Alpha
+
 paths:
 
   # ─────────────────────────────────────────
@@ -1515,6 +1567,419 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/GetFichajesResponse"
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+
+  /user/fichaje/{id}:
+    delete:
+      tags: [User]
+      summary: Eliminar fichaje
+      description: |
+        Elimina un fichaje del usuario autenticado junto con todas sus entries asociadas.
+
+        **Reglas de negocio**
+        - El fichaje debe pertenecer al usuario autenticado.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del fichaje a eliminar.
+          schema:
+            type: integer
+            example: 42
+      responses:
+        "200":
+          description: Fichaje eliminado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NullResponse"
+        "400":
+          description: ID inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BAD_REQUEST
+                  message: Cuerpo de la solicitud inválido
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "404":
+          description: Fichaje no encontrado o no pertenece al usuario autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: FICHAJE_NOT_FOUND
+                  message: Fichaje no encontrado.
+
+  /user/fichajes/{id}/entries:
+    post:
+      tags: [User]
+      summary: Crear entry de fichaje
+      description: |
+        Crea un nuevo bloque de proyecto dentro de un fichaje existente.
+
+        **Formato de fechas**
+        Todos los campos de fecha/hora deben enviarse en formato **ISO 8601 UTC**:
+        `"YYYY-MM-DDTHH:mm:ss.sssZ"`
+
+        **Reglas de negocio**
+        - El fichaje debe pertenecer al usuario autenticado.
+        - El proyecto debe existir.
+        - `started_at` no puede ser anterior al `clock_in` del fichaje (comparación por minuto — se permite el mismo minuto).
+        - Si el fichaje tiene `clock_out`, `started_at` no puede ser posterior a él (comparación por minuto).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del fichaje al que pertenece la entry.
+          schema:
+            type: integer
+            example: 42
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [project_id, started_at]
+              properties:
+                project_id:
+                  type: integer
+                  example: 3
+                started_at:
+                  type: string
+                  format: date-time
+                  description: Hora de inicio del bloque en formato ISO 8601 UTC.
+                  example: "2026-03-29T08:30:00.000Z"
+      responses:
+        "201":
+          description: Entry creada correctamente. Devuelve el ID de la nueva entry.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostFichajeEntryResponse"
+        "400":
+          description: |
+            Alguno de estos casos:
+            - Body inválido o campos faltantes (`BAD_REQUEST`).
+            - `started_at` anterior al `clock_in` del fichaje (`ENTRY_STARTED_AT_BEFORE_CLOCK_IN`).
+            - `started_at` posterior al `clock_out` del fichaje (`ENTRY_STARTED_AT_AFTER_CLOCK_OUT`).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: ENTRY_STARTED_AT_BEFORE_CLOCK_IN
+                  message: La hora de inicio no puede ser anterior a la entrada del fichaje.
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "404":
+          description: Fichaje o proyecto no encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: FICHAJE_NOT_FOUND
+                  message: Fichaje no encontrado.
+
+    get:
+      tags: [User]
+      summary: Obtener entries de un fichaje
+      description: |
+        Devuelve todas las entries (bloques de proyecto) de un fichaje concreto.
+
+        **Reglas de negocio**
+        - El fichaje debe pertenecer al usuario autenticado.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del fichaje cuyas entries se quieren obtener.
+          schema:
+            type: integer
+            example: 42
+      responses:
+        "200":
+          description: Lista de entries obtenida correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetFichajeEntriesResponse"
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "404":
+          description: Fichaje no encontrado o no pertenece al usuario autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: FICHAJE_NOT_FOUND
+                  message: Fichaje no encontrado.
+
+  /user/fichajes/{id}/entries/{entryId}/end:
+    patch:
+      tags: [User]
+      summary: Establecer hora de fin de una entry
+      description: |
+        Establece o corrige la hora de fin (`ended_at`) de una entry de fichaje.
+
+        **Formato de fechas**
+        Todos los campos de fecha/hora deben enviarse en formato **ISO 8601 UTC**:
+        `"YYYY-MM-DDTHH:mm:ss.sssZ"`
+
+        **Reglas de negocio**
+        - El fichaje debe pertenecer al usuario autenticado.
+        - La entry debe pertenecer al fichaje indicado.
+        - `ended_at` no puede ser igual o anterior a `started_at` (comparación por minuto — se permite el mismo minuto solo si el segundo difiere, pero el picker siempre envía segundos=0 así que en la práctica deben ser minutos distintos).
+        - `ended_at` no puede ser anterior al `clock_in` del fichaje (comparación por minuto).
+        - Si el fichaje tiene `clock_out`, `ended_at` no puede ser posterior a él (comparación por minuto).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del fichaje.
+          schema:
+            type: integer
+            example: 42
+        - name: entryId
+          in: path
+          required: true
+          description: ID de la entry a actualizar.
+          schema:
+            type: integer
+            example: 7
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ended_at]
+              properties:
+                ended_at:
+                  type: string
+                  format: date-time
+                  description: Hora de fin en formato ISO 8601 UTC.
+                  example: "2026-03-29T10:00:00.000Z"
+      responses:
+        "200":
+          description: Hora de fin actualizada correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NullResponse"
+        "400":
+          description: |
+            Alguno de estos casos:
+            - Body inválido o campos faltantes (`BAD_REQUEST`).
+            - `ended_at` igual o anterior a `started_at` (`ENTRY_ENDED_AT_BEFORE_STARTED_AT`).
+            - `ended_at` anterior al `clock_in` del fichaje (`ENTRY_ENDED_AT_BEFORE_CLOCK_IN`).
+            - `ended_at` posterior al `clock_out` del fichaje (`ENTRY_ENDED_AT_AFTER_CLOCK_OUT`).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: ENTRY_ENDED_AT_BEFORE_STARTED_AT
+                  message: La hora de fin no puede ser anterior o igual a la hora de inicio.
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "404":
+          description: Fichaje o entry no encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: FICHAJE_ENTRY_NOT_FOUND
+                  message: Entry no encontrada.
+
+  /user/fichajes/{id}/entries/{entryId}/start:
+    patch:
+      tags: [User]
+      summary: Editar hora de inicio de una entry
+      description: |
+        Corrige la hora de inicio (`started_at`) de una entry de fichaje ya creada.
+
+        **Formato de fechas**
+        Todos los campos de fecha/hora deben enviarse en formato **ISO 8601 UTC**:
+        `"YYYY-MM-DDTHH:mm:ss.sssZ"`
+
+        **Reglas de negocio**
+        - El fichaje debe pertenecer al usuario autenticado.
+        - La entry debe pertenecer al fichaje indicado.
+        - `started_at` no puede ser anterior al `clock_in` del fichaje (comparación por minuto — se permite el mismo minuto).
+        - Si el fichaje tiene `clock_out`, `started_at` no puede ser posterior a él (comparación por minuto).
+        - Si la entry ya tiene `ended_at`, `started_at` no puede ser posterior a él (comparación por minuto).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del fichaje.
+          schema:
+            type: integer
+            example: 42
+        - name: entryId
+          in: path
+          required: true
+          description: ID de la entry a actualizar.
+          schema:
+            type: integer
+            example: 7
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [started_at]
+              properties:
+                started_at:
+                  type: string
+                  format: date-time
+                  description: Nueva hora de inicio en formato ISO 8601 UTC.
+                  example: "2026-03-29T09:00:00.000Z"
+      responses:
+        "200":
+          description: Hora de inicio actualizada correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NullResponse"
+        "400":
+          description: |
+            Alguno de estos casos:
+            - Body inválido o campos faltantes (`BAD_REQUEST`).
+            - `started_at` anterior al `clock_in` del fichaje (`ENTRY_STARTED_AT_BEFORE_CLOCK_IN`).
+            - `started_at` posterior al `clock_out` del fichaje (`ENTRY_STARTED_AT_AFTER_CLOCK_OUT`).
+            - `started_at` posterior al `ended_at` de la entry (`ENTRY_STARTED_AT_AFTER_ENDED_AT`).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: ENTRY_STARTED_AT_BEFORE_CLOCK_IN
+                  message: La hora de inicio no puede ser anterior a la entrada del fichaje.
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "404":
+          description: Fichaje o entry no encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: FICHAJE_ENTRY_NOT_FOUND
+                  message: Entry no encontrada.
+
+  /user/projects:
+    get:
+      tags: [User]
+      summary: Obtener proyectos visibles
+      description: |
+        Devuelve los proyectos activos visibles para el usuario autenticado.
+
+        **Reglas de negocio**
+        - Se devuelven los proyectos activos (`is_active = true`) de la empresa del usuario.
+        - Si el usuario pertenece a un grupo, solo se devuelven los proyectos de ese grupo más los proyectos sin grupo asignado.
+        - Si el usuario no pertenece a ningún grupo, se devuelven todos los proyectos activos de la empresa.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Lista de proyectos obtenida correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetProjectsResponse"
         "401":
           description: Token ausente o inválido.
           content:

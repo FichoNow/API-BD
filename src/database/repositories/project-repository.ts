@@ -45,6 +45,18 @@ export async function createProject(data: CreateProjectRow): Promise<number> {
   return result.insertId;
 }
 
+export async function findProjectsByGroupId(
+  groupId: number | null,
+  companyId: number,
+): Promise<ProjectRow[]> {
+  const [rows] = await pool.query<ProjectRow[]>(
+    "SELECT * FROM projects WHERE (group_id = ? OR group_id IS NULL) AND company_id = ?",
+    [groupId, companyId],
+  );
+
+  return rows;
+}
+
 export async function updateProjectById(
   projectId: number,
   data: UpdateProjectRow,
