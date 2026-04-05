@@ -11,7 +11,7 @@ export type CreateFichajeEntryRow = Pick<
 >;
 
 /** Campos necesarios para cerrar una entry (poner su hora de fin). */
-export type UpdateFichajeEntryEndRow = Pick<
-  FichajeEntryData,
-  "ended_at"
->;
+export type UpdateFichajeEntryEndRow = Pick<FichajeEntryData, "ended_at">;
+
+/** Campos necesarios para corregir la hora de inicio de una entry. */
+export type UpdateFichajeEntryStartRow = Pick<FichajeEntryData, "started_at">;

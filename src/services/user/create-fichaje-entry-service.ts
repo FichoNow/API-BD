@@ -30,6 +30,26 @@ export async function createFichajeEntryService(
         throw new ResponseError("Projecto no encontrado.", 404, "PROJECT_NOT_FOUND");
     }
 
+    const clockInMinute = new Date(Math.floor(fichaje.clock_in.getTime() / 60000) * 60000);
+    if (body.started_at < clockInMinute) {
+        throw new ResponseError(
+            "La hora de inicio no puede ser anterior a la entrada del fichaje.",
+            400,
+            "ENTRY_STARTED_AT_BEFORE_CLOCK_IN",
+        );
+    }
+
+    if (fichaje.clock_out !== null) {
+        const clockOutMinute = new Date(Math.floor(fichaje.clock_out.getTime() / 60000) * 60000);
+        if (body.started_at > clockOutMinute) {
+            throw new ResponseError(
+                "La hora de inicio no puede ser posterior a la salida del fichaje.",
+                400,
+                "ENTRY_STARTED_AT_AFTER_CLOCK_OUT",
+            );
+        }
+    }
+
     const createdId = await createFichajeEntry({
         fichaje_id: fichajeId,
         project_id: body.project_id,

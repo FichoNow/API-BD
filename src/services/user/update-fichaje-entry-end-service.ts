@@ -26,7 +26,7 @@ export async function updateFichajeEntryEndService(
   const fichaje = await findFichajeById(fichajeId);
 
   if (!fichaje || fichaje.user_id !== userId) {
-    throw new ResponseError("Fichaje no encontrado.", 404, "FICHAJE_NOT FOUND");
+    throw new ResponseError("Fichaje no encontrado.", 404, "FICHAJE_NOT_FOUND");
   }
 
   const entry = await findFichajeEntryById(entryId);
@@ -37,6 +37,35 @@ export async function updateFichajeEntryEndService(
       404,
       "FICHAJE_ENTRY_NOT_FOUND",
     );
+  }
+
+  const startedAtMinute = new Date(Math.floor(entry.started_at.getTime() / 60000) * 60000);
+  if (body.ended_at < startedAtMinute) {
+    throw new ResponseError(
+      "La hora de fin no puede ser anterior o igual a la hora de inicio.",
+      400,
+      "ENTRY_ENDED_AT_BEFORE_STARTED_AT",
+    );
+  }
+
+  const clockInMinute = new Date(Math.floor(fichaje.clock_in.getTime() / 60000) * 60000);
+  if (body.ended_at < clockInMinute) {
+    throw new ResponseError(
+      "La hora de fin no puede ser anterior a la entrada del fichaje.",
+      400,
+      "ENTRY_ENDED_AT_BEFORE_CLOCK_IN",
+    );
+  }
+
+  if (fichaje.clock_out !== null) {
+    const clockOutMinute = new Date(Math.floor(fichaje.clock_out.getTime() / 60000) * 60000);
+    if (body.ended_at > clockOutMinute) {
+      throw new ResponseError(
+        "La hora de fin no puede ser posterior a la salida del fichaje.",
+        400,
+        "ENTRY_ENDED_AT_AFTER_CLOCK_OUT",
+      );
+    }
   }
 
   await updateFichajeEntryEndById(entryId, { ended_at: body.ended_at });

@@ -1,8 +1,9 @@
 import { ResultSetHeader } from "mysql2/promise";
-import { 
+import {
     FichajeEntryRow,
     CreateFichajeEntryRow,
     UpdateFichajeEntryEndRow,
+    UpdateFichajeEntryStartRow,
  } from "../../types/db/fichaje-entry-row-type.js";
 import { pool } from "../pool.js";
 
@@ -36,6 +37,17 @@ export async function updateFichajeEntryEndById(
     [data.ended_at, entryId],
   );
 
+  return result.affectedRows > 0;
+}
+
+export async function updateFichajeEntryStartById(
+  entryId: number,
+  data: UpdateFichajeEntryStartRow,
+): Promise<boolean> {
+  const [result] = await pool.query<ResultSetHeader>(
+    "UPDATE fichaje_entries SET started_at = ? WHERE id = ? LIMIT 1",
+    [data.started_at, entryId],
+  );
   return result.affectedRows > 0;
 }
 

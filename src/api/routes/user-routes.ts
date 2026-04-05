@@ -9,6 +9,7 @@ import { getFichajesController } from "../controllers/user/get-fichajes-controll
 import { deleteFichajeController } from "../controllers/user/delete-fichaje-controller.js";
 import { postFichajeEntryController } from "../controllers/user/post-fichaje-entry-controller.js";
 import { patchFichajeEntryEndController } from "../controllers/user/patch-fichaje-entry-end-controller.js";
+import { patchFichajeEntryStartController } from "../controllers/user/patch-fichaje-entry-start-controller.js";
 import { getFichajeEntriesController } from "../controllers/user/get-fichaje-entries-controller.js";
 import { getProjectsController } from "../controllers/user/get-projects-controller.js";
 
@@ -31,7 +32,8 @@ userRouter.get("/fichajes", getFichajesController); // Obtener los fichajes del 
 
 userRouter.post("/fichajes/:id/entries", postFichajeEntryController);   // Crear un bloque de proyecto dentro de un fichaje.
 
-userRouter.patch("/fichajes/:id/entries/:entryId/end", patchFichajeEntryEndController);    // Cerrar un bloque de proyecto dentro de un fichaje.
+userRouter.patch("/fichajes/:id/entries/:entryId/end", patchFichajeEntryEndController);
+userRouter.patch("/fichajes/:id/entries/:entryId/start", patchFichajeEntryStartController);    // Cerrar un bloque de proyecto dentro de un fichaje.
 
 userRouter.get("/fichajes/:id/entries", getFichajeEntriesController);   // Obtener las entries de un fichaje concreto.
 
