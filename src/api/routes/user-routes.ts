@@ -1,17 +1,17 @@
 import { Router } from "express";
-import { patchSelfController } from "../controllers/user/patch-user-controller.js";
-import { logoutController } from "../controllers/user/delete-logout-controller.js";
-import { postFichajeController } from "../controllers/user/post-fichaje-controller.js";
-import { patchClockOutController } from "../controllers/user/patch-clock-out-controller.js";
-import { patchClockOutModifiedController } from "../controllers/user/patch-clock-out-modified-controller.js";
-import { patchClockInModifiedController } from "../controllers/user/patch-clock-in-modified-controller.js";
-import { getFichajesController } from "../controllers/user/get-fichajes-controller.js";
-import { deleteFichajeController } from "../controllers/user/delete-fichaje-controller.js";
-import { postFichajeEntryController } from "../controllers/user/post-fichaje-entry-controller.js";
-import { patchFichajeEntryEndController } from "../controllers/user/patch-fichaje-entry-end-controller.js";
-import { patchFichajeEntryStartController } from "../controllers/user/patch-fichaje-entry-start-controller.js";
-import { getFichajeEntriesController } from "../controllers/user/get-fichaje-entries-controller.js";
-import { getProjectsController } from "../controllers/user/get-projects-controller.js";
+import { patchSelfController } from "../controllers/user/profile/patch-user-controller.js";
+import { logoutController } from "../controllers/user/profile/delete-logout-controller.js";
+import { postFichajeController } from "../controllers/user/fichajes/post-fichaje-controller.js";
+import { patchClockOutController } from "../controllers/user/fichajes/patch-clock-out-controller.js";
+import { patchClockOutModifiedController } from "../controllers/user/fichajes/patch-clock-out-modified-controller.js";
+import { patchClockInModifiedController } from "../controllers/user/fichajes/patch-clock-in-modified-controller.js";
+import { getFichajesController } from "../controllers/user/fichajes/get-fichajes-controller.js";
+import { deleteFichajeController } from "../controllers/user/fichajes/delete-fichaje-controller.js";
+import { postFichajeEntryController } from "../controllers/user/fichaje-entries/post-fichaje-entry-controller.js";
+import { patchFichajeEntryEndController } from "../controllers/user/fichaje-entries/patch-fichaje-entry-end-controller.js";
+import { patchFichajeEntryStartController } from "../controllers/user/fichaje-entries/patch-fichaje-entry-start-controller.js";
+import { getFichajeEntriesController } from "../controllers/user/fichaje-entries/get-fichaje-entries-controller.js";
+import { getProjectsController } from "../controllers/user/projects/get-projects-controller.js";
 
 export const userRouter = Router();
 
