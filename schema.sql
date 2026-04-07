@@ -341,7 +341,7 @@ INSERT INTO work_groups (name, company_id) VALUES
 
 -- Contraseñas: admin → '1' | empleado1 → 'password123' | empleado2 → 'password123'
 INSERT INTO users (company_id, group_id, email, name, role, is_active, password_hash) VALUES
-(1, 1, 'admin@empresa.com',     'Admin',        'ADMINISTRATOR', TRUE, '$argon2id$v=19$m=65536,t=3,p=4$lpu2IkLFjApNUpwvlcj8gw$ailSD22G2mxIbBCroN2XC/uHAPWfNnsYPhqPahd4Qyk'),
+(1, 1, 'a@a.com',     'Admin',        'ADMINISTRATOR', TRUE, '$argon2id$v=19$m=65536,t=3,p=4$lpu2IkLFjApNUpwvlcj8gw$ailSD22G2mxIbBCroN2XC/uHAPWfNnsYPhqPahd4Qyk'),
 (1, 2, 'empleado1@empresa.com', 'Empleado Uno', 'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$BceHtK70GVXGUHFdIjlLeQ$22lGigeJ/Q9lzELEevPzKbqkLHiocSCUk1rQN+XoSgs'),
 (1, 2, 'empleado2@empresa.com', 'Empleado Dos', 'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$UMbRhJqUylJwjEimExOt9A$t8FPm6DSlJdrKnxt/vbXmW03zeI9RhMsJ7CAJPsRWQ4');
 
