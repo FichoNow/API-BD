@@ -4,6 +4,7 @@ import {
     CreateFichajeEntryRow,
     UpdateFichajeEntryEndRow,
     UpdateFichajeEntryStartRow,
+    UpdateFichajeEntryProjectRow,
  } from "../../types/db/fichaje-entry-row-type.js";
 import { pool } from "../pool.js";
 
@@ -47,6 +48,17 @@ export async function updateFichajeEntryStartById(
   const [result] = await pool.query<ResultSetHeader>(
     "UPDATE fichaje_entries SET started_at = ? WHERE id = ? LIMIT 1",
     [data.started_at, entryId],
+  );
+  return result.affectedRows > 0;
+}
+
+export async function updateFichajeEntryProjectById(
+  entryId: number,
+  data: UpdateFichajeEntryProjectRow,
+): Promise<boolean> {
+  const [result] = await pool.query<ResultSetHeader>(
+    "UPDATE fichaje_entries SET project_id = ? WHERE id = ? LIMIT 1",
+    [data.project_id, entryId],
   );
   return result.affectedRows > 0;
 }

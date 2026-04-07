@@ -15,3 +15,6 @@ export type UpdateFichajeEntryEndRow = Pick<FichajeEntryData, "ended_at">;
 
 /** Campos necesarios para corregir la hora de inicio de una entry. */
 export type UpdateFichajeEntryStartRow = Pick<FichajeEntryData, "started_at">;
+
+/** Campos necesarios para cambiar el proyecto de una entry. */
+export type UpdateFichajeEntryProjectRow = Pick<FichajeEntryData, "project_id">;

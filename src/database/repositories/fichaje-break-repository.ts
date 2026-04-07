@@ -50,14 +50,3 @@ export async function updateFichajeBreakEndById(
 
   return result.affectedRows > 0;
 }
-
-export async function findFichajeBreaksByFichajeId(
-  fichajeId: number,
-): Promise<FichajeBreakRow[]> {
-  const [rows] = await pool.query<FichajeBreakRow[]>(
-    "SELECT * FROM fichaje_breaks WHERE fichaje_id = ? ORDER BY started_at ASC",
-    [fichajeId],
-  );
-
-  return rows;
-}

@@ -8,12 +8,19 @@ info:
 tags:
   - name: Auth
     description: Endpoints públicos de autenticación (sin token requerido).
-  - name: User
+  - name: "User › Perfil"
     description: |
-      Endpoints del usuario autenticado. Requieren `Authorization: Bearer <accessToken>`.
+      Gestión del perfil del usuario autenticado. Requieren `Authorization: Bearer <accessToken>`.
 
       El `id` del usuario **nunca se pasa como parámetro** — se extrae automáticamente del payload del access token.
-      Todas las acciones se aplican al usuario propietario del token.
+  - name: "User › Fichajes"
+    description: Operaciones sobre fichajes (entradas, salidas y correcciones). Requieren `Authorization: Bearer <accessToken>`.
+  - name: "User › Entries"
+    description: Bloques de proyecto dentro de un fichaje. Requieren `Authorization: Bearer <accessToken>`.
+  - name: "User › Breaks"
+    description: Descansos dentro de un fichaje. Requieren `Authorization: Bearer <accessToken>`.
+  - name: "User › Projects"
+    description: Proyectos visibles para el usuario autenticado. Requieren `Authorization: Bearer <accessToken>`.
   - name: Admin
     description: >
       Endpoints de administración. Requieren `Authorization: Bearer <accessToken>`
@@ -378,6 +385,16 @@ components:
                 type: string
                 example: Proyecto Alpha
 
+    PostFichajeBreakResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 5
+
 paths:
 
   # ─────────────────────────────────────────
@@ -511,7 +528,7 @@ paths:
 
   /user/update:
     patch:
-      tags: [User]
+      tags: ["User › Perfil"]
       summary: Actualizar perfil propio
       description: |
         Actualiza los datos del propio perfil del usuario autenticado.
@@ -609,7 +626,7 @@ paths:
 
   /user/logout:
     delete:
-      tags: [User]
+      tags: ["User › Perfil"]
       summary: Logout
       description: |
         Cierra la sesión del usuario eliminando su refresh token de la base de datos.
@@ -1229,9 +1246,9 @@ paths:
   # FICHAJES
   # ─────────────────────────────────────────
 
-  /user/fichaje:
+  /user/fichajes:
     post:
-      tags: [User]
+      tags: ["User › Fichajes"]
       summary: Iniciar fichaje
       description: |
         Registra la entrada de un nuevo fichaje para el usuario autenticado.
@@ -1288,9 +1305,9 @@ paths:
                   code: MISSING_AUTH_HEADER
                   message: No autorizado
 
-  /user/fichaje/{id}/clock-out:
+  /user/fichajes/{id}/clock-out:
     patch:
-      tags: [User]
+      tags: ["User › Fichajes"]
       summary: Registrar salida
       description: |
         Registra la hora de salida de un fichaje existente. Este es el **flujo normal** de cierre de jornada.
@@ -1371,9 +1388,9 @@ paths:
                   code: FICHAJE_NOT_FOUND
                   message: Fichaje no encontrado.
 
-  /user/fichaje/{id}/clock-in/modified:
+  /user/fichajes/{id}/clock-in/modified:
     patch:
-      tags: [User]
+      tags: ["User › Fichajes"]
       summary: Corregir hora de entrada
       description: |
         Corrige la hora de entrada de un fichaje ya existente. Se usa cuando el usuario se ha equivocado al fichar.
@@ -1459,9 +1476,9 @@ paths:
                   code: FICHAJE_NOT_FOUND
                   message: Fichaje no encontrado.
 
-  /user/fichaje/{id}/clock-out/modified:
+  /user/fichajes/{id}/clock-out/modified:
     patch:
-      tags: [User]
+      tags: ["User › Fichajes"]
       summary: Corregir hora de salida
       description: |
         Corrige la hora de salida de un fichaje ya existente. Se usa cuando el usuario se ha equivocado al fichar la salida.
@@ -1550,7 +1567,7 @@ paths:
 
   /user/fichajes:
     get:
-      tags: [User]
+      tags: ["User › Fichajes"]
       summary: Obtener fichajes
       description: |
         Devuelve los últimos 20 fichajes del usuario autenticado, ordenados por `clock_in` descendente.
@@ -1579,9 +1596,9 @@ paths:
                   code: MISSING_AUTH_HEADER
                   message: No autorizado
 
-  /user/fichaje/{id}:
+  /user/fichajes/{id}:
     delete:
-      tags: [User]
+      tags: ["User › Fichajes"]
       summary: Eliminar fichaje
       description: |
         Elimina un fichaje del usuario autenticado junto con todas sus entries asociadas.
@@ -1641,7 +1658,7 @@ paths:
 
   /user/fichajes/{id}/entries:
     post:
-      tags: [User]
+      tags: ["User › Entries"]
       summary: Crear entry de fichaje
       description: |
         Crea un nuevo bloque de proyecto dentro de un fichaje existente.
@@ -1727,7 +1744,7 @@ paths:
                   message: Fichaje no encontrado.
 
     get:
-      tags: [User]
+      tags: ["User › Entries"]
       summary: Obtener entries de un fichaje
       description: |
         Devuelve todas las entries (bloques de proyecto) de un fichaje concreto.
@@ -1776,7 +1793,7 @@ paths:
 
   /user/fichajes/{id}/entries/{entryId}/end:
     patch:
-      tags: [User]
+      tags: ["User › Entries"]
       summary: Establecer hora de fin de una entry
       description: |
         Establece o corrige la hora de fin (`ended_at`) de una entry de fichaje.
@@ -1869,7 +1886,7 @@ paths:
 
   /user/fichajes/{id}/entries/{entryId}/start:
     patch:
-      tags: [User]
+      tags: ["User › Entries"]
       summary: Editar hora de inicio de una entry
       description: |
         Corrige la hora de inicio (`started_at`) de una entry de fichaje ya creada.
@@ -1960,9 +1977,89 @@ paths:
                   code: FICHAJE_ENTRY_NOT_FOUND
                   message: Entry no encontrada.
 
+  /user/fichajes/{id}/entries/{entryId}/project:
+    patch:
+      tags: ["User › Entries"]
+      summary: Cambiar proyecto de una entry
+      description: |
+        Cambia el proyecto asociado a una entry existente.
+
+        **Reglas de negocio**
+        - El fichaje debe pertenecer al usuario autenticado.
+        - La entry debe pertenecer al fichaje indicado.
+        - El proyecto debe existir.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del fichaje.
+          schema:
+            type: integer
+            example: 42
+        - name: entryId
+          in: path
+          required: true
+          description: ID de la entry a actualizar.
+          schema:
+            type: integer
+            example: 7
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [project_id]
+              properties:
+                project_id:
+                  type: integer
+                  example: 2
+      responses:
+        "200":
+          description: Proyecto actualizado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NullResponse"
+        "400":
+          description: Body inválido o project_id ausente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BAD_REQUEST
+                  message: Cuerpo de la solicitud inválido
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "404":
+          description: Fichaje, entry o proyecto no encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: FICHAJE_ENTRY_NOT_FOUND
+                  message: Entry no encontrada.
+
   /user/projects:
     get:
-      tags: [User]
+      tags: ["User › Projects"]
       summary: Obtener proyectos visibles
       description: |
         Devuelve los proyectos activos visibles para el usuario autenticado.
@@ -1991,3 +2088,173 @@ paths:
                 error:
                   code: MISSING_AUTH_HEADER
                   message: No autorizado
+
+  # ─────────────────────────────────────────
+  # BREAKS
+  # ─────────────────────────────────────────
+
+  /user/fichajes/{id}/breaks:
+    post:
+      tags: ["User › Breaks"]
+      summary: Iniciar descanso
+      description: |
+        Inicia un nuevo descanso dentro de un fichaje existente.
+
+        **Formato de fechas**
+        Todos los campos de fecha/hora deben enviarse en formato **ISO 8601 UTC**:
+        `"YYYY-MM-DDTHH:mm:ss.sssZ"`
+
+        **Reglas de negocio**
+        - El fichaje debe pertenecer al usuario autenticado.
+        - `started_at` no puede ser anterior al `clock_in` del fichaje.
+        - Si el fichaje tiene `clock_out`, `started_at` no puede ser posterior a él.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del fichaje al que pertenece el descanso.
+          schema:
+            type: integer
+            example: 42
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [started_at]
+              properties:
+                started_at:
+                  type: string
+                  format: date-time
+                  description: Hora de inicio del descanso en formato ISO 8601 UTC.
+                  example: "2026-03-29T12:00:00.000Z"
+      responses:
+        "201":
+          description: Descanso iniciado correctamente. Devuelve el ID del nuevo descanso.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostFichajeBreakResponse"
+        "400":
+          description: Body inválido, `started_at` ausente o fuera del rango del fichaje.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BAD_REQUEST
+                  message: Cuerpo de la solicitud inválido
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "404":
+          description: Fichaje no encontrado o no pertenece al usuario autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: FICHAJE_NOT_FOUND
+                  message: Fichaje no encontrado.
+
+  /user/fichajes/{id}/breaks/{breakId}/end:
+    patch:
+      tags: ["User › Breaks"]
+      summary: Terminar descanso
+      description: |
+        Registra la hora de fin de un descanso activo.
+
+        **Formato de fechas**
+        Todos los campos de fecha/hora deben enviarse en formato **ISO 8601 UTC**:
+        `"YYYY-MM-DDTHH:mm:ss.sssZ"`
+
+        **Reglas de negocio**
+        - El fichaje debe pertenecer al usuario autenticado.
+        - El descanso debe pertenecer al fichaje indicado.
+        - `ended_at` debe ser posterior a `started_at`.
+        - Si el fichaje tiene `clock_out`, `ended_at` no puede ser posterior a él.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del fichaje.
+          schema:
+            type: integer
+            example: 42
+        - name: breakId
+          in: path
+          required: true
+          description: ID del descanso a cerrar.
+          schema:
+            type: integer
+            example: 5
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ended_at]
+              properties:
+                ended_at:
+                  type: string
+                  format: date-time
+                  description: Hora de fin del descanso en formato ISO 8601 UTC.
+                  example: "2026-03-29T12:30:00.000Z"
+      responses:
+        "200":
+          description: Descanso cerrado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NullResponse"
+        "400":
+          description: Body inválido, `ended_at` ausente o anterior a `started_at`.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BAD_REQUEST
+                  message: Cuerpo de la solicitud inválido
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "404":
+          description: Fichaje o descanso no encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: FICHAJE_BREAK_NOT_FOUND
+                  message: Descanso no encontrado.
