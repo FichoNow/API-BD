@@ -16,5 +16,6 @@ fichajeRouter.patch("/:id/clock-out", patchClockOutController);
 fichajeRouter.patch("/:id/clock-in/modified", patchClockInModifiedController);
 fichajeRouter.patch("/:id/clock-out/modified", patchClockOutModifiedController);
 fichajeRouter.get("/", getFichajesController);
+
 fichajeRouter.use("/:id/entries", entryRouter);
 fichajeRouter.use("/:id/breaks", breakRouter);
