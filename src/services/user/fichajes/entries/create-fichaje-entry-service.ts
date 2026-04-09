@@ -1,6 +1,7 @@
-import { createFichajeEntry } from "../../../../database/repositories/fichaje-entry-repository.js";
+import { createFichajeEntry } from "../../../../database/repositories/fichajes/fichaje-entry-repository.js";
 import { findProjectById } from "../../../../database/repositories/project-repository.js";
-import { verifyFichajeOwnership, toMinute } from "../../../../helpers/fichaje-helper.js";
+import { startOfMinute } from "date-fns";
+import { verifyFichajeOwnership } from "../../../../helpers/fichaje-helper.js";
 import { PostFichajeEntryBody } from "../../../../types/dto/user/fichajes/entries/post-fichaje-entry-body.js";
 import { PostFichajeEntryResponse } from "../../../../types/dto/user/fichajes/entries/post-fichaje-entry-response.js";
 import { ResponseError } from "../../../../types/express/response-type.js";
@@ -26,7 +27,7 @@ export async function createFichajeEntryService(
         throw new ResponseError("Projecto no encontrado.", 404, "PROJECT_NOT_FOUND");
     }
 
-    if (body.started_at < toMinute(fichaje.clock_in)) {
+    if (body.started_at < startOfMinute(fichaje.clock_in)) {
         throw new ResponseError(
             "La hora de inicio no puede ser anterior a la entrada del fichaje.",
             400,
@@ -34,7 +35,7 @@ export async function createFichajeEntryService(
         );
     }
 
-    if (fichaje.clock_out !== null && body.started_at > toMinute(fichaje.clock_out)) {
+    if (fichaje.clock_out !== null && body.started_at > startOfMinute(fichaje.clock_out)) {
         throw new ResponseError(
             "La hora de inicio no puede ser posterior a la salida del fichaje.",
             400,

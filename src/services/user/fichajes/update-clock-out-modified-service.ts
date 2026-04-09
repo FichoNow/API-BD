@@ -1,4 +1,5 @@
-import { updateClockOutModifiedById } from "../../../database/repositories/fichaje-repository.js";
+import { isAfter } from "date-fns";
+import { updateClockOutModifiedById } from "../../../database/repositories/fichajes/fichaje-repository.js";
 import { verifyFichajeOwnership } from "../../../helpers/fichaje-helper.js";
 import { PatchClockOutModifiedBody } from "../../../types/dto/user/fichajes/patch-clock-out-modified-body.js";
 import { ResponseError } from "../../../types/express/response-type.js";
@@ -20,7 +21,7 @@ export async function updateClockOutModifiedService(
     throw new ResponseError("El fichaje no tiene hora de salida registrada.", 400, "CLOCK_OUT_NOT_SET");
   }
 
-  if (new Date(body.clock_out) <= new Date(fichaje.clock_in)) {
+  if (!isAfter(new Date(body.clock_out), new Date(fichaje.clock_in))) {
     throw new ResponseError(
       "La hora de salida debe ser posterior a la hora de entrada.",
       400,

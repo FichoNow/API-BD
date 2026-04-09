@@ -1,6 +1,6 @@
 import * as z from "zod";
 import { createZodObject } from "../../../../../helpers/zod-helper.js";
-import { FichajeEntryData } from "../../../../models/fichaje-entry.js";
+import { FichajeEntryData } from "../../../../models/fichajes/fichaje-entry.js";
 
 /** Body del endpoint POST /user/fichajes/:id/entries. */
 export type PostFichajeEntryBody = Pick<FichajeEntryData, "project_id" | "started_at">;

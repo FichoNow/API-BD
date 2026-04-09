@@ -1,5 +1,5 @@
 import { RowDataPacket } from "mysql2";
-import { FichajeEntryData } from "../models/fichaje-entry.js";
+import { FichajeEntryData } from "../../models/fichajes/fichaje-entry.js";
 
 /** Representa una fila de la tabla "fichaje_entries" como la devuelve la base de datos. */
 export interface FichajeEntryRow extends RowDataPacket, FichajeEntryData {}

@@ -3,8 +3,8 @@ import {
   FichajeBreakRow,
   CreateFichajeBreakRow,
   UpdateFichajeBreakEndRow,
-} from "../../types/db/fichaje-break-row-type.js";
-import { pool } from "../pool.js";
+} from "../../../types/db/fichajes/fichaje-break-row-type.js";
+import { pool } from "../../pool.js";
 
 export async function findFichajeBreakById(
   breakId: number,
@@ -15,6 +15,17 @@ export async function findFichajeBreakById(
   );
 
   return rows.length ? rows[0] : null;
+}
+
+export async function findFichajeBreaksByFichajeId(
+  fichajeId: number,
+): Promise<FichajeBreakRow[]> {
+  const [rows] = await pool.query<FichajeBreakRow[]>(
+    "SELECT * FROM fichaje_breaks WHERE fichaje_id = ? ORDER BY started_at ASC",
+    [fichajeId],
+  );
+
+  return rows;
 }
 
 export async function findOpenBreakByFichajeId(

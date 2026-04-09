@@ -1,8 +1,9 @@
 import {
   findFichajeEntryById,
   updateFichajeEntryEndById,
-} from "../../../../database/repositories/fichaje-entry-repository.js";
-import { verifyFichajeOwnership, toMinute } from "../../../../helpers/fichaje-helper.js";
+} from "../../../../database/repositories/fichajes/fichaje-entry-repository.js";
+import { startOfMinute } from "date-fns";
+import { verifyFichajeOwnership } from "../../../../helpers/fichaje-helper.js";
 import { PatchFichajeEntryEndBody } from "../../../../types/dto/user/fichajes/entries/patch-fichaje-entry-end-body.js";
 import { ResponseError } from "../../../../types/express/response-type.js";
 
@@ -30,7 +31,7 @@ export async function updateFichajeEntryEndService(
     throw new ResponseError("Entry no encontrada.", 404, "FICHAJE_ENTRY_NOT_FOUND");
   }
 
-  if (body.ended_at < toMinute(entry.started_at)) {
+  if (body.ended_at < startOfMinute(entry.started_at)) {
     throw new ResponseError(
       "La hora de fin no puede ser anterior o igual a la hora de inicio.",
       400,
@@ -38,7 +39,7 @@ export async function updateFichajeEntryEndService(
     );
   }
 
-  if (body.ended_at < toMinute(fichaje.clock_in)) {
+  if (body.ended_at < startOfMinute(fichaje.clock_in)) {
     throw new ResponseError(
       "La hora de fin no puede ser anterior a la entrada del fichaje.",
       400,
@@ -46,7 +47,7 @@ export async function updateFichajeEntryEndService(
     );
   }
 
-  if (fichaje.clock_out !== null && body.ended_at > toMinute(fichaje.clock_out)) {
+  if (fichaje.clock_out !== null && body.ended_at > startOfMinute(fichaje.clock_out)) {
     throw new ResponseError(
       "La hora de fin no puede ser posterior a la salida del fichaje.",
       400,

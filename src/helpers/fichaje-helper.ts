@@ -1,5 +1,5 @@
-import { findFichajeById } from "../database/repositories/fichaje-repository.js";
-import { FichajeRow } from "../types/db/fichaje-row-type.js";
+import { findFichajeById } from "../database/repositories/fichajes/fichaje-repository.js";
+import { FichajeRow } from "../types/db/fichajes/fichaje-row-type.js";
 import { ResponseError } from "../types/express/response-type.js";
 
 /**
@@ -17,11 +17,4 @@ export async function verifyFichajeOwnership(
   }
 
   return fichaje;
-}
-
-/**
- * Trunca una fecha al minuto exacto (elimina segundos y milisegundos).
- */
-export function toMinute(date: Date): Date {
-  return new Date(Math.floor(date.getTime() / 60000) * 60000);
 }

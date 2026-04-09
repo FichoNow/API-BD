@@ -1,4 +1,4 @@
-import { deleteFichajeById } from "../../../database/repositories/fichaje-repository.js";
+import { deleteFichajeById } from "../../../database/repositories/fichajes/fichaje-repository.js";
 import { verifyFichajeOwnership } from "../../../helpers/fichaje-helper.js";
 
 /**

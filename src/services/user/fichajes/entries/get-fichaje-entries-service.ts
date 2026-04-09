@@ -1,5 +1,5 @@
-import { findFichajeById } from "../../../../database/repositories/fichaje-repository.js";
-import { findFichajeEntriesByFichajeId } from "../../../../database/repositories/fichaje-entry-repository.js";
+import { findFichajeById } from "../../../../database/repositories/fichajes/fichaje-repository.js";
+import { findFichajeEntriesByFichajeId } from "../../../../database/repositories/fichajes/fichaje-entry-repository.js";
 import { GetFichajeEntriesResponse } from "../../../../types/dto/user/fichajes/entries/get-fichaje-entries-response.js";
 import { ResponseError } from "../../../../types/express/response-type.js";
 

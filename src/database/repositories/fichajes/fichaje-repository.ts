@@ -5,8 +5,8 @@ import {
   UpdateClockOutFichajeRow,
   UpdateClockInFichajeRow,
   UpdateClockOutModifiedFichajeRow,
-} from "../../types/db/fichaje-row-type.js";
-import { pool } from "../pool.js";
+} from "../../../types/db/fichajes/fichaje-row-type.js";
+import { pool } from "../../pool.js";
 
 export async function findFichajeById(
   fichajeId: number,
@@ -76,6 +76,23 @@ export async function findFichajesByUserId(
      ORDER BY clock_in DESC
      LIMIT ?`,
      [userId, limit],
+  );
+
+  return rows;
+}
+
+export async function findFichajesByUserIdAndMonth(
+  userId: number,
+  year: number,
+  month: number,
+): Promise<FichajeRow[]> {
+  const [rows] = await pool.query<FichajeRow[]>(
+    `SELECT * FROM fichajes
+     WHERE user_id = ?
+       AND YEAR(clock_in) = ?
+       AND MONTH(clock_in) = ?
+     ORDER BY clock_in ASC`,
+    [userId, year, month],
   );
 
   return rows;

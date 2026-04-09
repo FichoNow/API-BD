@@ -1,4 +1,4 @@
-import { findFichajesByUserId } from "../../../database/repositories/fichaje-repository.js";
+import { findFichajesByUserId } from "../../../database/repositories/fichajes/fichaje-repository.js";
 import { GetFichajesResponse } from "../../../types/dto/user/fichajes/get-fichajes-response.js";
 
 /**

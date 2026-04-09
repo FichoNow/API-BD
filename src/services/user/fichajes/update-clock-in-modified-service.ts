@@ -1,4 +1,5 @@
-import { updateClockInById } from "../../../database/repositories/fichaje-repository.js";
+import { isAfter } from "date-fns";
+import { updateClockInById } from "../../../database/repositories/fichajes/fichaje-repository.js";
 import { verifyFichajeOwnership } from "../../../helpers/fichaje-helper.js";
 import { PatchClockInModifiedBody } from "../../../types/dto/user/fichajes/patch-clock-in-modified-body.js";
 import { ResponseError } from "../../../types/express/response-type.js";
@@ -16,7 +17,7 @@ export async function updateClockInModifiedService(
 ): Promise<void> {
   const fichaje = await verifyFichajeOwnership(fichajeId, userId);
 
-  if (fichaje.clock_out && new Date(body.clock_in) >= new Date(fichaje.clock_out)) {
+  if (fichaje.clock_out && isAfter(new Date(body.clock_in), new Date(fichaje.clock_out))) {
     throw new ResponseError(
       "La hora de entrada debe ser anterior a la hora de salida.",
       400,

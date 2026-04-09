@@ -1,4 +1,4 @@
-import { createFichaje } from "../../../database/repositories/fichaje-repository.js";
+import { createFichaje } from "../../../database/repositories/fichajes/fichaje-repository.js";
 import { PostFichajeBody } from "../../../types/dto/user/fichajes/post-fichaje-body.js";
 import { PostFichajeResponse } from "../../../types/dto/user/fichajes/post-fichaje-response.js";
 

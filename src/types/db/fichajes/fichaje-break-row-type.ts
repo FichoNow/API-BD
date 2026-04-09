@@ -1,5 +1,5 @@
 import { RowDataPacket } from "mysql2";
-import { FichajeBreakData } from "../models/fichaje-break.js";
+import { FichajeBreakData } from "../../models/fichajes/fichaje-break.js";
 
 /** Representa una fila de la tabla "fichaje_breaks" como la devuelve la base de datos. */
 export interface FichajeBreakRow extends RowDataPacket, FichajeBreakData {}

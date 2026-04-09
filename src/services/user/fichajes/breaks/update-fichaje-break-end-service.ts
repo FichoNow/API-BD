@@ -1,8 +1,9 @@
 import {
   findFichajeBreakById,
   updateFichajeBreakEndById,
-} from "../../../../database/repositories/fichaje-break-repository.js";
-import { verifyFichajeOwnership, toMinute } from "../../../../helpers/fichaje-helper.js";
+} from "../../../../database/repositories/fichajes/fichaje-break-repository.js";
+import { startOfMinute } from "date-fns";
+import { verifyFichajeOwnership } from "../../../../helpers/fichaje-helper.js";
 import { PatchFichajeBreakEndBody } from "../../../../types/dto/user/fichajes/breaks/patch-fichaje-break-end-body.js";
 import { ResponseError } from "../../../../types/express/response-type.js";
 
@@ -24,7 +25,7 @@ export async function updateFichajeBreakEndService(
     throw new ResponseError("Este descanso ya está cerrado.", 409, "BREAK_ALREADY_CLOSED");
   }
 
-  if (body.ended_at <= toMinute(fichajeBreak.started_at)) {
+  if (body.ended_at <= startOfMinute(fichajeBreak.started_at)) {
     throw new ResponseError(
       "La hora de fin no puede ser anterior o igual a la hora de inicio del descanso.",
       400,
@@ -32,7 +33,7 @@ export async function updateFichajeBreakEndService(
     );
   }
 
-  if (fichaje.clock_out !== null && body.ended_at > toMinute(fichaje.clock_out)) {
+  if (fichaje.clock_out !== null && body.ended_at > startOfMinute(fichaje.clock_out)) {
     throw new ResponseError(
       "La hora de fin del descanso no puede ser posterior a la salida del fichaje.",
       400,

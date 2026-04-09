@@ -5,8 +5,8 @@ import {
     UpdateFichajeEntryEndRow,
     UpdateFichajeEntryStartRow,
     UpdateFichajeEntryProjectRow,
- } from "../../types/db/fichaje-entry-row-type.js";
-import { pool } from "../pool.js";
+ } from "../../../types/db/fichajes/fichaje-entry-row-type.js";
+import { pool } from "../../pool.js";
 
 export async function findFichajeEntryById(
     entryId: number,

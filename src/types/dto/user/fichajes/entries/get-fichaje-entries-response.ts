@@ -1,4 +1,4 @@
-import { FichajeEntryData } from "../../../../models/fichaje-entry.js";
+import { FichajeEntryData } from "../../../../models/fichajes/fichaje-entry.js";
 
 /** Lo que devuelve la API al obtener las entries de un fichaje concreto.
  * Será un array de entries del fichaje indicado.

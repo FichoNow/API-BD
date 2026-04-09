@@ -1,7 +1,7 @@
 import {
   findFichajeEntryById,
   updateFichajeEntryProjectById,
-} from "../../../../database/repositories/fichaje-entry-repository.js";
+} from "../../../../database/repositories/fichajes/fichaje-entry-repository.js";
 import { findProjectById } from "../../../../database/repositories/project-repository.js";
 import { verifyFichajeOwnership } from "../../../../helpers/fichaje-helper.js";
 import { PatchFichajeEntryProjectBody } from "../../../../types/dto/user/fichajes/entries/patch-fichaje-entry-project-body.js";

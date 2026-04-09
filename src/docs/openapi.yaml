@@ -15,10 +15,12 @@ tags:
       El `id` del usuario **nunca se pasa como parámetro** — se extrae automáticamente del payload del access token.
   - name: "User › Fichajes"
     description: Operaciones sobre fichajes (entradas, salidas y correcciones). Requieren `Authorization: Bearer <accessToken>`.
-  - name: "User › Entries"
+  - name: "User › Fichajes › Entries"
     description: Bloques de proyecto dentro de un fichaje. Requieren `Authorization: Bearer <accessToken>`.
-  - name: "User › Breaks"
+  - name: "User › Fichajes › Breaks"
     description: Descansos dentro de un fichaje. Requieren `Authorization: Bearer <accessToken>`.
+  - name: "User › Calendar"
+    description: Calendario mensual del usuario autenticado. Requieren `Authorization: Bearer <accessToken>`.
   - name: "User › Projects"
     description: Proyectos visibles para el usuario autenticado. Requieren `Authorization: Bearer <accessToken>`.
   - name: Admin
@@ -394,6 +396,80 @@ components:
             id:
               type: integer
               example: 5
+
+    GetFichajeBreaksResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 3
+              fichaje_id:
+                type: integer
+                example: 42
+              started_at:
+                type: string
+                format: date-time
+                example: "2026-03-29T12:00:00.000Z"
+              ended_at:
+                type: string
+                format: date-time
+                nullable: true
+                example: "2026-03-29T12:30:00.000Z"
+
+    GetCalendarMonthResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            userId:
+              type: integer
+              example: 1
+            year:
+              type: integer
+              example: 2026
+            month:
+              type: integer
+              example: 4
+            days:
+              type: array
+              items:
+                type: object
+                properties:
+                  date:
+                    type: string
+                    format: date
+                    example: "2026-04-01"
+                  isWorkingDay:
+                    type: boolean
+                    example: true
+                  planned:
+                    nullable: true
+                    type: object
+                    properties:
+                      startTime:
+                        type: string
+                        example: "09:00"
+                      endTime:
+                        type: string
+                        example: "17:00"
+                      breakMinutes:
+                        type: integer
+                        example: 30
+                      plannedMinutes:
+                        type: integer
+                        example: 450
+                  statusType:
+                    type: string
+                    example: WORKED
+                    description: >
+                      Estado del día. Posibles valores: `WORKED`, `ABSENT`, `PLANNED`, `DAY_OFF`,
+                      o un código de tipo de excepción definido por la empresa.
 
 paths:
 
@@ -1658,7 +1734,7 @@ paths:
 
   /user/fichajes/{id}/entries:
     post:
-      tags: ["User › Entries"]
+      tags: ["User › Fichajes › Entries"]
       summary: Crear entry de fichaje
       description: |
         Crea un nuevo bloque de proyecto dentro de un fichaje existente.
@@ -1744,7 +1820,7 @@ paths:
                   message: Fichaje no encontrado.
 
     get:
-      tags: ["User › Entries"]
+      tags: ["User › Fichajes › Entries"]
       summary: Obtener entries de un fichaje
       description: |
         Devuelve todas las entries (bloques de proyecto) de un fichaje concreto.
@@ -1793,7 +1869,7 @@ paths:
 
   /user/fichajes/{id}/entries/{entryId}/end:
     patch:
-      tags: ["User › Entries"]
+      tags: ["User › Fichajes › Entries"]
       summary: Establecer hora de fin de una entry
       description: |
         Establece o corrige la hora de fin (`ended_at`) de una entry de fichaje.
@@ -1886,7 +1962,7 @@ paths:
 
   /user/fichajes/{id}/entries/{entryId}/start:
     patch:
-      tags: ["User › Entries"]
+      tags: ["User › Fichajes › Entries"]
       summary: Editar hora de inicio de una entry
       description: |
         Corrige la hora de inicio (`started_at`) de una entry de fichaje ya creada.
@@ -1979,7 +2055,7 @@ paths:
 
   /user/fichajes/{id}/entries/{entryId}/project:
     patch:
-      tags: ["User › Entries"]
+      tags: ["User › Fichajes › Entries"]
       summary: Cambiar proyecto de una entry
       description: |
         Cambia el proyecto asociado a una entry existente.
@@ -2094,8 +2170,67 @@ paths:
   # ─────────────────────────────────────────
 
   /user/fichajes/{id}/breaks:
+    get:
+      tags: ["User › Fichajes › Breaks"]
+      summary: Obtener descansos de un fichaje
+      description: |
+        Devuelve todos los descansos registrados dentro del fichaje indicado,
+        ordenados por hora de inicio ascendente.
+
+        **Reglas de negocio**
+        - El fichaje debe pertenecer al usuario autenticado.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del fichaje cuyos descansos se quieren consultar.
+          schema:
+            type: integer
+            example: 42
+      responses:
+        "200":
+          description: Lista de descansos del fichaje.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetFichajeBreaksResponse"
+        "400":
+          description: ID de fichaje inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BAD_REQUEST
+                  message: ID inválido.
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "404":
+          description: Fichaje no encontrado o no pertenece al usuario autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: FICHAJE_NOT_FOUND
+                  message: Fichaje no encontrado.
     post:
-      tags: ["User › Breaks"]
+      tags: ["User › Fichajes › Breaks"]
       summary: Iniciar descanso
       description: |
         Inicia un nuevo descanso dentro de un fichaje existente.
@@ -2174,7 +2309,7 @@ paths:
 
   /user/fichajes/{id}/breaks/{breakId}/end:
     patch:
-      tags: ["User › Breaks"]
+      tags: ["User › Fichajes › Breaks"]
       summary: Terminar descanso
       description: |
         Registra la hora de fin de un descanso activo.
@@ -2258,3 +2393,68 @@ paths:
                 error:
                   code: FICHAJE_BREAK_NOT_FOUND
                   message: Descanso no encontrado.
+
+  # ─────────────────────────────────────────
+  # CALENDAR
+  # ─────────────────────────────────────────
+
+  /user/calendar:
+    get:
+      tags: ["User › Calendar"]
+      summary: Obtener calendario mensual
+      description: |
+        Devuelve el calendario del mes indicado para el usuario autenticado.
+        Incluye un objeto por cada día del mes con su estado, horas planificadas
+        y si es día laborable.
+
+        **Reglas de negocio**
+        - `year` debe ser un entero positivo.
+        - `month` debe estar entre 1 y 12.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: year
+          in: query
+          required: true
+          description: Año del calendario a consultar.
+          schema:
+            type: integer
+            example: 2026
+        - name: month
+          in: query
+          required: true
+          description: Mes del calendario a consultar (1–12).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+            example: 4
+      responses:
+        "200":
+          description: Calendario mensual del usuario.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetCalendarMonthResponse"
+        "400":
+          description: Año o mes inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BAD_REQUEST
+                  message: Mes inválido.
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado

@@ -1,6 +1,6 @@
 import * as z from "zod";
 import { createZodObject } from "../../../../helpers/zod-helper.js";
-import { FichajeData } from "../../../models/fichaje.js";
+import { FichajeData } from "../../../models/fichajes/fichaje.js";
 
 /** Body del endpoint PATCH /user/fichaje/:id/clock-in/modified. */
 export type PatchClockInModifiedBody = Pick<FichajeData, "clock_in">;

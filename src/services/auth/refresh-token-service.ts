@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { isAfter, addDays } from "date-fns";
 import { env } from "../../config-env.js";
 import {
   createRefreshToken,
@@ -62,7 +63,7 @@ export async function validateRefreshToken(
     throw new ResponseError("Token inválido", 401, "UNAUTHORIZED");
   }
 
-  if (new Date() > new Date(dataRefreshToken.expires_at)) {
+  if (isAfter(new Date(), new Date(dataRefreshToken.expires_at))) {
     throw new ResponseError("Token expirado", 401, "TOKEN_EXPIRED");
   }
 
@@ -121,6 +122,5 @@ export function hashRefreshToken(token: string): string {
  * Calcula la fecha de expiración de un refresh token.
  */
 export function getRefreshTokenExpiresAt(now = new Date()): Date {
-  const ms = env.REFRESH_TOKEN_EXPIRES_IN * 24 * 60 * 60 * 1000;
-  return new Date(now.getTime() + ms);
+  return addDays(now, env.REFRESH_TOKEN_EXPIRES_IN);
 }

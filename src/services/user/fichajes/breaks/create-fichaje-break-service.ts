@@ -1,8 +1,9 @@
 import {
   createFichajeBreak,
   findOpenBreakByFichajeId,
-} from "../../../../database/repositories/fichaje-break-repository.js";
-import { verifyFichajeOwnership, toMinute } from "../../../../helpers/fichaje-helper.js";
+} from "../../../../database/repositories/fichajes/fichaje-break-repository.js";
+import { startOfMinute } from "date-fns";
+import { verifyFichajeOwnership } from "../../../../helpers/fichaje-helper.js";
 import { PostFichajeBreakBody } from "../../../../types/dto/user/fichajes/breaks/post-fichaje-break-body.js";
 import { PostFichajeBreakResponse } from "../../../../types/dto/user/fichajes/breaks/post-fichaje-break-response.js";
 import { ResponseError } from "../../../../types/express/response-type.js";
@@ -31,7 +32,7 @@ export async function createFichajeBreakService(
     );
   }
 
-  if (body.started_at < toMinute(fichaje.clock_in)) {
+  if (body.started_at < startOfMinute(fichaje.clock_in)) {
     throw new ResponseError(
       "La hora de inicio del descanso no puede ser anterior a la entrada del fichaje.",
       400,
