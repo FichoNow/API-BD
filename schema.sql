@@ -2,9 +2,12 @@ CREATE DATABASE IF NOT EXISTS BD_Jan_Fran;
 USE BD_Jan_Fran;
 
 /* ============= Borrado de tablas =============*/
-DROP TABLE IF EXISTS leave_requests;
 DROP TABLE IF EXISTS excepciones_calendario;
+DROP TABLE IF EXISTS leave_requests;
+DROP TABLE IF EXISTS leave_request_statuses;
+DROP TABLE IF EXISTS leave_request_types;
 DROP TABLE IF EXISTS tipos_excepcion;
+
 DROP TABLE IF EXISTS asignaciones_usuario;
 DROP TABLE IF EXISTS asignaciones_grupo;
 DROP TABLE IF EXISTS dias_plantilla;
@@ -230,6 +233,56 @@ CREATE TABLE tipos_excepcion (
     UNIQUE KEY uq_tipos_excepcion_code (code)
 );
 
+/* ============= Tabla de tipos de solicitud ================= */
+CREATE TABLE leave_request_types (
+    id INT NOT NULL AUTO_INCREMENT,
+    code VARCHAR(50) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_leave_request_types_code (code)
+);
+
+/* ============= Tabla de estados de solicitud ================= */
+CREATE TABLE leave_request_statuses (
+    id INT NOT NULL AUTO_INCREMENT,
+    code VARCHAR(50) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_leave_request_statuses_code (code)
+);
+
+/* ============= Solicitudes de usuario (vacaciones, médico, permisos...) =============*/
+CREATE TABLE leave_requests (
+    id INT NOT NULL AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    type_id INT NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    start_time TIME NULL,
+    end_time TIME NULL,
+    comment VARCHAR(255) NULL,
+    status_id INT NOT NULL,
+    reviewed_by INT NULL,
+    reviewed_at TIMESTAMP NULL DEFAULT NULL,
+    review_comment VARCHAR(255) NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_leave_requests_user_status (user_id, status_id),
+    KEY idx_leave_requests_dates (start_date, end_date),
+    CONSTRAINT fk_leave_requests_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_leave_requests_type
+        FOREIGN KEY (type_id) REFERENCES leave_request_types(id),
+    CONSTRAINT fk_leave_requests_status
+        FOREIGN KEY (status_id) REFERENCES leave_request_statuses(id),
+    CONSTRAINT fk_leave_requests_reviewed_by
+        FOREIGN KEY (reviewed_by) REFERENCES users(id)
+        ON DELETE SET NULL
+);
+
 /* ============= Excepciones calendario =============*/
 CREATE TABLE excepciones_calendario (
     id INT NOT NULL AUTO_INCREMENT,
@@ -237,6 +290,7 @@ CREATE TABLE excepciones_calendario (
     user_id INT NULL,
     group_id INT NULL,
     tipo_id INT NOT NULL,
+    leave_request_id INT NULL,
     title VARCHAR(150) NOT NULL,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
@@ -248,6 +302,11 @@ CREATE TABLE excepciones_calendario (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     KEY idx_excepciones_calendario_dates (start_date, end_date),
+    UNIQUE KEY uq_excepciones_calendario_leave_request (leave_request_id),
+
+    CONSTRAINT chk_excepciones_calendario_scope
+        CHECK (NOT (user_id IS NOT NULL AND group_id IS NOT NULL)),
+
     CONSTRAINT fk_excepciones_calendario_company
         FOREIGN KEY (company_id) REFERENCES companies(id)
         ON DELETE CASCADE,
@@ -259,43 +318,14 @@ CREATE TABLE excepciones_calendario (
         ON DELETE CASCADE,
     CONSTRAINT fk_excepciones_calendario_tipo
         FOREIGN KEY (tipo_id) REFERENCES tipos_excepcion(id),
+    CONSTRAINT fk_excepciones_calendario_leave_request
+        FOREIGN KEY (leave_request_id) REFERENCES leave_requests(id),
     CONSTRAINT fk_excepciones_calendario_created_by
         FOREIGN KEY (created_by) REFERENCES users(id)
         ON DELETE CASCADE
 );
 
-/* ============= Solicitudes de usuario (vacaciones, médico, permisos...) =============*/
-CREATE TABLE leave_requests (
-    id INT NOT NULL AUTO_INCREMENT,
-    user_id INT NOT NULL,
-    type ENUM(
-        'VACATION',
-        'PERMISSION',
-        'SICK_LEAVE',
-        'MEDICAL_APPOINTMENT',
-        'DAY_OFF'
-    ) NOT NULL,
-    start_date DATE NOT NULL,
-    end_date DATE NOT NULL,
-    start_time TIME NULL,
-    end_time TIME NULL,
-    comment VARCHAR(255) NULL,
-    status ENUM('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED') NOT NULL DEFAULT 'PENDING',
-    reviewed_by INT NULL,
-    reviewed_at TIMESTAMP NULL DEFAULT NULL,
-    review_comment VARCHAR(255) NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (id),
-    KEY idx_leave_requests_user_status (user_id, status),
-    KEY idx_leave_requests_dates (start_date, end_date),
-    CONSTRAINT fk_leave_requests_user
-        FOREIGN KEY (user_id) REFERENCES users(id)
-        ON DELETE CASCADE,
-    CONSTRAINT fk_leave_requests_reviewed_by
-        FOREIGN KEY (reviewed_by) REFERENCES users(id)
-        ON DELETE SET NULL
-);
+
 
 /* ========================================================= */
 /* ================= INSERTS ================================ */
@@ -365,24 +395,40 @@ INSERT INTO tipos_excepcion (code, name) VALUES
 ('SICK_LEAVE', 'Baja por enfermedad'),
 ('PERMISSION', 'Permiso'),
 ('DAY_OFF', 'Día libre'),
-('SPECIAL_SHIFT', 'Turno especial');
+('SPECIAL_SHIFT', 'Turno especial'),
+('MEDICAL_APPOINTMENT', 'Cita médica');
 
-INSERT INTO excepciones_calendario (
-    company_id, user_id, group_id, tipo_id, title, start_date, end_date, start_time, end_time, notes, created_by
-) VALUES
-(1, NULL, NULL, 1, 'Navidad', '2026-12-25', '2026-12-25', NULL, NULL, 'Festivo nacional', 1),
-(1, NULL, NULL, 1, 'Año Nuevo', '2026-01-01', '2026-01-01', NULL, NULL, 'Festivo nacional', 1),
-(1, 2, NULL, 2, 'Vacaciones verano', '2026-08-10', '2026-08-14', NULL, NULL, 'Vacaciones aprobadas', 1),
-(1, 3, NULL, 4, 'Permiso médico', '2026-04-15', '2026-04-15', '09:00:00', '11:00:00', 'Consulta médica', 1),
-(1, NULL, 2, 6, 'Jornada reducida operaciones', '2026-05-20', '2026-05-20', '08:00:00', '14:00:00', 'Cambio puntual de turno', 1);
+/* Tipos */
+INSERT INTO leave_request_types (code, name) VALUES
+('VACATION', 'Vacaciones'),
+('PERMISSION', 'Permiso'),
+('SICK_LEAVE', 'Baja por enfermedad'),
+('MEDICAL_APPOINTMENT', 'Cita médica'),
+('DAY_OFF', 'Día libre');
+
+/* Estados */
+INSERT INTO leave_request_statuses (code, name) VALUES
+('PENDING', 'Pendiente'),
+('APPROVED', 'Aprobada'),
+('REJECTED', 'Rechazada'),
+('CANCELLED', 'Cancelada');
 
 /* Solicitudes de usuarios */
 INSERT INTO leave_requests (
-    user_id, type, start_date, end_date, start_time, end_time, comment, status, reviewed_by, reviewed_at, review_comment
+    user_id, type_id, start_date, end_date, start_time, end_time, comment, status_id, reviewed_by, reviewed_at, review_comment
 ) VALUES
-(2, 'VACATION', '2026-08-10', '2026-08-14', NULL, NULL, 'Vacaciones de verano', 'APPROVED', 1, '2026-04-01 10:00:00', 'Aprobado'),
-(3, 'MEDICAL_APPOINTMENT', '2026-04-18', '2026-04-18', '10:00:00', '12:00:00', 'Cita con especialista', 'PENDING', NULL, NULL, NULL),
-(2, 'DAY_OFF', '2026-05-02', '2026-05-02', NULL, NULL, 'Asunto personal', 'REJECTED', 1, '2026-04-03 12:30:00', 'No hay cobertura ese día');
+(2, 1, '2026-08-10', '2026-08-14', NULL, NULL, 'Vacaciones de verano', 2, 1, '2026-04-01 10:00:00', 'Aprobado'),
+(3, 4, '2026-04-18', '2026-04-18', '10:00:00', '12:00:00', 'Cita con especialista', 1, NULL, NULL, NULL),
+(2, 5, '2026-05-02', '2026-05-02', NULL, NULL, 'Asunto personal', 3, 1, '2026-04-03 12:30:00', 'No hay cobertura ese día');
+
+INSERT INTO excepciones_calendario (
+    company_id, user_id, group_id, tipo_id, leave_request_id, title, start_date, end_date, start_time, end_time, notes, created_by
+) VALUES
+(1, NULL, NULL, 1, NULL, 'Navidad', '2026-12-25', '2026-12-25', NULL, NULL, 'Festivo nacional', 1),
+(1, NULL, NULL, 1, NULL, 'Año Nuevo', '2026-01-01', '2026-01-01', NULL, NULL, 'Festivo nacional', 1),
+(1, 2, NULL, 2, 1, 'Vacaciones verano', '2026-08-10', '2026-08-14', NULL, NULL, 'Vacaciones aprobadas', 1),
+(1, 3, NULL, 7, NULL, 'Cita médica', '2026-04-15', '2026-04-15', '09:00:00', '11:00:00', 'Consulta médica', 1),
+(1, NULL, 2, 6, NULL, 'Jornada reducida operaciones', '2026-05-20', '2026-05-20', '08:00:00', '14:00:00', 'Cambio puntual de turno', 1);
 
 /* Fichajes ejemplo */
 INSERT INTO fichajes (user_id, clock_in, clock_out, clock_in_modified, clock_out_modified) VALUES
@@ -396,3 +442,5 @@ INSERT INTO fichaje_entries (fichaje_id, project_id, started_at, ended_at) VALUE
 (1, 2, '2026-04-01 14:00:00', '2026-04-01 18:01:00'),
 (2, 2, '2026-04-01 09:15:00', '2026-04-01 17:50:00'),
 (3, 1, '2026-04-02 08:58:00', '2026-04-02 18:05:00');
+
+
