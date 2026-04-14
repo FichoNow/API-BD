@@ -4,7 +4,6 @@ import {
     BodyResponse,
     ResponseError,
 } from "../../../../types/express/response-type.js";
-import { DeleteLeaveRequestResponse } from "../../../../types/dto/user/requests/delete-leave-request-response.js";
 
 /**
  * Controller para cancelar una solicitud del usuario autenticado.
@@ -18,7 +17,7 @@ import { DeleteLeaveRequestResponse } from "../../../../types/dto/user/requests/
  */
 export async function deleteLeaveRequestController(
     req: Request<{ id: string }>,
-    res: Response<BodyResponse<DeleteLeaveRequestResponse>>,
+    res: Response<BodyResponse<null>>,
 ) {
     // Convertimos el id recibido por URL a número.
     const leaveRequestId = Number(req.params.id);
@@ -36,11 +35,8 @@ export async function deleteLeaveRequestController(
     const userId = req.jwtClaims!.id;
 
     // Llamamos al service, que se encarga de toda la lógica de negocio.
-    const data = await deleteLeaveRequestService(
-        leaveRequestId,
-        userId,
-    );
+    await deleteLeaveRequestService(leaveRequestId, userId);
 
     // Devolvemos la respuesta de éxito.
-    res.status(200).json({ data });
+    res.status(200).json({ data: null });
 }

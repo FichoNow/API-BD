@@ -3,7 +3,6 @@ import {
     updateLeaveRequestStatusById,
 } from "../../../database/repositories/requests/leave-request-repository.js";
 import { findLeaveRequestStatusByCode } from "../../../database/repositories/requests/leave-request-catalog-repository.js";
-import { DeleteLeaveRequestResponse } from "../../../types/dto/user/requests/delete-leave-request-response.js";
 import { ResponseError } from "../../../types/express/response-type.js";
 
 /**
@@ -18,7 +17,7 @@ import { ResponseError } from "../../../types/express/response-type.js";
 export async function deleteLeaveRequestService(
     leaveRequestId: number,
     userId: number,
-): Promise<DeleteLeaveRequestResponse> {
+): Promise<void> {
     // Buscamos la solicitud por su id.
     const leaveRequest = await findLeaveRequestById(leaveRequestId);
 
@@ -40,23 +39,11 @@ export async function deleteLeaveRequestService(
         );
     }
 
-    // Buscamos el estado CANCELLED en catálogo.
-    const cancelledStatus = await findLeaveRequestStatusByCode("CANCELLED");
-
-    // Si no existe en BD, hay un problema de configuración.
-    if (!cancelledStatus) {
-        throw new ResponseError(
-            "Estado CANCELLED no encontrado.",
-            500,
-            "LEAVE_REQUEST_STATUS_NOT_FOUND",
-        );
-    }
-
-    // Solo permitimos cancelar solicitudes que estén en PENDING.
-    // Según tus inserts, PENDING es id 1, pero no queremos fiarnos
-    // de un número mágico. Por eso comprobamos por id contra el catálogo
-    // buscando también el estado PENDING.
-    const pendingStatus = await findLeaveRequestStatusByCode("PENDING");
+    // Buscamos ambos estados en paralelo.
+    const [pendingStatus, cancelledStatus] = await Promise.all([
+        findLeaveRequestStatusByCode("PENDING"),
+        findLeaveRequestStatusByCode("CANCELLED"),
+    ]);
 
     if (!pendingStatus) {
         throw new ResponseError(
@@ -66,6 +53,15 @@ export async function deleteLeaveRequestService(
         );
     }
 
+    if (!cancelledStatus) {
+        throw new ResponseError(
+            "Estado CANCELLED no encontrado.",
+            500,
+            "LEAVE_REQUEST_STATUS_NOT_FOUND",
+        );
+    }
+
+    // Solo permitimos cancelar solicitudes que estén en PENDING.
     if (leaveRequest.status_id !== pendingStatus.id) {
         throw new ResponseError(
             "Solo se puede cancelar una solicitud pendiente.",
@@ -88,9 +84,4 @@ export async function deleteLeaveRequestService(
             "LEAVE_REQUEST_NOT_UPDATED",
         );
     }
-
-    // Devolvemos un mensaje simple de éxito.
-    return {
-        message: "Request cancelled successfully",
-    };
 }

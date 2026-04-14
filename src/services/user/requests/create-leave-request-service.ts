@@ -13,7 +13,7 @@ import { ResponseError } from "../../../types/express/response-type.js";
  * Qué hace este service:
  * 1. Comprueba que el tipo de solicitud existe en catálogo.
  * 2. Comprueba que el estado PENDING existe en catálogo.
- * 3. Valida reglas generales de fechas y horas.
+ * 3. Valida reglas de fechas.
  * 4. Valida reglas específicas según el tipo de solicitud.
  * 5. Inserta la solicitud en la base de datos.
  * 6. Devuelve el id creado.
@@ -55,9 +55,8 @@ export async function createLeaveRequestService(
         );
     }
 
-    // Validaciones generales para cualquier solicitud.
+    // Validación de rango de fechas.
     validateDateRange(body.start_date, body.end_date);
-    validateTimeRange(body.start_time, body.end_time);
 
     // Validaciones específicas según el tipo.
     validateLeaveRequestByType(body);
@@ -87,43 +86,6 @@ function validateDateRange(startDate: string, endDate: string): void {
             "La fecha de fin no puede ser anterior a la fecha de inicio.",
             400,
             "LEAVE_REQUEST_INVALID_DATE_RANGE",
-        );
-    }
-}
-
-/**
- * Valida la coherencia básica de horas.
- *
- * Reglas:
- * - o vienen las dos horas con valor
- * - o vienen las dos vacías/null
- * - si ambas existen, start_time debe ser menor que end_time
- */
-function validateTimeRange(
-    startTime?: string | null,
-    endTime?: string | null,
-): void {
-    const normalizedStartTime = startTime ?? null;
-    const normalizedEndTime = endTime ?? null;
-
-    const hasStartTime = normalizedStartTime !== null;
-    const hasEndTime = normalizedEndTime !== null;
-
-    // Si una viene y la otra no, error.
-    if (hasStartTime !== hasEndTime) {
-        throw new ResponseError(
-            "start_time y end_time deben venir ambos informados o ambos vacíos.",
-            400,
-            "LEAVE_REQUEST_INVALID_TIME_RANGE",
-        );
-    }
-
-    // Si ambas existen, la hora de inicio debe ser menor que la de fin.
-    if (hasStartTime && hasEndTime && normalizedStartTime! >= normalizedEndTime!) {
-        throw new ResponseError(
-            "La hora de inicio debe ser anterior a la hora de fin.",
-            400,
-            "LEAVE_REQUEST_INVALID_TIME_ORDER",
         );
     }
 }

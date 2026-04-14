@@ -6,8 +6,9 @@ import { deleteLeaveRequestController } from "../../controllers/user/requests/de
 /**
  * Router para las solicitudes del usuario.
  *
- * De momento solo añadimos el endpoint de crear solicitud:
- * POST /user/requests
+ * POST   /user/requests      → crear solicitud
+ * GET    /user/requests      → listar solicitudes del usuario
+ * DELETE /user/requests/:id  → cancelar solicitud
  */
 export const requestsRouter = Router();
 

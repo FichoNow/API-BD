@@ -1,18 +1,14 @@
-/* Definimos la forma con que llegará el body al ednpoint 
-*/
 import { z } from "zod";
-
+import { LeaveRequestType } from "../../../models/requests/leave-request.js";
 
 export interface PostLeaveRequestBody {
-  type: 'VACATION' | 'PERMISSION' | 'SICK_LEAVE' | 'MEDICAL_APPOINTMENT' | 'DAY_OFF';
-  start_date: string;
-  end_date: string;
-  start_time?: string | null;
-  end_time?: string | null;
-  comment?: string;
+    type: LeaveRequestType;
+    start_date: string;
+    end_date: string;
+    start_time?: string | null;
+    end_time?: string | null;
+    comment?: string;
 }
-
-
 
 export const PostLeaveRequestBodySchema = z
     .object({

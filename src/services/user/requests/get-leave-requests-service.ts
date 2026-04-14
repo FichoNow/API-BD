@@ -9,7 +9,7 @@ import {
  * del usuario autenticado.
  *
  * Qué hace este service:
- * 1. Pide al repository todas las solicitudes del usuario.
+ * 1. Pide al repository las solicitudes del usuario.
  * 2. Transforma el resultado de base de datos al formato
  *    de respuesta de la API.
  * 3. Devuelve la lista final.
@@ -24,10 +24,10 @@ export async function getLeaveRequestsService(
     const response: GetLeaveRequestsResponseItem[] = leaveRequests.map((leaveRequest) => ({
         id: leaveRequest.id,
         type: leaveRequest.type,
-        startDate: formatDateOnly(leaveRequest.start_date),
-        endDate: formatDateOnly(leaveRequest.end_date),
-        startTime: leaveRequest.start_time,
-        endTime: leaveRequest.end_time,
+        start_date: formatDateOnly(leaveRequest.start_date),
+        end_date: formatDateOnly(leaveRequest.end_date),
+        start_time: leaveRequest.start_time,
+        end_time: leaveRequest.end_time,
         status: leaveRequest.status,
         comment: leaveRequest.comment,
     }));
