@@ -6,6 +6,15 @@ import {
 import { BodyResponse, ResponseError } from "../../../../../types/express/response-type.js";
 import { updateFichajeEntryProjectService } from "../../../../../services/user/fichajes/entries/update-fichaje-entry-project-service.js";
 
+/**
+ * Controller para cambiar el proyecto asignado a una entry de fichaje.
+ *
+ * Qué hace:
+ * 1. Valida que los params `id` (fichaje) y `entryId` sean enteros positivos.
+ * 2. Valida el body con el schema de Zod.
+ * 3. Llama al service para actualizar el proyecto de la entry.
+ * 4. Devuelve 200 con data null si todo es correcto.
+ */
 export async function patchFichajeEntryProjectController(
   req: Request<{ id: string; entryId: string }, unknown, PatchFichajeEntryProjectBody>,
   res: Response<BodyResponse<null>>,

@@ -6,6 +6,15 @@ import {
 import { BodyResponse, ResponseError } from "../../../../../types/express/response-type.js";
 import { updateFichajeBreakEndService } from "../../../../../services/user/fichajes/breaks/update-fichaje-break-end-service.js";
 
+/**
+ * Controller para registrar la hora de fin de un descanso.
+ *
+ * Qué hace:
+ * 1. Valida que los params `id` (fichaje) y `breakId` sean enteros positivos.
+ * 2. Valida el body con el schema de Zod.
+ * 3. Llama al service para cerrar el descanso.
+ * 4. Devuelve 200 con data null si todo es correcto.
+ */
 export async function patchFichajeBreakEndController(
   req: Request<{ id: string; breakId: string }, unknown, PatchFichajeBreakEndBody>,
   res: Response<BodyResponse<null>>,

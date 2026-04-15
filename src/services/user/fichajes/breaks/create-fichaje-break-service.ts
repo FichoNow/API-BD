@@ -8,6 +8,16 @@ import { PostFichajeBreakBody } from "../../../../types/dto/user/fichajes/breaks
 import { PostFichajeBreakResponse } from "../../../../types/dto/user/fichajes/breaks/post-fichaje-break-response.js";
 import { ResponseError } from "../../../../types/express/response-type.js";
 
+/**
+ * Lógica de negocio para iniciar un descanso dentro de un fichaje activo.
+ * Comprueba que el fichaje pertenece al usuario, que está abierto (sin clock_out),
+ * que no hay ya un descanso activo y que la hora de inicio es válida.
+ *
+ * @param fichajeId ID del fichaje al que pertenece el descanso.
+ * @param body Cuerpo de la petición con la hora de inicio del descanso.
+ * @param userId ID del usuario autenticado.
+ * @returns ID del nuevo descanso creado.
+ */
 export async function createFichajeBreakService(
   fichajeId: number,
   body: PostFichajeBreakBody,

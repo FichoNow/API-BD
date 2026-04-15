@@ -7,6 +7,15 @@ import {
 import { createFichajeEntryService } from "../../../../../services/user/fichajes/entries/create-fichaje-entry-service.js";
 import { PostFichajeEntryResponse } from "../../../../../types/dto/user/fichajes/entries/post-fichaje-entry-response.js";
 
+/**
+ * Controller para crear una nueva entry (registro de proyecto) dentro de un fichaje.
+ *
+ * Qué hace:
+ * 1. Valida que el param `id` (fichaje) sea un entero positivo.
+ * 2. Valida el body con el schema de Zod.
+ * 3. Llama al service para crear la entry y obtiene el id generado.
+ * 4. Devuelve el id de la nueva entry con status 201.
+ */
 export async function postFichajeEntryController(
     req: Request<{ id: string }, unknown, PostFichajeEntryBody>,
     res: Response<BodyResponse<PostFichajeEntryResponse>>,

@@ -3,6 +3,14 @@ import { BodyResponse, ResponseError } from "../../../../types/express/response-
 import { buildCalendarMonthService } from "../../../../services/user/calendar/build-calendar-month-service.js";
 import { GetCalendarMonthResponse } from "../../../../types/dto/user/calendar/get-calendar-month-response.js";
 
+/**
+ * Controller para obtener el calendario mensual del usuario autenticado.
+ *
+ * Qué hace:
+ * 1. Valida que los query params `year` y `month` sean números enteros válidos.
+ * 2. Llama al service que construye el calendario con el estado de cada día.
+ * 3. Devuelve el calendario completo en la respuesta.
+ */
 export async function getMonthCalendarController(
   req: Request,
   res: Response<BodyResponse<GetCalendarMonthResponse>>,

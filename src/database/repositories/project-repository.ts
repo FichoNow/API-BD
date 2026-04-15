@@ -6,6 +6,11 @@ import {
 } from "../../types/db/project-row-type.js";
 import { pool } from "../pool.js";
 
+/**
+ * Busca un proyecto por su ID.
+ * @param projectId ID del proyecto a buscar.
+ * @returns El proyecto encontrado o null si no existe.
+ */
 export async function findProjectById(
   projectId: number,
 ): Promise<ProjectRow | null> {
@@ -17,6 +22,13 @@ export async function findProjectById(
   return rows.length ? rows[0] : null;
 }
 
+/**
+ * Busca un proyecto por su nombre dentro de una empresa concreta.
+ * Se usa para comprobar duplicados antes de crear uno nuevo.
+ * @param name Nombre del proyecto a buscar.
+ * @param companyId ID de la empresa en la que buscar.
+ * @returns El proyecto encontrado o null si no existe.
+ */
 export async function findProjectByNameAndCompany(
   name: string,
   companyId: number,
@@ -29,6 +41,11 @@ export async function findProjectByNameAndCompany(
   return rows.length ? rows[0] : null;
 }
 
+/**
+ * Crea un nuevo proyecto en la base de datos.
+ * @param data Datos del nuevo proyecto (company_id, group_id, name, is_active).
+ * @returns ID del proyecto recién creado.
+ */
 export async function createProject(data: CreateProjectRow): Promise<number> {
   const [result] = await pool.query<ResultSetHeader>(
     `INSERT INTO projects (
@@ -45,6 +62,13 @@ export async function createProject(data: CreateProjectRow): Promise<number> {
   return result.insertId;
 }
 
+/**
+ * Obtiene los proyectos accesibles para un grupo dentro de una empresa.
+ * Devuelve los proyectos del grupo específico y también los globales (group_id IS NULL).
+ * @param groupId ID del grupo del usuario (puede ser null si no tiene grupo).
+ * @param companyId ID de la empresa.
+ * @returns Lista de proyectos accesibles.
+ */
 export async function findProjectsByGroupId(
   groupId: number | null,
   companyId: number,
@@ -57,6 +81,13 @@ export async function findProjectsByGroupId(
   return rows;
 }
 
+/**
+ * Actualiza los campos de un proyecto de forma dinámica.
+ * Solo actualiza los campos que se incluyan en el objeto data (ignora undefined).
+ * @param projectId ID del proyecto a actualizar.
+ * @param data Objeto con los campos a actualizar.
+ * @returns true si se actualizó alguna fila, false si no se encontró el proyecto.
+ */
 export async function updateProjectById(
   projectId: number,
   data: UpdateProjectRow,

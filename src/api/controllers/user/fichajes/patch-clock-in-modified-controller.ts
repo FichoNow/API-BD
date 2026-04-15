@@ -9,6 +9,16 @@ import {
 } from "../../../../types/express/response-type.js";
 import { updateClockInModifiedService } from "../../../../services/user/fichajes/update-clock-in-modified-service.js";
 
+/**
+ * Controller para corregir la hora de entrada de un fichaje (clock_in modificado).
+ * Se usa cuando el usuario quiere ajustar manualmente su hora de entrada.
+ *
+ * Qué hace:
+ * 1. Valida que el param `id` sea un entero positivo.
+ * 2. Valida el body con el schema de Zod.
+ * 3. Llama al service para actualizar el clock_in y marcar la modificación.
+ * 4. Devuelve 200 con data null si todo es correcto.
+ */
 export async function patchClockInModifiedController(
   req: Request<{ id: string }, unknown, PatchClockInModifiedBody>,
   res: Response<BodyResponse<null>>,

@@ -7,6 +7,16 @@ import { verifyFichajeOwnership } from "../../../../helpers/fichaje-helper.js";
 import { PatchFichajeEntryProjectBody } from "../../../../types/dto/user/fichajes/entries/patch-fichaje-entry-project-body.js";
 import { ResponseError } from "../../../../types/express/response-type.js";
 
+/**
+ * Lógica de negocio para cambiar el proyecto asignado a una entry de fichaje.
+ * Verifica que el fichaje pertenece al usuario, que la entry existe dentro
+ * de ese fichaje y que el proyecto nuevo existe en la base de datos.
+ *
+ * @param fichajeId ID del fichaje al que pertenece la entry.
+ * @param entryId ID de la entry a modificar.
+ * @param body Cuerpo de la petición con el nuevo project_id.
+ * @param userId ID del usuario autenticado.
+ */
 export async function updateFichajeEntryProjectService(
   fichajeId: number,
   entryId: number,

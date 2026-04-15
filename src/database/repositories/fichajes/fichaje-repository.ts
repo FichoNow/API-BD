@@ -8,6 +8,11 @@ import {
 } from "../../../types/db/fichajes/fichaje-row-type.js";
 import { pool } from "../../pool.js";
 
+/**
+ * Busca un fichaje por su ID.
+ * @param fichajeId ID del fichaje a buscar.
+ * @returns El fichaje encontrado o null si no existe.
+ */
 export async function findFichajeById(
   fichajeId: number,
 ): Promise<FichajeRow | null> {
@@ -19,6 +24,11 @@ export async function findFichajeById(
   return rows.length ? rows[0] : null;
 }
 
+/**
+ * Crea un nuevo fichaje en la base de datos.
+ * @param data Datos del nuevo fichaje (user_id y clock_in).
+ * @returns ID del fichaje recién creado.
+ */
 export async function createFichaje(data: CreateFichajeRow): Promise<number> {
   const [result] = await pool.query<ResultSetHeader>(
     `INSERT INTO fichajes (user_id, clock_in, created_at)
@@ -29,6 +39,12 @@ export async function createFichaje(data: CreateFichajeRow): Promise<number> {
   return result.insertId;
 }
 
+/**
+ * Actualiza la hora de salida (clock_out) de un fichaje.
+ * @param fichajeId ID del fichaje a actualizar.
+ * @param data Objeto con el nuevo clock_out.
+ * @returns true si se actualizó alguna fila, false si no se encontró el fichaje.
+ */
 export async function updateClockOutById(
   fichajeId: number,
   data: UpdateClockOutFichajeRow,
@@ -41,6 +57,12 @@ export async function updateClockOutById(
   return result.affectedRows > 0;
 }
 
+/**
+ * Actualiza la hora de entrada (clock_in) de un fichaje y la marca como modificada.
+ * @param fichajeId ID del fichaje a actualizar.
+ * @param data Objeto con el nuevo clock_in y el flag clock_in_modified.
+ * @returns true si se actualizó alguna fila, false si no se encontró el fichaje.
+ */
 export async function updateClockInById(
   fichajeId: number,
   data: UpdateClockInFichajeRow,
@@ -53,6 +75,12 @@ export async function updateClockInById(
   return result.affectedRows > 0;
 }
 
+/**
+ * Actualiza la hora de salida modificada (clock_out) de un fichaje y la marca como modificada.
+ * @param fichajeId ID del fichaje a actualizar.
+ * @param data Objeto con el nuevo clock_out y el flag clock_out_modified.
+ * @returns true si se actualizó alguna fila, false si no se encontró el fichaje.
+ */
 export async function updateClockOutModifiedById(
   fichajeId: number,
   data: UpdateClockOutModifiedFichajeRow,
@@ -65,6 +93,12 @@ export async function updateClockOutModifiedById(
   return result.affectedRows > 0;
 }
 
+/**
+ * Obtiene los fichajes más recientes de un usuario, limitando el resultado.
+ * @param userId ID del usuario.
+ * @param limit Número máximo de fichajes a devolver.
+ * @returns Lista de fichajes ordenados del más reciente al más antiguo.
+ */
 export async function findFichajesByUserId(
   userId: number,
   limit: number,
@@ -81,6 +115,14 @@ export async function findFichajesByUserId(
   return rows;
 }
 
+/**
+ * Obtiene todos los fichajes de un usuario en un mes y año concretos.
+ * Se usa para construir el calendario mensual.
+ * @param userId ID del usuario.
+ * @param year Año a consultar.
+ * @param month Mes a consultar (1-12).
+ * @returns Lista de fichajes del mes ordenados por clock_in ascendente.
+ */
 export async function findFichajesByUserIdAndMonth(
   userId: number,
   year: number,
@@ -98,6 +140,11 @@ export async function findFichajesByUserIdAndMonth(
   return rows;
 }
 
+/**
+ * Elimina un fichaje de la base de datos por su ID.
+ * @param fichajeId ID del fichaje a eliminar.
+ * @returns true si se eliminó el fichaje, false si no existía.
+ */
 export async function deleteFichajeById(fichajeId: number): Promise<boolean> {
   const [result] = await pool.query<ResultSetHeader>(
     "DELETE FROM fichajes WHERE id = ? LIMIT 1",

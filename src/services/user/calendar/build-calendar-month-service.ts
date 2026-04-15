@@ -15,6 +15,17 @@ import {
   GetCalendarMonthResponse,
 } from "../../../types/dto/user/calendar/get-calendar-month-response.js";
 
+/**
+ * Lógica de negocio para construir el calendario mensual de un usuario.
+ * Combina la plantilla de horario asignada, los fichajes del mes y las
+ * excepciones de calendario (festivos, vacaciones, bajas...) para
+ * calcular el estado de cada día del mes.
+ *
+ * @param userClaims Claims del JWT del usuario (id, company_id, group_id).
+ * @param year Año del mes a consultar.
+ * @param month Mes a consultar (1-12).
+ * @returns Objeto con el estado de cada día del mes.
+ */
 export async function buildCalendarMonthService(
   userClaims: JwtClaims,
   year: number,
@@ -108,7 +119,14 @@ export async function buildCalendarMonthService(
   return { userId: userClaims.id, year, month, days };
 }
 
-// "09:00:00" → 540 minutos
+/**
+ * Convierte una cadena de tiempo "HH:mm:ss" a minutos totales.
+ * Por ejemplo: "09:00:00" → 540.
+ * Se usa para calcular la duración planificada del día.
+ *
+ * @param time Cadena en formato "HH:mm:ss".
+ * @returns Minutos totales.
+ */
 function timeToMinutes(time: string): number {
   const [h, m] = time.split(":").map(Number);
   return h * 60 + m;

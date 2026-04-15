@@ -3,6 +3,14 @@ import { findFichajeBreaksByFichajeId } from "../../../../database/repositories/
 import { GetFichajeBreaksResponse } from "../../../../types/dto/user/fichajes/breaks/get-fichaje-breaks-response.js";
 import { ResponseError } from "../../../../types/express/response-type.js";
 
+/**
+ * Lógica de negocio para obtener todos los descansos de un fichaje.
+ * Comprueba que el fichaje existe y pertenece al usuario antes de devolver los datos.
+ *
+ * @param fichajeId ID del fichaje cuyos descansos se quieren consultar.
+ * @param userId ID del usuario autenticado.
+ * @returns Lista de descansos del fichaje.
+ */
 export async function getFichajeBreaksService(
     fichajeId: number,
     userId: number,

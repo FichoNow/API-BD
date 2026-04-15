@@ -2,6 +2,17 @@ import { format, startOfMonth, endOfMonth } from "date-fns";
 import { pool } from "../../pool.js";
 import { ExcepcionCalendarioRow } from "../../../types/db/horarios/excepcion-calendario-row-type.js";
 
+/**
+ * Obtiene todas las excepciones de calendario que afectan a un usuario en un mes concreto.
+ * Incluye excepciones globales de la empresa (sin user_id ni group_id),
+ * las del grupo del usuario y las individuales del propio usuario.
+ * @param companyId ID de la empresa.
+ * @param userId ID del usuario.
+ * @param grupoId ID del grupo del usuario (puede ser null).
+ * @param year Año del mes a consultar.
+ * @param month Mes a consultar (1-12).
+ * @returns Lista de excepciones ordenadas por start_date ascendente.
+ */
 export async function findExcepcionesCalendarioByMonth(
   companyId: number,
   userId: number,

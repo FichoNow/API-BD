@@ -3,6 +3,13 @@ import { PostRefreshResponse } from "../../types/dto/auth/post-refresh-response.
 import { issueJwt } from "./access-token-service.js";
 import { rotateRefreshToken } from "./refresh-token-service.js";
 
+/**
+ * Lógica de negocio para renovar los tokens de sesión (access + refresh).
+ * Implementa la rotación de refresh token: el token antiguo se invalida
+ * y se genera uno nuevo en cada uso.
+ * @param body Cuerpo de la petición con el refresh token actual.
+ * @returns Nuevo access token y nuevo refresh token.
+ */
 export async function refreshUser(
   body: PostRefreshBody,
 ): Promise<PostRefreshResponse> {

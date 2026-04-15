@@ -7,6 +7,17 @@ import { verifyFichajeOwnership } from "../../../../helpers/fichaje-helper.js";
 import { PatchFichajeBreakEndBody } from "../../../../types/dto/user/fichajes/breaks/patch-fichaje-break-end-body.js";
 import { ResponseError } from "../../../../types/express/response-type.js";
 
+/**
+ * Lógica de negocio para registrar la hora de fin de un descanso.
+ * Verifica que el fichaje pertenece al usuario, que el descanso existe
+ * y no está ya cerrado, y que la hora de fin es posterior a la de inicio
+ * y no supera la salida del fichaje.
+ *
+ * @param fichajeId ID del fichaje al que pertenece el descanso.
+ * @param breakId ID del descanso a cerrar.
+ * @param body Cuerpo de la petición con la hora de fin.
+ * @param userId ID del usuario autenticado.
+ */
 export async function updateFichajeBreakEndService(
   fichajeId: number,
   breakId: number,

@@ -7,6 +7,15 @@ import { PostFichajeBreakResponse } from "../../../../../types/dto/user/fichajes
 import { BodyResponse, ResponseError } from "../../../../../types/express/response-type.js";
 import { createFichajeBreakService } from "../../../../../services/user/fichajes/breaks/create-fichaje-break-service.js";
 
+/**
+ * Controller para iniciar un descanso dentro de un fichaje activo.
+ *
+ * Qué hace:
+ * 1. Valida que el param `id` (fichaje) sea un entero positivo.
+ * 2. Valida el body con el schema de Zod.
+ * 3. Llama al service para crear el descanso y obtiene el id generado.
+ * 4. Devuelve el id del nuevo descanso con status 201.
+ */
 export async function postFichajeBreakController(
   req: Request<{ id: string }, unknown, PostFichajeBreakBody>,
   res: Response<BodyResponse<PostFichajeBreakResponse>>,

@@ -1,6 +1,11 @@
 import { pool } from "../../pool.js";
 import { PlantillaHorarioRow } from "../../../types/db/horarios/plantilla-horario-row-type.js";
 
+/**
+ * Busca una plantilla de horario por su ID.
+ * @param plantillaId ID de la plantilla a buscar.
+ * @returns La plantilla encontrada o null si no existe.
+ */
 export async function findPlantillaHorarioById(
   plantillaId: number,
 ): Promise<PlantillaHorarioRow | null> {
@@ -12,6 +17,11 @@ export async function findPlantillaHorarioById(
   return rows.length ? rows[0] : null;
 }
 
+/**
+ * Obtiene todas las plantillas de horario activas de una empresa, ordenadas por nombre.
+ * @param companyId ID de la empresa.
+ * @returns Lista de plantillas activas ordenadas alfabéticamente.
+ */
 export async function findPlantillasHorarioByCompanyId(
   companyId: number,
 ): Promise<PlantillaHorarioRow[]> {

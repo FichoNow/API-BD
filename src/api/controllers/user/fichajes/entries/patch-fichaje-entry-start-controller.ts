@@ -6,6 +6,15 @@ import {
 import { BodyResponse, ResponseError } from "../../../../../types/express/response-type.js";
 import { updateFichajeEntryStartService } from "../../../../../services/user/fichajes/entries/update-fichaje-entry-start-service.js";
 
+/**
+ * Controller para modificar la hora de inicio de una entry de proyecto.
+ *
+ * Qué hace:
+ * 1. Valida que los params `id` (fichaje) y `entryId` sean enteros positivos.
+ * 2. Valida el body con el schema de Zod.
+ * 3. Llama al service para actualizar la hora de inicio de la entry.
+ * 4. Devuelve 200 con data null si todo es correcto.
+ */
 export async function patchFichajeEntryStartController(
   req: Request<{ id: string; entryId: string }, unknown, PatchFichajeEntryStartBody>,
   res: Response<BodyResponse<null>>,
