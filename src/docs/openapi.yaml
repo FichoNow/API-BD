@@ -23,6 +23,8 @@ tags:
     description: Calendario mensual del usuario autenticado. Requieren `Authorization: Bearer <accessToken>`.
   - name: "User › Projects"
     description: Proyectos visibles para el usuario autenticado. Requieren `Authorization: Bearer <accessToken>`.
+  - name: "User › Requests"
+    description: Solicitudes de ausencia del usuario autenticado (vacaciones, permisos, etc.). Requieren `Authorization: Bearer <accessToken>`.
   - name: Admin
     description: >
       Endpoints de administración. Requieren `Authorization: Bearer <accessToken>`
@@ -470,6 +472,102 @@ components:
                     description: >
                       Estado del día. Posibles valores: `WORKED`, `ABSENT`, `PLANNED`, `DAY_OFF`,
                       o un código de tipo de excepción definido por la empresa.
+
+    # ── Solicitudes de ausencia ──────────────────
+
+    LeaveRequestItem:
+      type: object
+      description: Solicitud de ausencia de un usuario.
+      properties:
+        id:
+          type: integer
+          example: 12
+        type:
+          type: string
+          enum: [VACATION, PERMISSION, SICK_LEAVE, MEDICAL_APPOINTMENT, DAY_OFF]
+          example: VACATION
+        start_date:
+          type: string
+          format: date
+          example: "2026-06-01"
+        end_date:
+          type: string
+          format: date
+          example: "2026-06-15"
+        start_time:
+          type: string
+          format: time
+          nullable: true
+          example: null
+          description: Hora de inicio (HH:MM:SS). Null si la ausencia es de días completos.
+        end_time:
+          type: string
+          format: time
+          nullable: true
+          example: null
+          description: Hora de fin (HH:MM:SS). Null si la ausencia es de días completos.
+        status:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED, CANCELLED]
+          example: PENDING
+        comment:
+          type: string
+          nullable: true
+          maxLength: 255
+          example: "Vacaciones de verano"
+
+    GetLeaveRequestsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/LeaveRequestItem"
+
+    PostLeaveRequestBody:
+      type: object
+      required: [type, start_date, end_date]
+      properties:
+        type:
+          type: string
+          enum: [VACATION, PERMISSION, SICK_LEAVE, MEDICAL_APPOINTMENT, DAY_OFF]
+          example: VACATION
+        start_date:
+          type: string
+          format: date
+          example: "2026-06-01"
+        end_date:
+          type: string
+          format: date
+          example: "2026-06-15"
+        start_time:
+          type: string
+          nullable: true
+          example: null
+          description: >
+            Hora de inicio (HH:MM:SS). Si se informa, `end_time` también debe venir informado.
+            Si es una ausencia de días completos, omitir o enviar `null`.
+        end_time:
+          type: string
+          nullable: true
+          example: null
+          description: >
+            Hora de fin (HH:MM:SS). Si se informa, `start_time` también debe venir informado.
+            Si es una ausencia de días completos, omitir o enviar `null`.
+        comment:
+          type: string
+          maxLength: 255
+          example: "Vacaciones de verano"
+
+    PostLeaveRequestResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 12
 
 paths:
 
@@ -2458,3 +2556,180 @@ paths:
                 error:
                   code: MISSING_AUTH_HEADER
                   message: No autorizado
+
+  # ─────────────────────────────────────────
+  # USER › REQUESTS
+  # ─────────────────────────────────────────
+
+  /user/requests:
+    get:
+      tags: ["User › Requests"]
+      summary: Obtener solicitudes de ausencia
+      description: |
+        Devuelve todas las solicitudes de ausencia del usuario autenticado,
+        ordenadas por fecha de creación descendente.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Lista de solicitudes del usuario.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetLeaveRequestsResponse"
+              example:
+                data:
+                  - id: 12
+                    type: VACATION
+                    start_date: "2026-06-01"
+                    end_date: "2026-06-15"
+                    start_time: null
+                    end_time: null
+                    status: PENDING
+                    comment: "Vacaciones de verano"
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+
+    post:
+      tags: ["User › Requests"]
+      summary: Crear solicitud de ausencia
+      description: |
+        Crea una nueva solicitud de ausencia para el usuario autenticado.
+
+        **Reglas de negocio**
+        - `type` debe ser uno de: `VACATION`, `PERMISSION`, `SICK_LEAVE`, `MEDICAL_APPOINTMENT`, `DAY_OFF`.
+        - `start_date` y `end_date` deben tener formato `YYYY-MM-DD`.
+        - `start_time` y `end_time` deben venir **ambos informados** o **ambos vacíos/null**.
+          Si se proporcionan, deben tener formato `HH:MM:SS`.
+        - `comment` es opcional y no puede superar 255 caracteres.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostLeaveRequestBody"
+            example:
+              type: VACATION
+              start_date: "2026-06-01"
+              end_date: "2026-06-15"
+              comment: "Vacaciones de verano"
+      responses:
+        "201":
+          description: Solicitud creada correctamente. Devuelve el ID de la nueva solicitud.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostLeaveRequestResponse"
+              example:
+                data:
+                  id: 12
+        "400":
+          description: Cuerpo de la petición inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BAD_REQUEST
+                  message: Cuerpo de la solicitud inválido.
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+
+  /user/requests/{id}:
+    delete:
+      tags: ["User › Requests"]
+      summary: Cancelar solicitud de ausencia
+      description: |
+        Cancela una solicitud de ausencia del usuario autenticado.
+
+        **Reglas de negocio**
+        - El `id` debe ser un entero positivo.
+        - Solo se pueden cancelar solicitudes en estado `PENDING`.
+        - El usuario solo puede cancelar sus propias solicitudes.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la solicitud a cancelar.
+          schema:
+            type: integer
+            example: 12
+      responses:
+        "200":
+          description: Solicitud cancelada correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    nullable: true
+                    example: null
+        "400":
+          description: ID inválido o la solicitud no está en estado PENDING.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BAD_REQUEST
+                  message: ID inválido.
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "403":
+          description: La solicitud no pertenece al usuario autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: FORBIDDEN
+                  message: No tienes permiso para cancelar esta solicitud.
+        "404":
+          description: Solicitud no encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: NOT_FOUND
+                  message: Solicitud no encontrada.
