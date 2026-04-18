@@ -38,13 +38,7 @@ export async function patchUserController(
     );
   }
 
-  const adminCompanyId = req.jwtClaims!.company_id;
-
-  const data = await updateUser(
-    userId,
-    parsed.data as PatchUserBody,
-    adminCompanyId,
-  );
+  const data = await updateUser(userId, parsed.data as PatchUserBody, req.jwtClaims!);
 
   return res.status(200).json({ data });
 }

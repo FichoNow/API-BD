@@ -69,7 +69,7 @@ export async function updateLastLoginAt(userId: number) {
 export async function createUser(data: CreateUserRow): Promise<number> {
   const [result] = await pool.query<ResultSetHeader>(
     `INSERT INTO users (
-      company_id,
+      department_id,
       group_id,
       email,
       name,
@@ -83,7 +83,7 @@ export async function createUser(data: CreateUserRow): Promise<number> {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       `,
     [
-      data.company_id,
+      data.department_id,
       data.group_id,
       data.email,
       data.name,

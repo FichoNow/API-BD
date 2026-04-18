@@ -3,29 +3,27 @@ import {
   findUserByEmail,
 } from "../../database/repositories/user-repository.js";
 import { findGroupById } from "../../database/repositories/work-group-repository.js";
+import { findDepartmentById } from "../../database/repositories/department-repository.js";
 import { CreateUserBody } from "../../types/dto/admin/create-user-body.js";
 import { CreateUserResponse } from "../../types/dto/admin/create-user-response.js";
+import { JwtClaims } from "../../types/dto/jwt/jwt-claims-dto.js";
 import { hashPassword } from "../auth/password-hash-service.js";
 import { ResponseError } from "../../types/express/response-type.js";
 
-/**
- * Lógica de negocio para crear un usuario nuevo.
- * Recibe los datos del nuevo usuario, comprueba que el email no esté registrado,
- * genera el hash de la contraseña y crea el usuario en base de datos.
- * Devuelve los datos del usuario creado.
- * @param body Datos del nuevo usuario a crear.
- * @param companyId ID de la empresa del administrador autenticado (extraído del JWT). Se usa para
- *   asegurarse de que el grupo asignado pertenece a la misma empresa y para asociar el nuevo usuario a ella.
- * @returns Los datos del usuario creado.
- */
 export async function createUserService(
   body: CreateUserBody,
-  companyId: number,
+  claims: JwtClaims,
 ): Promise<CreateUserResponse> {
+  const department = await findDepartmentById(body.department_id);
+
+  if (!department || department.company_id !== claims.company_id) {
+    throw new ResponseError("Departamento no encontrado.", 404, "DEPARTMENT_NOT_FOUND");
+  }
+
   if (body.group_id) {
     const group = await findGroupById(body.group_id);
 
-    if (!group || group.company_id !== companyId) {
+    if (!group || group.department_id !== body.department_id) {
       throw new ResponseError("Grupo no encontrado.", 404, "GROUP_NOT_FOUND");
     }
   }
@@ -43,7 +41,7 @@ export async function createUserService(
   const passwordHash = await hashPassword(body.password);
 
   const createdId = await createUser({
-    company_id: companyId,
+    department_id: body.department_id,
     group_id: body.group_id,
     email: body.email,
     name: body.name,
@@ -55,7 +53,8 @@ export async function createUserService(
 
   return {
     id: createdId,
-    company_id: companyId,
+    company_id: claims.company_id,
+    department_id: body.department_id,
     group_id: body.group_id,
     email: body.email,
     name: body.name,

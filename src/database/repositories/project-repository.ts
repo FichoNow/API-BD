@@ -29,13 +29,13 @@ export async function findProjectById(
  * @param companyId ID de la empresa en la que buscar.
  * @returns El proyecto encontrado o null si no existe.
  */
-export async function findProjectByNameAndCompany(
+export async function findProjectByNameAndDepartment(
   name: string,
-  companyId: number,
+  departmentId: number,
 ): Promise<ProjectRow | null> {
   const [rows] = await pool.query<ProjectRow[]>(
-    "SELECT * FROM projects WHERE name = ? AND company_id = ? LIMIT 1",
-    [name, companyId],
+    "SELECT * FROM projects WHERE name = ? AND department_id = ? LIMIT 1",
+    [name, departmentId],
   );
 
   return rows.length ? rows[0] : null;
@@ -49,14 +49,14 @@ export async function findProjectByNameAndCompany(
 export async function createProject(data: CreateProjectRow): Promise<number> {
   const [result] = await pool.query<ResultSetHeader>(
     `INSERT INTO projects (
-      company_id,
+      department_id,
       group_id,
       name,
       is_active,
       created_at
     )
     VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)`,
-    [data.company_id, data.group_id, data.name, data.is_active],
+    [data.department_id, data.group_id, data.name, data.is_active],
   );
 
   return result.insertId;
@@ -71,11 +71,11 @@ export async function createProject(data: CreateProjectRow): Promise<number> {
  */
 export async function findProjectsByGroupId(
   groupId: number | null,
-  companyId: number,
+  departmentId: number,
 ): Promise<ProjectRow[]> {
   const [rows] = await pool.query<ProjectRow[]>(
-    "SELECT * FROM projects WHERE (group_id = ? OR group_id IS NULL) AND company_id = ?",
-    [groupId, companyId],
+    "SELECT * FROM projects WHERE (group_id = ? OR group_id IS NULL) AND department_id = ?",
+    [groupId, departmentId],
   );
 
   return rows;

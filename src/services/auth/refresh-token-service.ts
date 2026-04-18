@@ -10,6 +10,7 @@ import {
 import { ResponseError } from "../../types/express/response-type.js";
 import { UserRow } from "../../types/db/user-row-type.js";
 import { findUserById } from "../../database/repositories/user-repository.js";
+import { findDepartmentById } from "../../database/repositories/department-repository.js";
 import { findCompanyById } from "../../database/repositories/company-repository.js";
 
 /**
@@ -73,7 +74,13 @@ export async function validateRefreshToken(
     throw new ResponseError("Token inválido", 401, "UNAUTHORIZED");
   }
 
-  const company = await findCompanyById(dataUser.company_id);
+  const department = await findDepartmentById(dataUser.department_id);
+
+  if (!department || !department.is_active) {
+    throw new ResponseError("Token inválido", 401, "UNAUTHORIZED");
+  }
+
+  const company = await findCompanyById(department.company_id);
 
   if (!company || !company.is_active) {
     throw new ResponseError("Token inválido", 401, "UNAUTHORIZED");

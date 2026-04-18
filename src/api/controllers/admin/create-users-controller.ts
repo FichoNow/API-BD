@@ -33,9 +33,7 @@ export async function createUsersController(
     );
   }
 
-  const companyId = req.jwtClaims!.company_id;
-
-  const data = await createUsersService(parsed.data as CreateUsersBody, companyId);
+  const data = await createUsersService(parsed.data as CreateUsersBody, req.jwtClaims!);
 
   res.status(201).json({ data });
 }

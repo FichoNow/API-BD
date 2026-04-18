@@ -14,7 +14,7 @@ import { ExcepcionCalendarioRow } from "../../../types/db/horarios/excepcion-cal
  * @returns Lista de excepciones ordenadas por start_date ascendente.
  */
 export async function findExcepcionesCalendarioByMonth(
-  companyId: number,
+  departmentId: number,
   userId: number,
   grupoId: number | null,
   year: number,
@@ -26,7 +26,7 @@ export async function findExcepcionesCalendarioByMonth(
 
   const [rows] = await pool.query<ExcepcionCalendarioRow[]>(
     `SELECT * FROM excepciones_calendario
-     WHERE company_id = ?
+     WHERE department_id = ?
        AND start_date <= ?
        AND end_date >= ?
        AND (
@@ -35,7 +35,7 @@ export async function findExcepcionesCalendarioByMonth(
          OR (user_id IS NULL AND group_id IS NULL)
        )
      ORDER BY start_date ASC`,
-    [companyId, end, start, userId, grupoId],
+    [departmentId, end, start, userId, grupoId],
   );
 
   return rows;

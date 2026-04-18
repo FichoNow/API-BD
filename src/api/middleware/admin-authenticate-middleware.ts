@@ -34,7 +34,7 @@ export async function requireAdministrator(
   const claims = validateAccessToken(token);
   req.jwtClaims = claims;
 
-  if (claims.role !== "ADMINISTRATOR") {
+  if (claims.role !== "ADMINISTRATOR" && claims.role !== "SUPERADMIN") {
     return next(new ResponseError("No autorizado", 403, "FORBIDDEN"));
   }
 

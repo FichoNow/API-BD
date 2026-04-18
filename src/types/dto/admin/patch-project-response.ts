@@ -4,7 +4,7 @@ import { ProjectData } from "../../models/project.js";
 export type PatchProjectResponse = Pick<
   ProjectData,
   | "id"
-  | "company_id"
+  | "department_id"
   | "group_id"
   | "name"
   | "is_active"

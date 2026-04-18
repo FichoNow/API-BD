@@ -10,9 +10,9 @@ import { GetProjectsResponse } from "../../../types/dto/user/projects/get-projec
  */
 export async function getProjectsService(
     groupId: number | null,
-    companyId: number,
+    departmentId: number,
 ): Promise<GetProjectsResponse> {
-    const projects = await findProjectsByGroupId(groupId, companyId);
+    const projects = await findProjectsByGroupId(groupId, departmentId);
 
     return projects.map((project) => ({
         id: project.id,

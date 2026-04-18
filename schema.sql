@@ -20,6 +20,7 @@ DROP TABLE IF EXISTS projects;
 DROP TABLE IF EXISTS refresh_tokens;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS work_groups;
+DROP TABLE IF EXISTS departments;
 DROP TABLE IF EXISTS companies;
 
 /* ============= Tabla companies =============*/
@@ -39,26 +40,41 @@ CREATE TABLE companies (
     UNIQUE KEY uq_companies_cif_nif (cif_nif)
 );
 
+/* ============= Tabla departments =============*/
+CREATE TABLE departments (
+    id INT NOT NULL AUTO_INCREMENT,
+    company_id INT NOT NULL,
+    name VARCHAR(150) NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_departments_company_name (company_id, name),
+    CONSTRAINT fk_departments_company
+        FOREIGN KEY (company_id) REFERENCES companies(id)
+        ON DELETE CASCADE
+);
+
 /* ============= Tabla work_groups =============*/
 CREATE TABLE work_groups (
     id INT NOT NULL AUTO_INCREMENT,
     name VARCHAR(120) NOT NULL,
-    company_id INT NOT NULL,
+    department_id INT NOT NULL,
     PRIMARY KEY (id),
-    UNIQUE KEY uq_groups_company_name (company_id, name),
-    CONSTRAINT fk_groups_company
-        FOREIGN KEY (company_id) REFERENCES companies(id)
+    UNIQUE KEY uq_groups_department_name (department_id, name),
+    CONSTRAINT fk_groups_department
+        FOREIGN KEY (department_id) REFERENCES departments(id)
         ON DELETE CASCADE
 );
 
 /* ============= Tabla users =============*/
 CREATE TABLE users (
     id INT NOT NULL AUTO_INCREMENT,
-    company_id INT NOT NULL,
+    department_id INT NOT NULL,
     group_id INT NULL,
     email VARCHAR(254) NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
-    role ENUM('USER','ADMINISTRATOR') NOT NULL,
+    role ENUM('USER','ADMINISTRATOR','SUPERADMIN') NOT NULL,
     password_hash VARCHAR(255) NULL,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     must_change_password BOOLEAN NOT NULL DEFAULT FALSE,
@@ -66,8 +82,8 @@ CREATE TABLE users (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    CONSTRAINT fk_users_company
-        FOREIGN KEY (company_id) REFERENCES companies(id)
+    CONSTRAINT fk_users_department
+        FOREIGN KEY (department_id) REFERENCES departments(id)
         ON DELETE CASCADE,
     CONSTRAINT fk_users_group
         FOREIGN KEY (group_id) REFERENCES work_groups(id)
@@ -92,15 +108,15 @@ CREATE TABLE refresh_tokens (
 /* ============= Tabla projects =============*/
 CREATE TABLE projects (
     id INT NOT NULL AUTO_INCREMENT,
-    company_id INT NOT NULL,
+    department_id INT NOT NULL,
     group_id INT NULL,
     name VARCHAR(150) NOT NULL,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    UNIQUE KEY uq_projects_company_name (company_id, name),
-    CONSTRAINT fk_projects_company
-        FOREIGN KEY (company_id) REFERENCES companies(id)
+    UNIQUE KEY uq_projects_department_name (department_id, name),
+    CONSTRAINT fk_projects_department
+        FOREIGN KEY (department_id) REFERENCES departments(id)
         ON DELETE CASCADE,
     CONSTRAINT fk_projects_group
         FOREIGN KEY (group_id) REFERENCES work_groups(id)
@@ -154,7 +170,7 @@ CREATE TABLE fichaje_breaks (
 /* ============= Plantillas de horario =============*/
 CREATE TABLE plantillas_horario (
     id INT NOT NULL AUTO_INCREMENT,
-    company_id INT NOT NULL,
+    department_id INT NOT NULL,
     name VARCHAR(120) NOT NULL,
     description VARCHAR(255) NULL,
     weekly_minutes INT NOT NULL DEFAULT 0,
@@ -162,9 +178,9 @@ CREATE TABLE plantillas_horario (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    UNIQUE KEY uq_schedule_template_company_name (company_id, name),
-    CONSTRAINT fk_schedule_templates_company
-        FOREIGN KEY (company_id) REFERENCES companies(id)
+    UNIQUE KEY uq_schedule_template_department_name (department_id, name),
+    CONSTRAINT fk_schedule_templates_department
+        FOREIGN KEY (department_id) REFERENCES departments(id)
         ON DELETE CASCADE
 );
 
@@ -286,7 +302,7 @@ CREATE TABLE leave_requests (
 /* ============= Excepciones calendario =============*/
 CREATE TABLE excepciones_calendario (
     id INT NOT NULL AUTO_INCREMENT,
-    company_id INT NOT NULL,
+    department_id INT NOT NULL,
     user_id INT NULL,
     group_id INT NULL,
     tipo_id INT NOT NULL,
@@ -307,8 +323,8 @@ CREATE TABLE excepciones_calendario (
     CONSTRAINT chk_excepciones_calendario_scope
         CHECK (NOT (user_id IS NOT NULL AND group_id IS NOT NULL)),
 
-    CONSTRAINT fk_excepciones_calendario_company
-        FOREIGN KEY (company_id) REFERENCES companies(id)
+    CONSTRAINT fk_excepciones_calendario_department
+        FOREIGN KEY (department_id) REFERENCES departments(id)
         ON DELETE CASCADE,
     CONSTRAINT fk_excepciones_calendario_user
         FOREIGN KEY (user_id) REFERENCES users(id)
@@ -338,23 +354,26 @@ INSERT INTO companies (
     'Calle Principal 123', 'Barcelona', '08001'
 );
 
-INSERT INTO work_groups (name, company_id) VALUES
+INSERT INTO departments (company_id, name) VALUES
+(1, 'Departamento Demo');
+
+INSERT INTO work_groups (name, department_id) VALUES
 ('Dirección', 1),
 ('Operaciones', 1);
 
 -- Contraseñas: admin → '1' | empleado1 → 'password123' | empleado2 → 'password123'
-INSERT INTO users (company_id, group_id, email, name, role, is_active, password_hash) VALUES
+INSERT INTO users (department_id, group_id, email, name, role, is_active, password_hash) VALUES
 (1, 1, 'a@a.com',     'Admin',        'ADMINISTRATOR', TRUE, '$argon2id$v=19$m=65536,t=3,p=4$lpu2IkLFjApNUpwvlcj8gw$ailSD22G2mxIbBCroN2XC/uHAPWfNnsYPhqPahd4Qyk'),
-(1, 2, 'empleado1@empresa.com', 'Empleado Uno', 'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$BceHtK70GVXGUHFdIjlLeQ$22lGigeJ/Q9lzELEevPzKbqkLHiocSCUk1rQN+XoSgs'),
-(1, 2, 'empleado2@empresa.com', 'Empleado Dos', 'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$UMbRhJqUylJwjEimExOt9A$t8FPm6DSlJdrKnxt/vbXmW03zeI9RhMsJ7CAJPsRWQ4');
+(1, 2, 'empleado1@empresa.com', 'Empleado Uno', 'USER', TRUE, '$argon2id$v=19$m=65536,t=3,p=4$BceHtK70GVXGUHFdIjlLeQ$22lGigeJ/Q9lzELEevPzKbqkLHiocSCUk1rQN+XoSgs'),
+(1, 2, 'empleado2@empresa.com', 'Empleado Dos', 'USER', TRUE, '$argon2id$v=19$m=65536,t=3,p=4$UMbRhJqUylJwjEimExOt9A$t8FPm6DSlJdrKnxt/vbXmW03zeI9RhMsJ7CAJPsRWQ4');
 
 /* Proyectos */
-INSERT INTO projects (company_id, group_id, name, is_active) VALUES
+INSERT INTO projects (department_id, group_id, name, is_active) VALUES
 (1, NULL, 'Proyecto General', TRUE),
 (1, 2, 'Soporte', TRUE);
 
 /* Plantillas */
-INSERT INTO plantillas_horario (company_id, name, description, weekly_minutes, is_active) VALUES
+INSERT INTO plantillas_horario (department_id, name, description, weekly_minutes, is_active) VALUES
 (1, 'Horario Oficina', 'Horario estándar de lunes a viernes', 2400, TRUE),
 (1, 'Horario Intensivo', 'Horario intensivo de verano', 2100, TRUE);
 
@@ -422,7 +441,7 @@ INSERT INTO leave_requests (
 (2, 5, '2026-05-02', '2026-05-02', NULL, NULL, 'Asunto personal', 3, 1, '2026-04-03 12:30:00', 'No hay cobertura ese día');
 
 INSERT INTO excepciones_calendario (
-    company_id, user_id, group_id, tipo_id, leave_request_id, title, start_date, end_date, start_time, end_time, notes, created_by
+    department_id, user_id, group_id, tipo_id, leave_request_id, title, start_date, end_date, start_time, end_time, notes, created_by
 ) VALUES
 (1, NULL, NULL, 1, NULL, 'Navidad', '2026-12-25', '2026-12-25', NULL, NULL, 'Festivo nacional', 1),
 (1, NULL, NULL, 1, NULL, 'Año Nuevo', '2026-01-01', '2026-01-01', NULL, NULL, 'Festivo nacional', 1),
@@ -442,5 +461,3 @@ INSERT INTO fichaje_entries (fichaje_id, project_id, started_at, ended_at) VALUE
 (1, 2, '2026-04-01 14:00:00', '2026-04-01 18:01:00'),
 (2, 2, '2026-04-01 09:15:00', '2026-04-01 17:50:00'),
 (3, 1, '2026-04-02 08:58:00', '2026-04-02 18:05:00');
-
-

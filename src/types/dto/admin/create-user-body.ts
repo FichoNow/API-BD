@@ -5,11 +5,12 @@ import { UserData } from "../../models/user.js";
 /** Body del endpoint POST /admin/user. */
 export type CreateUserBody = Pick<
   UserData,
-  "group_id" | "email" | "name" | "role" | "is_active"
+  "department_id" | "group_id" | "email" | "name" | "role" | "is_active"
 > & { password: string };
 
 /** Schema de validación del body de creación de usuario. */
 export const CreateUserBodySchema = createZodObject<CreateUserBody>({
+  department_id: z.number(),
   group_id: z.number().nullable(),
   email: z.email().trim().toLowerCase(),
   name: z.string().trim(),

@@ -16,9 +16,9 @@ export async function getProjectsController(
     req: Request,
     res: Response<BodyResponse<GetProjectsResponse>>,
 ) {
-    const { group_id, company_id } = req.jwtClaims!;
+    const { group_id, department_id } = req.jwtClaims!;
 
-    const data = await getProjectsService(group_id, company_id);
+    const data = await getProjectsService(group_id, department_id);
 
     res.status(200).json({ data });
 }

@@ -33,9 +33,7 @@ export async function createProjectController(
     );
   }
 
-  const companyId = req.jwtClaims!.company_id;
-
-  const data = await createProjectService(parsed.data as CreateProjectBody, companyId);
+  const data = await createProjectService(parsed.data as CreateProjectBody, req.jwtClaims!);
 
   res.status(201).json({ data });
 }

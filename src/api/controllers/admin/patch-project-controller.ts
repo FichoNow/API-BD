@@ -44,13 +44,7 @@ export async function patchProjectController(
     );
   }
 
-  const companyId = req.jwtClaims!.company_id;
-
-  const data = await updateProjectService(
-    projectId,
-    parsed.data as PatchProjectBody,
-    companyId,
-  );
+  const data = await updateProjectService(projectId, parsed.data as PatchProjectBody, req.jwtClaims!);
 
   return res.status(200).json({ data });
 }

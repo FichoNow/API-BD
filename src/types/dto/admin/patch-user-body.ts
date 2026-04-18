@@ -4,11 +4,12 @@ import { UserData } from "../../models/user.js";
 
 /** Body del endpoint PATCH /admin/user/:id. Todos los campos son opcionales, pero al menos uno es requerido. */
 export type PatchUserBody = Partial<
-  Pick<UserData, "group_id" | "email" | "name" | "role" | "is_active">
+  Pick<UserData, "department_id" | "group_id" | "email" | "name" | "role" | "is_active">
 > & { password?: string };
 
 /** Schema de validación del body de actualización de usuario por un administrador. */
 export const PatchUserBodySchema = createZodObject<PatchUserBody>({
+  department_id: z.number().optional(),
   group_id: z.number().nullable().optional(),
   email: z.email().trim().toLowerCase().optional(),
   name: z.string().trim().optional(),

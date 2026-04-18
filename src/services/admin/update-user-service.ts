@@ -4,45 +4,46 @@ import {
   updateUserById,
 } from "../../database/repositories/user-repository.js";
 import { findGroupById } from "../../database/repositories/work-group-repository.js";
+import { findDepartmentById } from "../../database/repositories/department-repository.js";
 import { UpdateUserRow } from "../../types/db/user-row-type.js";
 import { PatchUserBody } from "../../types/dto/admin/patch-user-body.js";
+import { JwtClaims } from "../../types/dto/jwt/jwt-claims-dto.js";
 import { hashPassword } from "../auth/password-hash-service.js";
 import { PatchUserResponse } from "../../types/dto/admin/patch-user-response.js";
 import { ResponseError } from "../../types/express/response-type.js";
 
-/**
- * Ejecuta la lógica de actualización de un usuario por parte de un administrador.
- *
- * Verifica que el usuario exista, construye el objeto de actualización mapeando
- * los campos del body al formato de la base de datos (ej: password → password_hash),
- * persiste los cambios y devuelve los datos actualizados del usuario.
- *
- * @param userId ID del usuario a actualizar.
- * @param body Campos a actualizar recibidos del body de la petición.
- * @param adminCompanyId ID de la empresa del administrador que realiza la petición.
- * @returns Los datos actualizados del usuario.
- */
 export async function updateUser(
   userId: number,
   body: PatchUserBody,
-  adminCompanyId: number,
+  claims: JwtClaims,
 ): Promise<PatchUserResponse> {
   const { password, ...rest } = body;
 
   const user = await findUserById(userId);
+  const userDepartment = user ? await findDepartmentById(user.department_id) : null;
 
   if (
     !user ||
-    user.company_id !== adminCompanyId ||
+    !userDepartment ||
+    userDepartment.company_id !== claims.company_id ||
     user.role === "ADMINISTRATOR"
   ) {
     throw new ResponseError("Usuario no encontrado", 404, "USER_NOT_FOUND");
   }
 
+  if (rest.department_id !== undefined) {
+    const department = await findDepartmentById(rest.department_id);
+
+    if (!department || department.company_id !== claims.company_id) {
+      throw new ResponseError("Departamento no encontrado.", 404, "DEPARTMENT_NOT_FOUND");
+    }
+  }
+
   if (rest.group_id) {
     const group = await findGroupById(rest.group_id);
+    const targetDepartmentId = rest.department_id ?? user.department_id;
 
-    if (!group || group.company_id !== adminCompanyId) {
+    if (!group || group.department_id !== targetDepartmentId) {
       throw new ResponseError("Grupo no encontrado.", 404, "GROUP_NOT_FOUND");
     }
   }

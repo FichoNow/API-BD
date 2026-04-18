@@ -3,44 +3,41 @@ import {
   findUserByEmail,
 } from "../../database/repositories/user-repository.js";
 import { findGroupById } from "../../database/repositories/work-group-repository.js";
+import { findDepartmentById } from "../../database/repositories/department-repository.js";
 import { CreateUsersResponse } from "../../types/dto/admin/create-users-response.js";
 import { hashPassword } from "../auth/password-hash-service.js";
 import { ResponseError } from "../../types/express/response-type.js";
 import { CreateUsersBody } from "../../types/dto/admin/create-users-body.js";
+import { JwtClaims } from "../../types/dto/jwt/jwt-claims-dto.js";
 import { WorkGroupRow } from "../../types/db/work-group-row-type.js";
 
-/**
- * Lógica de negocio para crear usuarios en bulk.
- * Recibe un array de usuarios, comprueba que ningún email esté registrado y que
- * los grupos pertenezcan a la empresa, genera los hashes de contraseña y crea los usuarios.
- * Devuelve los datos de los usuarios creados.
- * @param body Array de datos de los nuevos usuarios a crear.
- * @param companyId ID de la empresa del administrador autenticado (extraído del JWT). Se usa para
- *   asegurarse de que los grupos asignados pertenecen a la misma empresa y para asociar los usuarios a ella.
- * @returns Los datos de los usuarios creados.
- */
 export async function createUsersService(
   body: CreateUsersBody,
-  companyId: number,
+  claims: JwtClaims,
 ): Promise<CreateUsersResponse> {
   const groupCache = new Map<number, WorkGroupRow | null>();
   const emailCache = new Map<string, boolean>();
   const validationErrors: string[] = [];
 
   for (const user of body) {
-    let group: WorkGroupRow | null | undefined = undefined;
+    const department = await findDepartmentById(user.department_id);
+
+    if (!department || department.company_id !== claims.company_id) {
+      validationErrors.push(`El departamento del usuario ${user.email} no existe.`);
+      continue;
+    }
 
     if (user.group_id !== null) {
-      group = groupCache.get(user.group_id);
+      let group = groupCache.get(user.group_id);
 
       if (group === undefined) {
         group = await findGroupById(user.group_id);
         groupCache.set(user.group_id, group ?? null);
       }
-    }
 
-    if (!group || group.company_id !== companyId) {
-      validationErrors.push(`El grupo del usuario ${user.email} no existe.`);
+      if (!group || group.department_id !== user.department_id) {
+        validationErrors.push(`El grupo del usuario ${user.email} no existe.`);
+      }
     }
 
     let emailExists = emailCache.get(user.email);
@@ -69,7 +66,7 @@ export async function createUsersService(
       const passwordHash = await hashPassword(u.password);
 
       const createdId = await createUser({
-        company_id: companyId,
+        department_id: u.department_id,
         group_id: u.group_id,
         email: u.email,
         name: u.name,
@@ -81,7 +78,8 @@ export async function createUsersService(
 
       return {
         id: createdId,
-        company_id: companyId,
+        company_id: claims.company_id,
+        department_id: u.department_id,
         group_id: u.group_id,
         email: u.email,
         name: u.name,

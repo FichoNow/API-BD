@@ -1,6 +1,6 @@
 export interface ExcepcionCalendarioData {
   id: number;
-  company_id: number;
+  department_id: number;
   user_id: number | null;
   group_id: number | null;
   tipo_id: number;

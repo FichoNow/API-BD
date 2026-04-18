@@ -1,4 +1,5 @@
 import { findCompanyById } from "../../database/repositories/company-repository.js";
+import { findDepartmentById } from "../../database/repositories/department-repository.js";
 import {
   findUserByEmail,
   updateLastLoginAt,
@@ -44,7 +45,13 @@ export async function loginUser(
     throw new ResponseError("Credenciales incorrectas", 401, "UNAUTHORIZED");
   }
 
-  const company = await findCompanyById(userRow.company_id);
+  const department = await findDepartmentById(userRow.department_id);
+
+  if (!department || !department.is_active) {
+    throw new ResponseError("Credenciales incorrectas", 401, "UNAUTHORIZED");
+  }
+
+  const company = await findCompanyById(department.company_id);
 
   if (!company || !company.is_active) {
     throw new ResponseError("Credenciales incorrectas", 401, "UNAUTHORIZED");
@@ -54,7 +61,8 @@ export async function loginUser(
 
   const accessToken = issueJwt({
     id: userRow.id,
-    company_id: userRow.company_id,
+    company_id: department.company_id,
+    department_id: userRow.department_id,
     group_id: userRow.group_id,
     role: userRow.role,
   });

@@ -1,4 +1,5 @@
 import { RowDataPacket } from "mysql2/promise";
+import { LeaveRequestType, LeaveRequestStatus } from "../../models/requests/leave-request.js";
 
 /**
  * Representa una fila del listado de solicitudes del usuario.
@@ -10,11 +11,11 @@ import { RowDataPacket } from "mysql2/promise";
  */
 export interface LeaveRequestListRow extends RowDataPacket {
     id: number;
-    type: string;
+    type: LeaveRequestType;
     start_date: Date;
     end_date: Date;
     start_time: string | null;
     end_time: string | null;
-    status: string;
+    status: LeaveRequestStatus;
     comment: string | null;
 }

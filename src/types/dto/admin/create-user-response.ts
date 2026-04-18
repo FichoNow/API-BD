@@ -4,11 +4,11 @@ import { UserData } from "../../models/user.js";
 export type CreateUserResponse = Pick<
   UserData,
   | "id"
-  | "company_id"
+  | "department_id"
   | "group_id"
   | "email"
   | "name"
   | "role"
   | "is_active"
   | "must_change_password"
->;
+> & { company_id: number };

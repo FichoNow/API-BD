@@ -1,10 +1,10 @@
 /** Roles posibles de un usuario en el sistema. */
-export type UserRole = "USER" | "ADMINISTRATOR";
+export type UserRole = "USER" | "ADMINISTRATOR" | "SUPERADMIN";
 
 /** Forma pura de los datos de un usuario, sin index signature de RowDataPacket. */
 export interface UserData {
   id: number;
-  company_id: number;
+  department_id: number;
   group_id: number | null;
   email: string;
   name: string;

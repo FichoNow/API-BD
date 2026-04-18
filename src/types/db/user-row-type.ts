@@ -8,6 +8,7 @@ export interface UserRow extends RowDataPacket, UserData {}
 export type UpdateUserRow = Partial<
   Pick<
     UserData,
+    | "department_id"
     | "group_id"
     | "email"
     | "name"
@@ -21,7 +22,7 @@ export type UpdateUserRow = Partial<
 /** Campos necesarios para insertar un nuevo usuario en la tabla `users`. */
 export type CreateUserRow = Pick<
   UserData,
-  | "company_id"
+  | "department_id"
   | "group_id"
   | "email"
   | "name"

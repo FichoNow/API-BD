@@ -28,9 +28,14 @@ tags:
   - name: Admin
     description: >
       Endpoints de administración. Requieren `Authorization: Bearer <accessToken>`
-      y que el usuario tenga rol `ADMINISTRATOR`.
+      y que el usuario tenga rol `ADMINISTRATOR` o `SUPERADMIN`.
       Todas las acciones se realizan automáticamente en el contexto de la empresa
       a la que pertenece el administrador autenticado — no se puede operar sobre otras empresas.
+  - name: Superadmin
+    description: >
+      Endpoints exclusivos del superadministrador. Requieren `Authorization: Bearer <accessToken>`
+      y que el usuario tenga rol `SUPERADMIN`.
+      Permiten editar los datos de la propia empresa.
 
 components:
   securitySchemes:
@@ -97,7 +102,7 @@ components:
                   example: Juan García
                 role:
                   type: string
-                  enum: [USER, ADMINISTRATOR]
+                  enum: [USER, ADMINISTRATOR, SUPERADMIN]
                   example: USER
                 email:
                   type: string
@@ -157,6 +162,9 @@ components:
             company_id:
               type: integer
               example: 1
+            department_id:
+              type: integer
+              example: 2
             group_id:
               type: integer
               nullable: true
@@ -170,7 +178,7 @@ components:
               example: Ana López
             role:
               type: string
-              enum: [USER, ADMINISTRATOR]
+              enum: [USER, ADMINISTRATOR, SUPERADMIN]
               example: USER
             is_active:
               type: boolean
@@ -194,6 +202,9 @@ components:
               company_id:
                 type: integer
                 example: 1
+              department_id:
+                type: integer
+                example: 2
               group_id:
                 type: integer
                 nullable: true
@@ -207,7 +218,7 @@ components:
                 example: Ana López
               role:
                 type: string
-                enum: [USER, ADMINISTRATOR]
+                enum: [USER, ADMINISTRATOR, SUPERADMIN]
                 example: USER
               is_active:
                 type: boolean
@@ -235,7 +246,7 @@ components:
               example: nuevo@email.com
             role:
               type: string
-              enum: [USER, ADMINISTRATOR]
+              enum: [USER, ADMINISTRATOR, SUPERADMIN]
               example: USER
             group_id:
               type: integer
@@ -262,9 +273,9 @@ components:
             id:
               type: integer
               example: 5
-            company_id:
+            department_id:
               type: integer
-              example: 1
+              example: 2
             group_id:
               type: integer
               nullable: true
@@ -285,9 +296,9 @@ components:
             id:
               type: integer
               example: 5
-            company_id:
+            department_id:
               type: integer
-              example: 1
+              example: 2
             group_id:
               type: integer
               nullable: true
@@ -298,6 +309,38 @@ components:
             is_active:
               type: boolean
               example: false
+
+    PatchCompanyResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            name:
+              type: string
+              example: Gimbernat S.A.
+            cif_nif:
+              type: string
+              example: A12345678
+            email:
+              type: string
+              format: email
+              example: contacto@gimbernat.com
+            address_line:
+              type: string
+              example: Calle Mayor 1
+            city:
+              type: string
+              example: Barcelona
+            postal_code:
+              type: string
+              example: "08001"
+            is_active:
+              type: boolean
+              example: true
 
     NullResponse:
       type: object
@@ -873,8 +916,11 @@ paths:
           application/json:
             schema:
               type: object
-              required: [email, name, role, password, is_active]
+              required: [department_id, email, name, role, password, is_active]
               properties:
+                department_id:
+                  type: integer
+                  example: 2
                 group_id:
                   type: integer
                   nullable: true
@@ -888,7 +934,7 @@ paths:
                   example: Ana López
                 role:
                   type: string
-                  enum: [USER, ADMINISTRATOR]
+                  enum: [USER, ADMINISTRATOR, SUPERADMIN]
                 password:
                   type: string
                   example: contraseñaSegura789
@@ -997,8 +1043,11 @@ paths:
               maxItems: 50
               items:
                 type: object
-                required: [email, name, role, password, is_active]
+                required: [department_id, email, name, role, password, is_active]
                 properties:
+                  department_id:
+                    type: integer
+                    example: 2
                   group_id:
                     type: integer
                     nullable: true
@@ -1012,7 +1061,7 @@ paths:
                     example: Ana López
                   role:
                     type: string
-                    enum: [USER, ADMINISTRATOR]
+                    enum: [USER, ADMINISTRATOR, SUPERADMIN]
                   password:
                     type: string
                     example: contraseñaSegura789
@@ -1224,8 +1273,11 @@ paths:
           application/json:
             schema:
               type: object
-              required: [name, is_active]
+              required: [department_id, name, is_active]
               properties:
+                department_id:
+                  type: integer
+                  example: 2
                 group_id:
                   type: integer
                   nullable: true
@@ -2733,3 +2785,107 @@ paths:
                 error:
                   code: NOT_FOUND
                   message: Solicitud no encontrada.
+
+  # ─────────────────────────────────────────
+  # SUPERADMIN
+  # ─────────────────────────────────────────
+
+  /superadmin/company:
+    patch:
+      tags: [Superadmin]
+      summary: Editar empresa propia
+      description: |
+        Actualiza los datos de la empresa a la que pertenece el SUPERADMIN autenticado.
+
+        **Reglas de negocio**
+        - El SUPERADMIN solo puede editar su propia empresa — la empresa se obtiene automáticamente del JWT.
+        - Al menos un campo debe estar presente en el body.
+        - Todos los campos son opcionales pero al menos uno es obligatorio.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Al menos uno de los campos es obligatorio.
+              properties:
+                name:
+                  type: string
+                  maxLength: 150
+                  example: Gimbernat S.A.
+                cif_nif:
+                  type: string
+                  maxLength: 20
+                  example: A12345678
+                email:
+                  type: string
+                  format: email
+                  example: contacto@gimbernat.com
+                address_line:
+                  type: string
+                  maxLength: 200
+                  example: Calle Mayor 1
+                city:
+                  type: string
+                  maxLength: 100
+                  example: Barcelona
+                postal_code:
+                  type: string
+                  maxLength: 10
+                  example: "08001"
+                is_active:
+                  type: boolean
+                  example: true
+      responses:
+        "200":
+          description: Empresa actualizada correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatchCompanyResponse"
+        "400":
+          description: Body vacío o campos inválidos.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: EMPTY_BODY
+                  message: No se han enviado campos a actualizar
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "403":
+          description: Token válido pero el usuario no tiene rol SUPERADMIN.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: FORBIDDEN
+                  message: No autorizado
+        "404":
+          description: Empresa no encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: COMPANY_NOT_FOUND
+                  message: Empresa no encontrada

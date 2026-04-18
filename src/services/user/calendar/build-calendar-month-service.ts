@@ -54,7 +54,7 @@ export async function buildCalendarMonthService(
   // Cargamos todos los datos que necesitamos para construir el calendario
   const diasPlantilla = await findDiasPlantillaByPlantillaId(asignacion.template_id);
   const fichajes = await findFichajesByUserIdAndMonth(userClaims.id, year, month);
-  const excepciones = await findExcepcionesCalendarioByMonth(userClaims.company_id, userClaims.id, userClaims.group_id, year, month);
+  const excepciones = await findExcepcionesCalendarioByMonth(userClaims.department_id, userClaims.id, userClaims.group_id, year, month);
   const tiposExcepcion = await findAllTiposExcepcion();
 
   const today = new Date();

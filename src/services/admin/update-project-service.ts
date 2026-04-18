@@ -1,43 +1,42 @@
 import { findGroupById } from "../../database/repositories/work-group-repository.js";
+import { findDepartmentById } from "../../database/repositories/department-repository.js";
 import {
   findProjectById,
-  findProjectByNameAndCompany,
+  findProjectByNameAndDepartment,
   updateProjectById,
 } from "../../database/repositories/project-repository.js";
 import { PatchProjectBody } from "../../types/dto/admin/patch-project-body.js";
 import { PatchProjectResponse } from "../../types/dto/admin/patch-project-response.js";
+import { JwtClaims } from "../../types/dto/jwt/jwt-claims-dto.js";
 import { ResponseError } from "../../types/express/response-type.js";
 
-/**
- * Lógica de negocio para actualizar un proyecto existente.
- * Verifica que el proyecto exista y pertenezca a la empresa, valida el grupo si se cambia,
- * comprueba que el nombre no esté en uso y persiste los cambios.
- * @param projectId ID del proyecto a actualizar.
- * @param body Campos a actualizar.
- * @param companyId ID de la empresa del administrador autenticado (extraído del JWT).
- * @returns Los datos actualizados del proyecto.
- */
 export async function updateProjectService(
   projectId: number,
   body: PatchProjectBody,
-  companyId: number,
+  claims: JwtClaims,
 ): Promise<PatchProjectResponse> {
   const project = await findProjectById(projectId);
 
-  if (!project || project.company_id !== companyId) {
+  if (!project) {
+    throw new ResponseError("Proyecto no encontrado.", 404, "PROJECT_NOT_FOUND");
+  }
+
+  const department = await findDepartmentById(project.department_id);
+
+  if (!department || department.company_id !== claims.company_id) {
     throw new ResponseError("Proyecto no encontrado.", 404, "PROJECT_NOT_FOUND");
   }
 
   if (body.group_id) {
     const group = await findGroupById(body.group_id);
 
-    if (!group || group.company_id !== companyId) {
+    if (!group || group.department_id !== project.department_id) {
       throw new ResponseError("Grupo no encontrado.", 404, "GROUP_NOT_FOUND");
     }
   }
 
   if (body.name) {
-    const existing = await findProjectByNameAndCompany(body.name, companyId);
+    const existing = await findProjectByNameAndDepartment(body.name, project.department_id);
 
     if (existing && existing.id !== projectId) {
       throw new ResponseError(
@@ -66,7 +65,7 @@ export async function updateProjectService(
 
   return {
     id: updatedProject.id,
-    company_id: updatedProject.company_id,
+    department_id: updatedProject.department_id,
     group_id: updatedProject.group_id,
     name: updatedProject.name,
     is_active: updatedProject.is_active,

@@ -22,12 +22,12 @@ export async function findPlantillaHorarioById(
  * @param companyId ID de la empresa.
  * @returns Lista de plantillas activas ordenadas alfabéticamente.
  */
-export async function findPlantillasHorarioByCompanyId(
-  companyId: number,
+export async function findPlantillasHorarioByDepartmentId(
+  departmentId: number,
 ): Promise<PlantillaHorarioRow[]> {
   const [rows] = await pool.query<PlantillaHorarioRow[]>(
-    "SELECT * FROM plantillas_horario WHERE company_id = ? AND is_active = TRUE ORDER BY name ASC",
-    [companyId],
+    "SELECT * FROM plantillas_horario WHERE department_id = ? AND is_active = TRUE ORDER BY name ASC",
+    [departmentId],
   );
 
   return rows;
