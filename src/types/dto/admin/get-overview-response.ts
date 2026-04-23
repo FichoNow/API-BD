@@ -1,12 +1,12 @@
-export interface OverviewDepartment {
+export interface CompanyInfoDepartment {
   id: number;
   name: string;
 }
 
-export interface GetOverviewResponse {
+export interface GetCompanyInfoResponse {
   company: {
     id: number;
     name: string;
   };
-  departments: OverviewDepartment[];
+  departments: CompanyInfoDepartment[];
 }
