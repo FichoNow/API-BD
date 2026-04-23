@@ -347,117 +347,170 @@ CREATE TABLE excepciones_calendario (
 /* ================= INSERTS ================================ */
 /* ========================================================= */
 
-INSERT INTO companies (
-    name, cif_nif, email, address_line, city, postal_code
-) VALUES (
-    'Empresa Demo', 'B12345678', 'contacto@empresa.com',
-    'Calle Principal 123', 'Barcelona', '08001'
-);
+-- ── Companies ──────────────────────────────────────────────
+INSERT INTO companies (name, cif_nif, email, address_line, city, postal_code) VALUES
+('Empresa Demo', 'B12345678', 'contacto@empresa.com', 'Calle Principal 123', 'Barcelona', '08001');
 
+-- ── Departments ────────────────────────────────────────────
 INSERT INTO departments (company_id, name) VALUES
-(1, 'Departamento Demo');
+(1, 'Tecnología'),      -- id 1
+(1, 'Ventas'),          -- id 2
+(1, 'Recursos Humanos'),-- id 3
+(1, 'Operaciones');     -- id 4
 
+-- ── Work groups ────────────────────────────────────────────
 INSERT INTO work_groups (name, department_id) VALUES
-('Dirección', 1),
-('Operaciones', 1);
+('Backend',   1),  -- id 1
+('Frontend',  1),  -- id 2
+('Comercial', 2),  -- id 3
+('Preventa',  2),  -- id 4
+('Selección', 3),  -- id 5
+('Logística', 4),  -- id 6
+('Almacén',   4);  -- id 7
 
--- Contraseñas: admin → '1' | empleado1 → 'password123' | empleado2 → 'password123'
+-- ── Users ──────────────────────────────────────────────────
+-- a@a.com → '1234' | admins → 'admin1' | users → 'user1'
 INSERT INTO users (department_id, group_id, email, name, role, is_active, password_hash) VALUES
-(1, 1, 'a@a.com',     'Admin',        'ADMINISTRATOR', TRUE, '$argon2id$v=19$m=65536,t=3,p=4$lpu2IkLFjApNUpwvlcj8gw$ailSD22G2mxIbBCroN2XC/uHAPWfNnsYPhqPahd4Qyk'),
-(1, 2, 'empleado1@empresa.com', 'Empleado Uno', 'USER', TRUE, '$argon2id$v=19$m=65536,t=3,p=4$BceHtK70GVXGUHFdIjlLeQ$22lGigeJ/Q9lzELEevPzKbqkLHiocSCUk1rQN+XoSgs'),
-(1, 2, 'empleado2@empresa.com', 'Empleado Dos', 'USER', TRUE, '$argon2id$v=19$m=65536,t=3,p=4$UMbRhJqUylJwjEimExOt9A$t8FPm6DSlJdrKnxt/vbXmW03zeI9RhMsJ7CAJPsRWQ4');
+(1, 1, 'a@a.com',                  'Super Admin',     'SUPERADMIN',    TRUE, '$argon2id$v=19$m=65536,t=3,p=4$gwDYVNxoupQd4QvaE94zQQ$yGkHmZ1zypYGYaCwew3Ykdr0/ffw0bJA/IQgdnC1E6A'),  -- 1234
+(1, 1, 'admin.tec@empresa.com',    'Ana Torres',      'ADMINISTRATOR', TRUE, '$argon2id$v=19$m=65536,t=3,p=4$RU6sltkLohcx7yMRMAsOvw$GU+s2BI2upvHCFwyVfDnrPXzcEsLBb/ngldfhZ8vdHk'),  -- admin1
+(1, 1, 'dev1@empresa.com',         'Carlos Ruiz',     'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- user1
+(1, 2, 'dev2@empresa.com',         'Marta Iglesias',  'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- user1
+(2, 3, 'admin.ventas@empresa.com', 'Pedro Molina',    'ADMINISTRATOR', TRUE, '$argon2id$v=19$m=65536,t=3,p=4$RU6sltkLohcx7yMRMAsOvw$GU+s2BI2upvHCFwyVfDnrPXzcEsLBb/ngldfhZ8vdHk'),  -- admin1
+(2, 3, 'ventas1@empresa.com',      'Laura Sanz',      'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- user1
+(2, 4, 'ventas2@empresa.com',      'Javier Campos',   'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- user1
+(3, 5, 'admin.rrhh@empresa.com',   'Sofía Navarro',   'ADMINISTRATOR', TRUE, '$argon2id$v=19$m=65536,t=3,p=4$RU6sltkLohcx7yMRMAsOvw$GU+s2BI2upvHCFwyVfDnrPXzcEsLBb/ngldfhZ8vdHk'),  -- admin1
+(3, 5, 'rrhh1@empresa.com',        'David Herrera',   'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- user1
+(4, 6, 'admin.ops@empresa.com',    'Elena Vidal',     'ADMINISTRATOR', TRUE, '$argon2id$v=19$m=65536,t=3,p=4$RU6sltkLohcx7yMRMAsOvw$GU+s2BI2upvHCFwyVfDnrPXzcEsLBb/ngldfhZ8vdHk'),  -- admin1
+(4, 6, 'ops1@empresa.com',         'Roberto Jiménez', 'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- user1
+(4, 7, 'ops2@empresa.com',         'Nuria Blanco',    'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ');  -- user1
 
-/* Proyectos */
+-- ── Projects ───────────────────────────────────────────────
 INSERT INTO projects (department_id, group_id, name, is_active) VALUES
-(1, NULL, 'Proyecto General', TRUE),
-(1, 2, 'Soporte', TRUE);
+(1, NULL, 'Portal Web',         TRUE),  -- id 1
+(1, 1,    'App Móvil',          TRUE),  -- id 2
+(2, NULL, 'CRM Ventas',         TRUE),  -- id 3
+(2, 3,    'Captación Clientes', TRUE),  -- id 4
+(3, NULL, 'Selección Técnicos', TRUE),  -- id 5
+(4, NULL, 'Distribución',       TRUE);  -- id 6
 
-/* Plantillas */
+-- ── Schedule templates ─────────────────────────────────────
 INSERT INTO plantillas_horario (department_id, name, description, weekly_minutes, is_active) VALUES
-(1, 'Horario Oficina', 'Horario estándar de lunes a viernes', 2400, TRUE),
-(1, 'Horario Intensivo', 'Horario intensivo de verano', 2100, TRUE);
+(1, 'Horario Tecnología', 'Lunes a viernes, horario partido',  2400, TRUE),  -- id 1
+(1, 'Verano Tecnología',  'Julio–agosto, jornada intensiva',   2100, TRUE),  -- id 2
+(2, 'Horario Ventas',     'Lunes a sábado, turno mañana',      2700, TRUE),  -- id 3
+(3, 'Horario RRHH',       'Lunes a viernes, viernes intensivo',2400, TRUE),  -- id 4
+(4, 'Turno Mañana Ops',   'Lunes a viernes, turno de mañana',  2100, TRUE),  -- id 5
+(4, 'Turno Tarde Ops',    'Lunes a viernes, turno de tarde',   2100, TRUE);  -- id 6
 
-/* Días plantilla: Horario Oficina */
+-- Tecnología – horario partido
 INSERT INTO dias_plantilla (template_id, weekday, is_working_day, start_time, end_time, break_minutes) VALUES
-(1, 1, TRUE,  '09:00:00', '18:00:00', 60),
-(1, 2, TRUE,  '09:00:00', '18:00:00', 60),
-(1, 3, TRUE,  '09:00:00', '18:00:00', 60),
-(1, 4, TRUE,  '09:00:00', '18:00:00', 60),
-(1, 5, TRUE,  '09:00:00', '18:00:00', 60),
-(1, 6, FALSE, NULL, NULL, 0),
-(1, 7, FALSE, NULL, NULL, 0);
+(1,1,TRUE,'09:00:00','18:00:00',60),(1,2,TRUE,'09:00:00','18:00:00',60),
+(1,3,TRUE,'09:00:00','18:00:00',60),(1,4,TRUE,'09:00:00','18:00:00',60),
+(1,5,TRUE,'09:00:00','18:00:00',60),(1,6,FALSE,NULL,NULL,0),(1,7,FALSE,NULL,NULL,0);
 
-/* Días plantilla: Horario Intensivo */
+-- Tecnología – verano intensivo
 INSERT INTO dias_plantilla (template_id, weekday, is_working_day, start_time, end_time, break_minutes) VALUES
-(2, 1, TRUE,  '08:00:00', '15:00:00', 0),
-(2, 2, TRUE,  '08:00:00', '15:00:00', 0),
-(2, 3, TRUE,  '08:00:00', '15:00:00', 0),
-(2, 4, TRUE,  '08:00:00', '15:00:00', 0),
-(2, 5, TRUE,  '08:00:00', '15:00:00', 0),
-(2, 6, FALSE, NULL, NULL, 0),
-(2, 7, FALSE, NULL, NULL, 0);
+(2,1,TRUE,'08:00:00','15:00:00',0),(2,2,TRUE,'08:00:00','15:00:00',0),
+(2,3,TRUE,'08:00:00','15:00:00',0),(2,4,TRUE,'08:00:00','15:00:00',0),
+(2,5,TRUE,'08:00:00','15:00:00',0),(2,6,FALSE,NULL,NULL,0),(2,7,FALSE,NULL,NULL,0);
 
-/* Asignación de horario al grupo Operaciones */
+-- Ventas – lun–sáb mañana
+INSERT INTO dias_plantilla (template_id, weekday, is_working_day, start_time, end_time, break_minutes) VALUES
+(3,1,TRUE,'09:00:00','14:30:00',0),(3,2,TRUE,'09:00:00','14:30:00',0),
+(3,3,TRUE,'09:00:00','14:30:00',0),(3,4,TRUE,'09:00:00','14:30:00',0),
+(3,5,TRUE,'09:00:00','14:30:00',0),(3,6,TRUE,'09:00:00','14:00:00',0),(3,7,FALSE,NULL,NULL,0);
+
+-- RRHH – partido con viernes intensivo
+INSERT INTO dias_plantilla (template_id, weekday, is_working_day, start_time, end_time, break_minutes) VALUES
+(4,1,TRUE,'09:00:00','18:00:00',60),(4,2,TRUE,'09:00:00','18:00:00',60),
+(4,3,TRUE,'09:00:00','18:00:00',60),(4,4,TRUE,'09:00:00','18:00:00',60),
+(4,5,TRUE,'09:00:00','14:00:00',0),(4,6,FALSE,NULL,NULL,0),(4,7,FALSE,NULL,NULL,0);
+
+-- Operaciones – turno mañana
+INSERT INTO dias_plantilla (template_id, weekday, is_working_day, start_time, end_time, break_minutes) VALUES
+(5,1,TRUE,'06:00:00','14:00:00',30),(5,2,TRUE,'06:00:00','14:00:00',30),
+(5,3,TRUE,'06:00:00','14:00:00',30),(5,4,TRUE,'06:00:00','14:00:00',30),
+(5,5,TRUE,'06:00:00','14:00:00',30),(5,6,FALSE,NULL,NULL,0),(5,7,FALSE,NULL,NULL,0);
+
+-- Operaciones – turno tarde
+INSERT INTO dias_plantilla (template_id, weekday, is_working_day, start_time, end_time, break_minutes) VALUES
+(6,1,TRUE,'14:00:00','22:00:00',30),(6,2,TRUE,'14:00:00','22:00:00',30),
+(6,3,TRUE,'14:00:00','22:00:00',30),(6,4,TRUE,'14:00:00','22:00:00',30),
+(6,5,TRUE,'14:00:00','22:00:00',30),(6,6,FALSE,NULL,NULL,0),(6,7,FALSE,NULL,NULL,0);
+
+-- ── Group schedule assignments ─────────────────────────────
 INSERT INTO asignaciones_grupo (group_id, template_id, start_date, end_date) VALUES
-(2, 1, '2026-01-01', '2026-06-30'),
-(2, 2, '2026-07-01', '2026-08-31'),
-(2, 1, '2026-09-01', NULL);
+(1, 1, '2026-01-01', '2026-06-30'),  -- Backend → Tecnología
+(1, 2, '2026-07-01', '2026-08-31'),  -- Backend → Verano
+(1, 1, '2026-09-01', NULL),          -- Backend → vuelta Tecnología
+(2, 1, '2026-01-01', NULL),          -- Frontend → Tecnología
+(3, 3, '2026-01-01', NULL),          -- Comercial → Ventas
+(4, 3, '2026-01-01', NULL),          -- Preventa → Ventas
+(5, 4, '2026-01-01', NULL),          -- Selección → RRHH
+(6, 5, '2026-01-01', NULL),          -- Logística → Turno mañana
+(7, 6, '2026-01-01', NULL);          -- Almacén → Turno tarde
 
-/* Asignación individual al admin */
+-- ── User schedule assignments ──────────────────────────────
 INSERT INTO asignaciones_usuario (user_id, template_id, start_date, end_date) VALUES
-(1, 1, '2026-01-01', NULL);
+(1, 1, '2026-01-01', NULL);  -- SUPERADMIN → Tecnología
 
-/* Excepciones de calendario */
+-- ── Lookup tables ──────────────────────────────────────────
 INSERT INTO tipos_excepcion (code, name) VALUES
-('HOLIDAY', 'Festivo'),
-('VACATION', 'Vacaciones'),
-('SICK_LEAVE', 'Baja por enfermedad'),
-('PERMISSION', 'Permiso'),
-('DAY_OFF', 'Día libre'),
-('SPECIAL_SHIFT', 'Turno especial'),
+('HOLIDAY',             'Festivo'),
+('VACATION',            'Vacaciones'),
+('SICK_LEAVE',          'Baja por enfermedad'),
+('PERMISSION',          'Permiso'),
+('DAY_OFF',             'Día libre'),
+('SPECIAL_SHIFT',       'Turno especial'),
 ('MEDICAL_APPOINTMENT', 'Cita médica');
 
-/* Tipos */
 INSERT INTO leave_request_types (code, name) VALUES
-('VACATION', 'Vacaciones'),
-('PERMISSION', 'Permiso'),
-('SICK_LEAVE', 'Baja por enfermedad'),
+('VACATION',            'Vacaciones'),
+('PERMISSION',          'Permiso'),
+('SICK_LEAVE',          'Baja por enfermedad'),
 ('MEDICAL_APPOINTMENT', 'Cita médica'),
-('DAY_OFF', 'Día libre');
+('DAY_OFF',             'Día libre');
 
-/* Estados */
 INSERT INTO leave_request_statuses (code, name) VALUES
-('PENDING', 'Pendiente'),
-('APPROVED', 'Aprobada'),
-('REJECTED', 'Rechazada'),
+('PENDING',   'Pendiente'),
+('APPROVED',  'Aprobada'),
+('REJECTED',  'Rechazada'),
 ('CANCELLED', 'Cancelada');
 
-/* Solicitudes de usuarios */
-INSERT INTO leave_requests (
-    user_id, type_id, start_date, end_date, start_time, end_time, comment, status_id, reviewed_by, reviewed_at, review_comment
-) VALUES
-(2, 1, '2026-08-10', '2026-08-14', NULL, NULL, 'Vacaciones de verano', 2, 1, '2026-04-01 10:00:00', 'Aprobado'),
-(3, 4, '2026-04-18', '2026-04-18', '10:00:00', '12:00:00', 'Cita con especialista', 1, NULL, NULL, NULL),
-(2, 5, '2026-05-02', '2026-05-02', NULL, NULL, 'Asunto personal', 3, 1, '2026-04-03 12:30:00', 'No hay cobertura ese día');
+-- ── Leave requests ─────────────────────────────────────────
+INSERT INTO leave_requests (user_id, type_id, start_date, end_date, start_time, end_time, comment, status_id, reviewed_by, reviewed_at, review_comment) VALUES
+(3, 1, '2026-08-10', '2026-08-14', NULL,       NULL,       'Vacaciones de verano',  2, 2, '2026-04-01 10:00:00', 'Aprobado'),
+(4, 4, '2026-04-18', '2026-04-18', '10:00:00', '12:00:00', 'Cita con especialista', 1, NULL, NULL, NULL),
+(3, 5, '2026-05-02', '2026-05-02', NULL,       NULL,       'Asunto personal',       3, 2, '2026-04-03 12:30:00', 'No hay cobertura ese día'),
+(6, 1, '2026-07-01', '2026-07-15', NULL,       NULL,       'Vacaciones anuales',    1, NULL, NULL, NULL),
+(9, 2, '2026-04-25', '2026-04-25', '08:00:00', '14:00:00', 'Asunto familiar',       1, NULL, NULL, NULL),
+(11,3, '2026-04-20', '2026-04-22', NULL,       NULL,       'Baja médica',           2, 10, '2026-04-20 09:00:00', 'Justificado');
 
-INSERT INTO excepciones_calendario (
-    department_id, user_id, group_id, tipo_id, leave_request_id, title, start_date, end_date, start_time, end_time, notes, created_by
-) VALUES
-(1, NULL, NULL, 1, NULL, 'Navidad', '2026-12-25', '2026-12-25', NULL, NULL, 'Festivo nacional', 1),
-(1, NULL, NULL, 1, NULL, 'Año Nuevo', '2026-01-01', '2026-01-01', NULL, NULL, 'Festivo nacional', 1),
-(1, 2, NULL, 2, 1, 'Vacaciones verano', '2026-08-10', '2026-08-14', NULL, NULL, 'Vacaciones aprobadas', 1),
-(1, 3, NULL, 7, NULL, 'Cita médica', '2026-04-15', '2026-04-15', '09:00:00', '11:00:00', 'Consulta médica', 1),
-(1, NULL, 2, 6, NULL, 'Jornada reducida operaciones', '2026-05-20', '2026-05-20', '08:00:00', '14:00:00', 'Cambio puntual de turno', 1);
+-- ── Calendar exceptions ────────────────────────────────────
+INSERT INTO excepciones_calendario (department_id, user_id, group_id, tipo_id, leave_request_id, title, start_date, end_date, start_time, end_time, notes, created_by) VALUES
+(1, NULL, NULL, 1, NULL, 'Navidad',           '2026-12-25', '2026-12-25', NULL,       NULL,       'Festivo nacional',    1),
+(2, NULL, NULL, 1, NULL, 'Navidad',           '2026-12-25', '2026-12-25', NULL,       NULL,       'Festivo nacional',    5),
+(3, NULL, NULL, 1, NULL, 'Navidad',           '2026-12-25', '2026-12-25', NULL,       NULL,       'Festivo nacional',    8),
+(4, NULL, NULL, 1, NULL, 'Navidad',           '2026-12-25', '2026-12-25', NULL,       NULL,       'Festivo nacional',    10),
+(1, NULL, NULL, 1, NULL, 'Año Nuevo',         '2026-01-01', '2026-01-01', NULL,       NULL,       'Festivo nacional',    1),
+(1, 3,   NULL, 2, 1,    'Vacaciones verano',  '2026-08-10', '2026-08-14', NULL,       NULL,       'Vacaciones aprobadas',2),
+(1, 4,   NULL, 7, NULL, 'Cita médica',        '2026-04-18', '2026-04-18', '10:00:00', '12:00:00', 'Consulta médica',     2),
+(4, 11,  NULL, 3, 6,    'Baja médica',        '2026-04-20', '2026-04-22', NULL,       NULL,       'Baja justificada',    10),
+(1, NULL, 2,   6, NULL, 'Jornada reducida',   '2026-05-20', '2026-05-20', '08:00:00', '14:00:00', 'Cambio puntual',      2);
 
-/* Fichajes ejemplo */
+-- ── Fichajes ───────────────────────────────────────────────
 INSERT INTO fichajes (user_id, clock_in, clock_out, clock_in_modified, clock_out_modified) VALUES
-(2, '2026-04-01 09:02:00', '2026-04-01 18:01:00', FALSE, FALSE),
-(3, '2026-04-01 09:15:00', '2026-04-01 17:50:00', FALSE, FALSE),
-(2, '2026-04-02 08:58:00', '2026-04-02 18:05:00', FALSE, FALSE);
+(3,  '2026-04-01 09:02:00', '2026-04-01 18:01:00', FALSE, FALSE),  -- id 1  Carlos (Tec)
+(4,  '2026-04-01 09:15:00', '2026-04-01 17:50:00', FALSE, FALSE),  -- id 2  Marta (Tec)
+(3,  '2026-04-02 08:58:00', '2026-04-02 18:05:00', FALSE, FALSE),  -- id 3  Carlos (Tec)
+(6,  '2026-04-01 09:05:00', '2026-04-01 14:28:00', FALSE, FALSE),  -- id 4  Laura (Ventas)
+(11, '2026-04-01 06:03:00', '2026-04-01 14:02:00', FALSE, FALSE);  -- id 5  Roberto (Ops)
 
-/* Reparto de tiempo por proyecto */
+-- ── Fichaje entries ────────────────────────────────────────
 INSERT INTO fichaje_entries (fichaje_id, project_id, started_at, ended_at) VALUES
 (1, 1, '2026-04-01 09:02:00', '2026-04-01 13:00:00'),
 (1, 2, '2026-04-01 14:00:00', '2026-04-01 18:01:00'),
-(2, 2, '2026-04-01 09:15:00', '2026-04-01 17:50:00'),
-(3, 1, '2026-04-02 08:58:00', '2026-04-02 18:05:00');
+(2, 1, '2026-04-01 09:15:00', '2026-04-01 17:50:00'),
+(3, 2, '2026-04-02 08:58:00', '2026-04-02 18:05:00'),
+(4, 3, '2026-04-01 09:05:00', '2026-04-01 14:28:00'),
+(5, 6, '2026-04-01 06:03:00', '2026-04-01 14:02:00');

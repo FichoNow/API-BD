@@ -17,3 +17,14 @@ export async function findDepartmentById(
 
   return rows.length ? rows[0] : null;
 }
+
+export async function findDepartmentsByCompanyId(
+  companyId: number,
+): Promise<DepartmentRow[]> {
+  const [rows] = await pool.query<DepartmentRow[]>(
+    "SELECT * FROM departments WHERE company_id = ? ORDER BY name ASC",
+    [companyId],
+  );
+
+  return rows;
+}
