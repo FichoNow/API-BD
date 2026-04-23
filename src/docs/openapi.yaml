@@ -129,6 +129,55 @@ components:
               type: string
               description: Nuevo refresh token (el anterior queda invalidado).
 
+    RegisterResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            company:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  example: 1
+                name:
+                  type: string
+                  example: Gimbernat S.L.
+                cif_nif:
+                  type: string
+                  example: B12345678
+                email:
+                  type: string
+                  format: email
+                  example: contacto@gimbernat.com
+                address_line:
+                  type: string
+                  example: Calle Mayor, 1
+                city:
+                  type: string
+                  example: Barcelona
+                postal_code:
+                  type: string
+                  example: "08001"
+            user:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  example: 1
+                name:
+                  type: string
+                  example: Juan García
+                email:
+                  type: string
+                  format: email
+                  example: admin@gimbernat.com
+                role:
+                  type: string
+                  enum: [SUPERADMIN]
+                  example: SUPERADMIN
+
     LogoutResponse:
       type: object
       properties:
@@ -738,6 +787,124 @@ paths:
                 error:
                   code: TOKEN_EXPIRED
                   message: Token inválido
+
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Registrar empresa
+      description: |
+        Crea una nueva empresa junto con su usuario SUPERADMIN en una sola operación.
+
+        **Qué hace internamente**
+        1. Verifica que el email del usuario no esté ya registrado.
+        2. Crea la empresa con los datos proporcionados (`is_active = true`).
+        3. Crea automáticamente un departamento **"General"** vinculado a la empresa.
+        4. Hashea la contraseña y crea el usuario con rol `SUPERADMIN` en ese departamento.
+
+        **Reglas de negocio**
+        - El email del usuario debe ser único en todo el sistema.
+        - La contraseña debe tener al menos 8 caracteres.
+        - Este endpoint es **público** — no requiere `Authorization`.
+        - Limitado a **5 intentos por IP cada hora** para prevenir abusos.
+        - Tras el registro el usuario debe hacer login en `POST /auth/login` para obtener tokens.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [company, user]
+              properties:
+                company:
+                  type: object
+                  required: [name, cif_nif, email, address_line, city, postal_code]
+                  properties:
+                    name:
+                      type: string
+                      maxLength: 150
+                      example: Gimbernat S.L.
+                    cif_nif:
+                      type: string
+                      maxLength: 20
+                      example: B12345678
+                    email:
+                      type: string
+                      format: email
+                      example: contacto@gimbernat.com
+                    address_line:
+                      type: string
+                      maxLength: 200
+                      example: Calle Mayor, 1
+                    city:
+                      type: string
+                      maxLength: 100
+                      example: Barcelona
+                    postal_code:
+                      type: string
+                      maxLength: 10
+                      example: "08001"
+                user:
+                  type: object
+                  required: [name, email, password]
+                  properties:
+                    name:
+                      type: string
+                      maxLength: 100
+                      example: Juan García
+                    email:
+                      type: string
+                      format: email
+                      example: admin@gimbernat.com
+                    password:
+                      type: string
+                      minLength: 8
+                      example: "miContraseña123"
+      responses:
+        "201":
+          description: Empresa y SUPERADMIN creados correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegisterResponse"
+        "400":
+          description: Body inválido, campos faltantes o contraseña demasiado corta.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BAD_REQUEST
+                  message: Cuerpo de la solicitud inválido
+        "409":
+          description: El email del usuario ya está registrado en el sistema.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: EMAIL_ALREADY_EXISTS
+                  message: Ya existe un usuario con ese email.
+        "429":
+          description: Demasiados intentos desde la misma IP (más de 5 en 1 hora).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: Demasiados intentos. Inténtalo de nuevo en 1 hora.
+        "500":
+          description: Error interno inesperado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError"
 
   # ─────────────────────────────────────────
   # USER

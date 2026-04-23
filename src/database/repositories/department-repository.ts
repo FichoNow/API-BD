@@ -1,4 +1,5 @@
-import { DepartmentRow } from "../../types/db/department-row-type.js";
+import { ResultSetHeader } from "mysql2/promise";
+import { CreateDepartmentRow, DepartmentRow } from "../../types/db/department-row-type.js";
 import { pool } from "../pool.js";
 
 /**
@@ -16,6 +17,22 @@ export async function findDepartmentById(
   );
 
   return rows.length ? rows[0] : null;
+}
+
+/**
+ * Inserta un nuevo departamento en la base de datos con `is_active = true`.
+ *
+ * @param data Campos del departamento a crear (company_id y nombre).
+ * @returns El `insertId` del departamento creado.
+ */
+export async function createDepartment(data: CreateDepartmentRow): Promise<number> {
+  const [result] = await pool.query<ResultSetHeader>(
+    `INSERT INTO departments (company_id, name, is_active, created_at, updated_at)
+     VALUES (?, ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+    [data.company_id, data.name],
+  );
+
+  return result.insertId;
 }
 
 export async function findDepartmentsByCompanyId(
