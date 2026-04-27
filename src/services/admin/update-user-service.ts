@@ -20,13 +20,14 @@ export async function updateUser(
   const { password, ...rest } = body;
 
   const user = await findUserById(userId);
-  const userDepartment = user ? await findDepartmentById(user.department_id) : null;
+  const userDepartment = user
+    ? await findDepartmentById(user.department_id)
+    : null;
 
   if (
     !user ||
     !userDepartment ||
-    userDepartment.company_id !== claims.company_id ||
-    user.role === "ADMINISTRATOR"
+    userDepartment.company_id !== claims.company_id
   ) {
     throw new ResponseError("Usuario no encontrado", 404, "USER_NOT_FOUND");
   }
@@ -35,7 +36,11 @@ export async function updateUser(
     const department = await findDepartmentById(rest.department_id);
 
     if (!department || department.company_id !== claims.company_id) {
-      throw new ResponseError("Departamento no encontrado.", 404, "DEPARTMENT_NOT_FOUND");
+      throw new ResponseError(
+        "Departamento no encontrado.",
+        404,
+        "DEPARTMENT_NOT_FOUND",
+      );
     }
   }
 
@@ -77,13 +82,21 @@ export async function updateUser(
   const updated = await updateUserById(userId, dataToUpdate);
 
   if (!updated) {
-    throw new ResponseError("Error al actualizar el usuario.", 500, "UPDATE_FAILED");
+    throw new ResponseError(
+      "Error al actualizar el usuario.",
+      500,
+      "UPDATE_FAILED",
+    );
   }
 
   const updatedUser = await findUserById(userId);
 
   if (!updatedUser) {
-    throw new ResponseError("Error al obtener el usuario actualizado.", 500, "USER_NOT_FOUND");
+    throw new ResponseError(
+      "Error al obtener el usuario actualizado.",
+      500,
+      "USER_NOT_FOUND",
+    );
   }
 
   return {
