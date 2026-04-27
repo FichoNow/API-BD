@@ -38,7 +38,5 @@ export async function requireAdministrator(
     return next(new ResponseError("No autorizado", 403, "FORBIDDEN"));
   }
 
-  console.log(claims);
-
   return next();
 }

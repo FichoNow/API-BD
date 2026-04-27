@@ -106,6 +106,20 @@ export async function createUser(data: CreateUserRow): Promise<number> {
  * @param data Campos a actualizar. Solo se incluyen los que estén definidos.
  * @returns `true` si se actualizó alguna fila, `false` si no.
  */
+/**
+ * Devuelve todos los usuarios de un departamento ordenados por nombre.
+ *
+ * @param departmentId ID del departamento.
+ * @returns Array de filas de usuario.
+ */
+export async function findUsersByDepartmentId(departmentId: number): Promise<UserRow[]> {
+  const [rows] = await pool.query<UserRow[]>(
+    "SELECT * FROM users WHERE department_id = ? ORDER BY name ASC",
+    [departmentId],
+  );
+  return rows;
+}
+
 export async function updateUserById(
   userId: number,
   data: UpdateUserRow,

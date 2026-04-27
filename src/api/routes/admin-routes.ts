@@ -5,10 +5,13 @@ import { createUsersController } from "../controllers/admin/create-users-control
 import { createProjectController } from "../controllers/admin/create-project-controller.js";
 import { patchProjectController } from "../controllers/admin/patch-project-controller.js";
 import { getCompanyInfoController } from "../controllers/admin/get-overview-controller.js";
+import { getUsersController } from "../controllers/admin/get-users-controller.js";
 
 export const adminRouter = Router();
 
 adminRouter.get("/company-info", getCompanyInfoController); // Info de empresa y departamentos
+
+adminRouter.get("/users", getUsersController); // Listar usuarios de un departamento
 
 adminRouter.post("/user", createUserController); // Crear un usuario
 

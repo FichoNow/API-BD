@@ -359,6 +359,33 @@ components:
               type: boolean
               example: false
 
+    GetCompanyInfoResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            company:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  example: 1
+                name:
+                  type: string
+                  example: Gimbernat S.L.
+            departments:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 2
+                  name:
+                    type: string
+                    example: General
+
     PatchCompanyResponse:
       type: object
       properties:
@@ -1062,6 +1089,44 @@ paths:
   # ─────────────────────────────────────────
   # ADMIN
   # ─────────────────────────────────────────
+
+  /admin/company-info:
+    get:
+      tags: [Admin]
+      summary: Info de empresa y departamentos
+      description: |
+        Devuelve el nombre de la empresa y la lista de departamentos visibles para el administrador autenticado.
+
+        **Reglas de negocio**
+        - Si el rol es `SUPERADMIN`, devuelve todos los departamentos de la empresa.
+        - Si el rol es `ADMINISTRATOR`, devuelve únicamente su propio departamento.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Información de la empresa y departamentos.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetCompanyInfoResponse"
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: El usuario no tiene rol ADMINISTRATOR ni SUPERADMIN.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Empresa o departamento no encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /admin/user:
     post:
