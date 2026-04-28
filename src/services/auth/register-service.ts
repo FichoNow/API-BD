@@ -1,4 +1,4 @@
-import { createCompany } from "../../database/repositories/company-repository.js";
+import { createCompany, findCompanyByCifNif } from "../../database/repositories/company-repository.js";
 import { createDepartment } from "../../database/repositories/department-repository.js";
 import { createUser, findUserByEmail } from "../../database/repositories/user-repository.js";
 import { PostRegisterBody } from "../../types/dto/auth/post-register-body.js";
@@ -24,6 +24,12 @@ export async function registerCompany(body: PostRegisterBody): Promise<PostRegis
 
   if (existingUser) {
     throw new ResponseError("Ya existe un usuario con ese email.", 409, "EMAIL_ALREADY_EXISTS");
+  }
+
+  const existingCompany = await findCompanyByCifNif(body.company.cif_nif);
+
+  if (existingCompany) {
+    throw new ResponseError("Ya existe una empresa con ese CIF/NIF.", 409, "CIF_NIF_ALREADY_EXISTS");
   }
 
   const companyId = await createCompany({

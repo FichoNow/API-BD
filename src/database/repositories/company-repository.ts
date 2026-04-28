@@ -20,6 +20,17 @@ export async function findCompanyById(
  * @param data Campos de la empresa a crear (nombre, CIF/NIF, email, dirección, ciudad, código postal).
  * @returns El `insertId` de la empresa creada.
  */
+export async function findCompanyByCifNif(
+  cifNif: string,
+): Promise<CompanyRow | null> {
+  const [rows] = await pool.query<CompanyRow[]>(
+    "SELECT * FROM companies WHERE cif_nif = ? LIMIT 1",
+    [cifNif],
+  );
+
+  return rows.length ? rows[0] : null;
+}
+
 export async function createCompany(data: CreateCompanyRow): Promise<number> {
   const [result] = await pool.query<ResultSetHeader>(
     `INSERT INTO companies (name, cif_nif, email, address_line, city, postal_code, is_active, created_at, updated_at)
