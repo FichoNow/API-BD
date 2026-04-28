@@ -29,3 +29,26 @@ export async function findTipoExcepcionById(
 
   return rows.length ? rows[0] : null;
 }
+
+/**
+ * Busca un tipo de excepción de calendario por su código.
+ *
+ * Ejemplos de code:
+ * - VACATION
+ * - PERMISSION
+ * - SICK_LEAVE
+ * - MEDICAL_APPOINTMENT
+ * - DAY_OFF
+ *
+ * Devuelve el tipo de excepción encontrado o null si no existe.
+ */
+export async function findTipoExcepcionByCode(
+  code: string,
+): Promise<TipoExcepcionRow | null> {
+  const [rows] = await pool.query<TipoExcepcionRow[]>(
+    "SELECT * FROM tipos_excepcion WHERE code = ? LIMIT 1",
+    [code],
+  );
+
+  return rows.length ? rows[0] : null;
+}

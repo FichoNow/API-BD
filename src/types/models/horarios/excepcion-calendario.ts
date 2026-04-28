@@ -4,6 +4,7 @@ export interface ExcepcionCalendarioData {
   user_id: number | null;
   group_id: number | null;
   tipo_id: number;
+  leave_request_id: number | null;
   title: string;
   start_date: string;
   end_date: string;

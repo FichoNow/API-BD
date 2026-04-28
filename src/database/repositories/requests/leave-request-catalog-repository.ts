@@ -44,3 +44,20 @@ export async function findLeaveRequestStatusByCode(
 
     return rows.length ? rows[0] : null;
 }
+
+/**
+ * Busca un tipo de solicitud por su ID.
+ *
+ * Se usa cuando tenemos una solicitud ya guardada en leave_requests
+ * y necesitamos recuperar el código del tipo: VACATION, PERMISSION, etc.
+ */
+export async function findLeaveRequestTypeById(
+    typeId: number,
+): Promise<LeaveRequestTypeRow | null> {
+    const [rows] = await pool.query<LeaveRequestTypeRow[]>(
+        "SELECT * FROM leave_request_types WHERE id = ? LIMIT 1",
+        [typeId],
+    );
+
+    return rows.length ? rows[0] : null;
+}

@@ -5,6 +5,7 @@ import {
 } from "../../../types/db/requests/leave-request-row-type.js";
 import { LeaveRequestListRow } from "../../../types/db/requests/leave-request-list-row-type.js";
 import { pool } from "../../pool.js";
+import { AdminLeaveRequestListRow } from "../../../types/db/requests/admin-leave-request-list-row-type.js";
 
 export async function findLeaveRequestById(
     leaveRequestId: number,
@@ -102,4 +103,83 @@ export async function updateLeaveRequestStatusById(
     );
 
     return result.affectedRows > 0;
+}
+
+/**
+ * Busca todas las solicitudes de ausencia de los usuarios de un departamento.
+ *
+ * Se usa desde el panel admin para que un administrador pueda revisar
+ * vacaciones, permisos, bajas y citas médicas de su departamento.
+ *
+ * Hacemos JOIN con:
+ * - users -> para obtener nombre/email del empleado
+ * - leave_request_types -> para obtener el código del tipo
+ * - leave_request_statuses -> para obtener el código del estado
+ */
+export async function findLeaveRequestsByDepartmentId(
+  departmentId: number,
+): Promise<AdminLeaveRequestListRow[]> {
+  const [rows] = await pool.query<AdminLeaveRequestListRow[]>(
+    `SELECT
+        lr.id,
+        lr.user_id,
+        u.name AS employee_name,
+        u.email AS employee_email,
+        u.department_id,
+        lrt.code AS type,
+        lr.start_date,
+        lr.end_date,
+        lr.start_time,
+        lr.end_time,
+        lrs.code AS status,
+        lr.comment,
+        lr.reviewed_by,
+        lr.reviewed_at,
+        lr.review_comment,
+        lr.created_at
+     FROM leave_requests lr
+     INNER JOIN users u
+        ON u.id = lr.user_id
+     INNER JOIN leave_request_types lrt
+        ON lrt.id = lr.type_id
+     INNER JOIN leave_request_statuses lrs
+        ON lrs.id = lr.status_id
+     WHERE u.department_id = ?
+     ORDER BY lr.created_at DESC`,
+    [departmentId],
+  );
+
+  return rows;
+}
+
+/**
+ * Actualiza una solicitud como revisada por un administrador.
+ *
+ * Guarda:
+ * - nuevo estado
+ * - usuario que revisa
+ * - fecha/hora de revisión
+ * - comentario de revisión
+ *
+ * Se usará tanto para aprobar como para rechazar solicitudes.
+ */
+export async function reviewLeaveRequestById(
+  leaveRequestId: number,
+  statusId: number,
+  reviewedBy: number,
+  reviewComment: string | null,
+): Promise<boolean> {
+  const [result] = await pool.query<ResultSetHeader>(
+    `UPDATE leave_requests
+     SET
+        status_id = ?,
+        reviewed_by = ?,
+        reviewed_at = CURRENT_TIMESTAMP,
+        review_comment = ?
+     WHERE id = ?
+     LIMIT 1`,
+    [statusId, reviewedBy, reviewComment, leaveRequestId],
+  );
+
+  return result.affectedRows > 0;
 }

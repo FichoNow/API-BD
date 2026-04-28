@@ -1,6 +1,10 @@
 import { format, startOfMonth, endOfMonth } from "date-fns";
+import { ResultSetHeader } from "mysql2/promise";
 import { pool } from "../../pool.js";
-import { ExcepcionCalendarioRow } from "../../../types/db/horarios/excepcion-calendario-row-type.js";
+import {
+  ExcepcionCalendarioRow,
+  CreateExcepcionCalendarioRow,
+} from "../../../types/db/horarios/excepcion-calendario-row-type.js";
 
 /**
  * Obtiene todas las excepciones de calendario que afectan a un usuario en un mes concreto.
@@ -39,4 +43,49 @@ export async function findExcepcionesCalendarioByMonth(
   );
 
   return rows;
+}
+
+/**
+ * Crea una excepción de calendario.
+ *
+ * Se usa cuando una solicitud de ausencia queda aprobada y debe reflejarse
+ * en el calendario real del usuario/departamento.
+ *
+ * Devuelve el ID de la excepción creada.
+ */
+export async function createExcepcionCalendario(
+  data: CreateExcepcionCalendarioRow,
+): Promise<number> {
+  const [result] = await pool.query<ResultSetHeader>(
+    `INSERT INTO excepciones_calendario (
+        department_id,
+        user_id,
+        group_id,
+        tipo_id,
+        leave_request_id,
+        title,
+        start_date,
+        end_date,
+        start_time,
+        end_time,
+        notes,
+        created_by
+     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      data.department_id,
+      data.user_id,
+      data.group_id,
+      data.tipo_id,
+      data.leave_request_id,
+      data.title,
+      data.start_date,
+      data.end_date,
+      data.start_time,
+      data.end_time,
+      data.notes,
+      data.created_by,
+    ],
+  );
+
+  return result.insertId;
 }
