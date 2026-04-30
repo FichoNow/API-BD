@@ -1,14 +1,14 @@
-import { findDepartmentById } from "../../database/repositories/department-repository.js";
-import { findUserById } from "../../database/repositories/user-repository.js";
+import { findDepartmentById } from "../../../database/repositories/department-repository.js";
+import { findUserById } from "../../../database/repositories/user-repository.js";
 import {
   findLeaveRequestById,
   reviewLeaveRequestById,
-} from "../../database/repositories/requests/leave-request-repository.js";
-import { findLeaveRequestStatusByCode } from "../../database/repositories/requests/leave-request-catalog-repository.js";
-import { JwtClaims } from "../../types/dto/jwt/jwt-claims-dto.js";
-import { ReviewRequestBody } from "../../types/dto/admin/review-request-body.js";
-import { ReviewRequestResponse } from "../../types/dto/admin/review-request-response.js";
-import { ResponseError } from "../../types/express/response-type.js";
+} from "../../../database/repositories/requests/leave-request-repository.js";
+import { findLeaveRequestStatusByCode } from "../../../database/repositories/requests/leave-request-catalog-repository.js";
+import { JwtClaims } from "../../../types/dto/jwt/jwt-claims-dto.js";
+import { ReviewRequestBody } from "../../../types/dto/admin/review-request-body.js";
+import { ReviewRequestResponse } from "../../../types/dto/admin/review-request-response.js";
+import { ResponseError } from "../../../types/express/response-type.js";
 
 /**
  * Rechaza una solicitud de ausencia desde el panel admin.

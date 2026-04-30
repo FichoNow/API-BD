@@ -1,15 +1,15 @@
 import {
   createUser,
   findUserByEmail,
-} from "../../database/repositories/user-repository.js";
-import { findGroupById } from "../../database/repositories/work-group-repository.js";
-import { findDepartmentById } from "../../database/repositories/department-repository.js";
-import { CreateUsersResponse } from "../../types/dto/admin/create-users-response.js";
-import { hashPassword } from "../auth/password-hash-service.js";
-import { ResponseError } from "../../types/express/response-type.js";
-import { CreateUsersBody } from "../../types/dto/admin/create-users-body.js";
-import { JwtClaims } from "../../types/dto/jwt/jwt-claims-dto.js";
-import { WorkGroupRow } from "../../types/db/work-group-row-type.js";
+} from "../../../database/repositories/user-repository.js";
+import { findGroupById } from "../../../database/repositories/work-group-repository.js";
+import { findDepartmentById } from "../../../database/repositories/department-repository.js";
+import { CreateUsersResponse } from "../../../types/dto/admin/create-users-response.js";
+import { hashPassword } from "../../auth/password-hash-service.js";
+import { ResponseError } from "../../../types/express/response-type.js";
+import { CreateUsersBody } from "../../../types/dto/admin/create-users-body.js";
+import { JwtClaims } from "../../../types/dto/jwt/jwt-claims-dto.js";
+import { WorkGroupRow } from "../../../types/db/work-group-row-type.js";
 
 export async function createUsersService(
   body: CreateUsersBody,

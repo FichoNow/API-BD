@@ -2,13 +2,13 @@ import { Request, Response } from "express";
 import {
   BodyResponse,
   ResponseError,
-} from "../../../types/express/response-type.js";
+} from "../../../../types/express/response-type.js";
 import {
   PatchProjectBody,
   PatchProjectBodySchema,
-} from "../../../types/dto/admin/patch-project-body.js";
-import { PatchProjectResponse } from "../../../types/dto/admin/patch-project-response.js";
-import { updateProjectService } from "../../../services/admin/update-project-service.js";
+} from "../../../../types/dto/admin/patch-project-body.js";
+import { PatchProjectResponse } from "../../../../types/dto/admin/patch-project-response.js";
+import { updateProjectService } from "../../../../services/admin/projects/update-project-service.js";
 
 /**
  * Controller del endpoint de actualización de proyecto (PATCH /admin/project/:id).

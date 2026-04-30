@@ -1,14 +1,14 @@
 import { Request, Response } from "express";
-import { createUserService } from "../../../services/admin/create-user-service.js";
+import { createUserService } from "../../../../services/admin/users/create-user-service.js";
 import {
   CreateUserBody,
   CreateUserBodySchema,
-} from "../../../types/dto/admin/create-user-body.js";
+} from "../../../../types/dto/admin/create-user-body.js";
 import {
   BodyResponse,
   ResponseError,
-} from "../../../types/express/response-type.js";
-import { CreateUserResponse } from "../../../types/dto/admin/create-user-response.js";
+} from "../../../../types/express/response-type.js";
+import { CreateUserResponse } from "../../../../types/dto/admin/create-user-response.js";
 
 /**
  * Controller encargado de gestionar la creación de un usuario nuevo.

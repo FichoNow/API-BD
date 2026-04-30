@@ -2,15 +2,15 @@ import {
   findUserById,
   findUserByEmail,
   updateUserById,
-} from "../../database/repositories/user-repository.js";
-import { findGroupById } from "../../database/repositories/work-group-repository.js";
-import { findDepartmentById } from "../../database/repositories/department-repository.js";
-import { UpdateUserRow } from "../../types/db/user-row-type.js";
-import { PatchUserBody } from "../../types/dto/admin/patch-user-body.js";
-import { JwtClaims } from "../../types/dto/jwt/jwt-claims-dto.js";
-import { hashPassword } from "../auth/password-hash-service.js";
-import { PatchUserResponse } from "../../types/dto/admin/patch-user-response.js";
-import { ResponseError } from "../../types/express/response-type.js";
+} from "../../../database/repositories/user-repository.js";
+import { findGroupById } from "../../../database/repositories/work-group-repository.js";
+import { findDepartmentById } from "../../../database/repositories/department-repository.js";
+import { UpdateUserRow } from "../../../types/db/user-row-type.js";
+import { PatchUserBody } from "../../../types/dto/admin/patch-user-body.js";
+import { JwtClaims } from "../../../types/dto/jwt/jwt-claims-dto.js";
+import { hashPassword } from "../../auth/password-hash-service.js";
+import { PatchUserResponse } from "../../../types/dto/admin/patch-user-response.js";
+import { ResponseError } from "../../../types/express/response-type.js";
 
 export async function updateUser(
   userId: number,

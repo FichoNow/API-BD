@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import { BodyResponse, ResponseError } from "../../../types/express/response-type.js";
+import { BodyResponse, ResponseError } from "../../../../types/express/response-type.js";
 import {
   ReviewRequestBody,
   ReviewRequestBodySchema,
-} from "../../../types/dto/admin/review-request-body.js";
-import { ReviewRequestResponse } from "../../../types/dto/admin/review-request-response.js";
-import { rejectRequestService } from "../../../services/admin/reject-request-service.js";
+} from "../../../../types/dto/admin/review-request-body.js";
+import { ReviewRequestResponse } from "../../../../types/dto/admin/review-request-response.js";
+import { rejectRequestService } from "../../../../services/admin/requests/reject-request-service.js";
 
 /**
  * Controller del endpoint PATCH /admin/requests/:id/reject.

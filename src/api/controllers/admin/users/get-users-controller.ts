@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { BodyResponse, ResponseError } from "../../../types/express/response-type.js";
-import { GetUsersResponse } from "../../../types/dto/admin/get-users-response.js";
-import { getUsersService } from "../../../services/admin/get-users-service.js";
+import { BodyResponse, ResponseError } from "../../../../types/express/response-type.js";
+import { GetUsersResponse } from "../../../../types/dto/admin/get-users-response.js";
+import { getUsersService } from "../../../../services/admin/users/get-users-service.js";
 
 /**
  * Controller del endpoint GET /admin/users.

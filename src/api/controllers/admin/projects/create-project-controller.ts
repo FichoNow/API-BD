@@ -2,13 +2,13 @@ import { Request, Response } from "express";
 import {
   BodyResponse,
   ResponseError,
-} from "../../../types/express/response-type.js";
+} from "../../../../types/express/response-type.js";
 import {
   CreateProjectBody,
   CreateProjectBodySchema,
-} from "../../../types/dto/admin/create-project-body.js";
-import { createProjectService } from "../../../services/admin/create-project-service.js";
-import { CreateProjectResponse } from "../../../types/dto/admin/create-project-response.js";
+} from "../../../../types/dto/admin/create-project-body.js";
+import { createProjectService } from "../../../../services/admin/projects/create-project-service.js";
+import { CreateProjectResponse } from "../../../../types/dto/admin/create-project-response.js";
 
 /**
  * Controller encargado de gestionar la creación de un proyecto nuevo.

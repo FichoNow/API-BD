@@ -1,14 +1,14 @@
-import { findGroupById } from "../../database/repositories/work-group-repository.js";
-import { findDepartmentById } from "../../database/repositories/department-repository.js";
+import { findGroupById } from "../../../database/repositories/work-group-repository.js";
+import { findDepartmentById } from "../../../database/repositories/department-repository.js";
 import {
   findProjectById,
   findProjectByNameAndDepartment,
   updateProjectById,
-} from "../../database/repositories/project-repository.js";
-import { PatchProjectBody } from "../../types/dto/admin/patch-project-body.js";
-import { PatchProjectResponse } from "../../types/dto/admin/patch-project-response.js";
-import { JwtClaims } from "../../types/dto/jwt/jwt-claims-dto.js";
-import { ResponseError } from "../../types/express/response-type.js";
+} from "../../../database/repositories/project-repository.js";
+import { PatchProjectBody } from "../../../types/dto/admin/patch-project-body.js";
+import { PatchProjectResponse } from "../../../types/dto/admin/patch-project-response.js";
+import { JwtClaims } from "../../../types/dto/jwt/jwt-claims-dto.js";
+import { ResponseError } from "../../../types/express/response-type.js";
 
 export async function updateProjectService(
   projectId: number,

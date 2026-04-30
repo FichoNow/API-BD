@@ -7,16 +7,20 @@
     "clean": "rimraf dist",
     "build": "npm run clean && tsc && node -e \"const fs=require('fs');fs.mkdirSync('dist/docs',{recursive:true});fs.copyFileSync('src/docs/openapi.yaml','dist/docs/openapi.yaml')\"",
     "start": "node dist/server.js",
-    "dev": "tsx src/server.ts"
+    "dev": "tsx src/server.ts",
+    "test": "vitest run"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/express-rate-limit": "^5.1.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.3.1",
+    "@types/supertest": "^7.2.0",
     "rimraf": "^6.1.3",
+    "supertest": "^7.2.2",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.5"
   },
   "dependencies": {
     "@types/swagger-ui-express": "^4.1.8",

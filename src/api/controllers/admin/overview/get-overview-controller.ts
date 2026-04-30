@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { BodyResponse } from "../../../types/express/response-type.js";
-import { GetCompanyInfoResponse } from "../../../types/dto/admin/get-overview-response.js";
-import { getCompanyInfoService } from "../../../services/admin/get-overview-service.js";
+import { BodyResponse } from "../../../../types/express/response-type.js";
+import { GetCompanyInfoResponse } from "../../../../types/dto/admin/get-overview-response.js";
+import { getCompanyInfoService } from "../../../../services/admin/overview/get-overview-service.js";
 
 export async function getCompanyInfoController(
   req: Request,
