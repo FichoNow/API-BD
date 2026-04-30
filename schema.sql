@@ -370,29 +370,79 @@ INSERT INTO work_groups (name, department_id) VALUES
 
 -- ── Users ──────────────────────────────────────────────────
 -- a@a.com → '1234' | admins → 'admin1' | users → 'user1'
--- Los usuarios de Operaciones se mantienen, pero ahora pertenecen a Tecnología.
 INSERT INTO users (department_id, group_id, email, name, role, is_active, password_hash) VALUES
-(1, 1, 'a@a.com',                  'Super Admin',     'SUPERADMIN',    TRUE, '$argon2id$v=19$m=65536,t=3,p=4$gwDYVNxoupQd4QvaE94zQQ$yGkHmZ1zypYGYaCwew3Ykdr0/ffw0bJA/IQgdnC1E6A'),  -- 1234
-(1, 1, 'admin.tec@empresa.com',    'Ana Torres',      'ADMINISTRATOR', TRUE, '$argon2id$v=19$m=65536,t=3,p=4$RU6sltkLohcx7yMRMAsOvw$GU+s2BI2upvHCFwyVfDnrPXzcEsLBb/ngldfhZ8vdHk'),  -- admin1
-(1, 1, 'dev1@empresa.com',         'Carlos Ruiz',     'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- user1
-(1, 2, 'dev2@empresa.com',         'Marta Iglesias',  'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- user1
-(2, 3, 'admin.ventas@empresa.com', 'Pedro Molina',    'ADMINISTRATOR', TRUE, '$argon2id$v=19$m=65536,t=3,p=4$RU6sltkLohcx7yMRMAsOvw$GU+s2BI2upvHCFwyVfDnrPXzcEsLBb/ngldfhZ8vdHk'),  -- admin1
-(2, 3, 'ventas1@empresa.com',      'Laura Sanz',      'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- user1
-(2, 4, 'ventas2@empresa.com',      'Javier Campos',   'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- user1
-(3, 5, 'admin.rrhh@empresa.com',   'Sofía Navarro',   'ADMINISTRATOR', TRUE, '$argon2id$v=19$m=65536,t=3,p=4$RU6sltkLohcx7yMRMAsOvw$GU+s2BI2upvHCFwyVfDnrPXzcEsLBb/ngldfhZ8vdHk'),  -- admin1
-(3, 5, 'rrhh1@empresa.com',        'David Herrera',   'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- user1
-(1, 6, 'admin.ops@empresa.com',    'Elena Vidal',     'ADMINISTRATOR', TRUE, '$argon2id$v=19$m=65536,t=3,p=4$RU6sltkLohcx7yMRMAsOvw$GU+s2BI2upvHCFwyVfDnrPXzcEsLBb/ngldfhZ8vdHk'),  -- admin1
-(1, 6, 'ops1@empresa.com',         'Roberto Jiménez', 'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- user1
-(1, 7, 'ops2@empresa.com',         'Nuria Blanco',    'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ');  -- user1
+-- Tecnología (1-4, 10-12, 13-27) — total 22
+(1, 1, 'a@a.com',                  'Super Admin',       'SUPERADMIN',    TRUE, '$argon2id$v=19$m=65536,t=3,p=4$gwDYVNxoupQd4QvaE94zQQ$yGkHmZ1zypYGYaCwew3Ykdr0/ffw0bJA/IQgdnC1E6A'),  -- 1: 1234
+(1, 1, 'admin.tec@empresa.com',    'Ana Torres',        'ADMINISTRATOR', TRUE, '$argon2id$v=19$m=65536,t=3,p=4$RU6sltkLohcx7yMRMAsOvw$GU+s2BI2upvHCFwyVfDnrPXzcEsLBb/ngldfhZ8vdHk'),  -- 2: admin1
+(1, 1, 'dev1@empresa.com',         'Carlos Ruiz',       'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 3: user1
+(1, 2, 'dev2@empresa.com',         'Marta Iglesias',    'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 4
+(2, 3, 'admin.ventas@empresa.com', 'Pedro Molina',      'ADMINISTRATOR', TRUE, '$argon2id$v=19$m=65536,t=3,p=4$RU6sltkLohcx7yMRMAsOvw$GU+s2BI2upvHCFwyVfDnrPXzcEsLBb/ngldfhZ8vdHk'),  -- 5
+(2, 3, 'ventas1@empresa.com',      'Laura Sanz',        'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 6
+(2, 4, 'ventas2@empresa.com',      'Javier Campos',     'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 7
+(3, 5, 'admin.rrhh@empresa.com',   'Sofía Navarro',     'ADMINISTRATOR', TRUE, '$argon2id$v=19$m=65536,t=3,p=4$RU6sltkLohcx7yMRMAsOvw$GU+s2BI2upvHCFwyVfDnrPXzcEsLBb/ngldfhZ8vdHk'),  -- 8
+(3, 5, 'rrhh1@empresa.com',        'David Herrera',     'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 9
+(1, 6, 'admin.ops@empresa.com',    'Elena Vidal',       'ADMINISTRATOR', TRUE, '$argon2id$v=19$m=65536,t=3,p=4$RU6sltkLohcx7yMRMAsOvw$GU+s2BI2upvHCFwyVfDnrPXzcEsLBb/ngldfhZ8vdHk'),  -- 10
+(1, 6, 'ops1@empresa.com',         'Roberto Jiménez',   'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 11 PROBLEM
+(1, 7, 'ops2@empresa.com',         'Nuria Blanco',      'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 12
+
+-- Backend (g1) extra
+(1, 1, 'dev3@empresa.com',         'Sergio Cano',       'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 13 MILD
+(1, 1, 'dev4@empresa.com',         'Lucía Ortega',      'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 14
+(1, 1, 'dev5@empresa.com',         'Mario Reyes',       'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 15
+
+-- Frontend (g2) extra
+(1, 2, 'dev6@empresa.com',         'Paula Soler',       'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 16
+(1, 2, 'dev7@empresa.com',         'Hugo Romero',       'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 17 MILD
+(1, 2, 'dev8@empresa.com',         'Cristina Vega',     'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 18
+(1, 2, 'dev9@empresa.com',         'Iván Garrido',      'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 19
+
+-- Logística (g6) extra
+(1, 6, 'log1@empresa.com',         'Patricia León',     'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 20
+(1, 6, 'log2@empresa.com',         'Andrés Pérez',      'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 21
+(1, 6, 'log3@empresa.com',         'Beatriz Ramos',     'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 22 MILD
+(1, 6, 'log4@empresa.com',         'Diego Castro',      'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 23
+
+-- Almacén (g7) extra
+(1, 7, 'alm1@empresa.com',         'Raquel Núñez',      'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 24
+(1, 7, 'alm2@empresa.com',         'Tomás Fuentes',     'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 25 MILD
+(1, 7, 'alm3@empresa.com',         'Eva Pascual',       'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 26
+(1, 7, 'alm4@empresa.com',         'Óscar Domínguez',   'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 27
+
+-- Ventas Comercial (g3) extra
+(2, 3, 'ventas3@empresa.com',      'Alicia Bravo',      'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 28 HIGH
+(2, 3, 'ventas4@empresa.com',      'Manuel Cortés',     'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 29 MILD
+(2, 3, 'ventas5@empresa.com',      'Sara Marín',        'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 30
+(2, 3, 'ventas6@empresa.com',      'Fernando Aguilar',  'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 31
+
+-- Ventas Preventa (g4) extra
+(2, 4, 'ventas7@empresa.com',      'Carmen Suárez',     'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 32
+(2, 4, 'ventas8@empresa.com',      'Pablo Méndez',      'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 33
+(2, 4, 'ventas9@empresa.com',      'Inés Lozano',       'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 34
+
+-- RRHH Selección (g5) extra
+(3, 5, 'rrhh2@empresa.com',        'Gema Rivas',        'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 35
+(3, 5, 'rrhh3@empresa.com',        'Alejandro Salas',   'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 36 HIGH
+(3, 5, 'rrhh4@empresa.com',        'Marina Lara',       'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 37
+(3, 5, 'rrhh5@empresa.com',        'Adrián Quintana',   'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'); -- 38
 
 -- ── Projects ───────────────────────────────────────────────
 INSERT INTO projects (department_id, group_id, name, is_active) VALUES
-(1, NULL, 'Portal Web',         TRUE),  -- id 1
-(1, 1,    'App Móvil',          TRUE),  -- id 2
-(2, NULL, 'CRM Ventas',         TRUE),  -- id 3
-(2, 3,    'Captación Clientes', TRUE),  -- id 4
-(3, NULL, 'Selección Técnicos', TRUE),  -- id 5
-(1, NULL, 'Distribución',       TRUE);  -- id 6 antes Operaciones
+(1, NULL, 'Portal Web',          TRUE),  -- id 1
+(1, 1,    'App Móvil',           TRUE),  -- id 2
+(2, NULL, 'CRM Ventas',          TRUE),  -- id 3
+(2, 3,    'Captación Clientes',  TRUE),  -- id 4
+(3, NULL, 'Selección Técnicos',  TRUE),  -- id 5
+(1, NULL, 'Distribución',        TRUE),  -- id 6
+(1, 1,    'API Backoffice',      TRUE),  -- id 7
+(1, NULL, 'Dashboard Analytics', TRUE),  -- id 8
+(1, 2,    'Mobile iOS',          TRUE),  -- id 9
+(1, NULL, 'Refactor Legacy',     TRUE),  -- id 10
+(1, NULL, 'Migración Cloud',     TRUE),  -- id 11
+(2, 3,    'Renovaciones',        TRUE),  -- id 12
+(2, 4,    'Upselling',           TRUE),  -- id 13
+(2, NULL, 'Tier Premium',        TRUE),  -- id 14
+(3, NULL, 'Onboarding',          TRUE),  -- id 15
+(3, NULL, 'Formación Interna',   TRUE);  -- id 16
 
 -- ── Schedule templates ─────────────────────────────────────
 INSERT INTO plantillas_horario (department_id, name, description, weekly_minutes, is_active) VALUES
@@ -598,76 +648,84 @@ BEGIN
                     ELSE '18:00:00'
                 END AS base_end,
 
-                -- Retrasos/adelantos de entrada. No es RAND puro para que el script sea reproducible.
+                -- Retrasos/adelantos de entrada. Reproducible (sin RAND).
+                -- Distribución suave: la mayoría llega +/- 5 min, pocos retrasos significativos.
                 CASE
                     WHEN fecha_actual = '2026-05-20' AND u.group_id = 2 THEN 0
-                    WHEN MOD(DAYOFYEAR(fecha_actual) * 19 + MONTH(fecha_actual) * 17 + u.id * 29, 100)
-                         < CASE WHEN u.id IN (4,7,11) THEN 18 WHEN u.id IN (3,6,12) THEN 12 ELSE 7 END
-                        THEN 25 + MOD(DAYOFYEAR(fecha_actual) * 7 + u.id * 13, 41)       -- retraso fuerte: 25-65 min
-                    WHEN MOD(DAYOFYEAR(fecha_actual) * 19 + MONTH(fecha_actual) * 17 + u.id * 29, 100)
-                         < CASE WHEN u.id IN (4,7,11) THEN 42 WHEN u.id IN (3,6,12) THEN 34 ELSE 25 END
-                        THEN 8 + MOD(DAYOFYEAR(fecha_actual) * 5 + u.id * 11, 18)        -- retraso leve: 8-25 min
-                    ELSE -7 + MOD(DAYOFYEAR(fecha_actual) * 3 + u.id * 5, 16)            -- normal: -7 a +8 min
+                    WHEN MOD(DAYOFYEAR(fecha_actual) * 19 + u.id * 29, 100)
+                         < CASE WHEN u.id IN (4, 7, 11) THEN 9 WHEN u.id IN (3, 6, 22) THEN 6 ELSE 3 END
+                        THEN 18 + MOD(DAYOFYEAR(fecha_actual) * 7 + u.id * 13, 21)       -- retraso fuerte: 18-38 min
+                    WHEN MOD(DAYOFYEAR(fecha_actual) * 19 + u.id * 29, 100)
+                         < CASE WHEN u.id IN (4, 7, 11) THEN 25 WHEN u.id IN (3, 6, 22) THEN 18 ELSE 12 END
+                        THEN 6 + MOD(DAYOFYEAR(fecha_actual) * 5 + u.id * 11, 13)        -- retraso leve: 6-18 min
+                    ELSE -5 + MOD(DAYOFYEAR(fecha_actual) * 3 + u.id * 5, 11)            -- normal: -5 a +5 min
                 END AS in_offset,
 
-                -- Salidas: aqui esta la gracia de las estadisticas.
-                -- Hay perfiles con overtime alto, campanias por mes, cierres de mes y salidas tempranas.
+                -- Salidas: distribución por perfiles para que el cumplimiento legal salga realista.
+                --   Problem (id 11): ~83 h/año extras (único que pasa el límite de 80h)
+                --   High    (2, 28, 36): ~65-75 h/año
+                --   Mild    (3, 6, 13, 17, 22, 25, 29): ~35-50 h/año
+                --   Resto (normal): ~5-20 h/año
                 CASE
                     WHEN fecha_actual = '2026-05-20' AND u.group_id = 2 THEN 0
 
-                    -- Backend en verano: jornada intensiva, pero aun asi con algun pico puntual.
+                    -- Backend en verano: jornada intensiva 8-15, casi siempre se cumple.
                     WHEN u.department_id = 1 AND u.group_id = 1 AND fecha_actual BETWEEN '2026-07-01' AND '2026-08-31' THEN
                         CASE
-                            WHEN MOD(DAYOFYEAR(fecha_actual) * 37 + u.id * 23, 100) < 10
-                                THEN 45 + MOD(DAYOFYEAR(fecha_actual) * 11 + u.id * 17, 76)
+                            WHEN MOD(DAYOFYEAR(fecha_actual) * 37 + u.id * 23, 100) < 5
+                                THEN 20 + MOD(DAYOFYEAR(fecha_actual) * 11 + u.id * 17, 26)
                             WHEN MOD(DAYOFYEAR(fecha_actual) * 37 + u.id * 23, 100) > 92
-                                THEN -(25 + MOD(DAYOFYEAR(fecha_actual) * 13 + u.id * 7, 46))
-                            ELSE MOD(DAYOFYEAR(fecha_actual) + u.id, 16)
+                                THEN -(15 + MOD(DAYOFYEAR(fecha_actual) * 13 + u.id * 7, 26))
+                            ELSE MOD(DAYOFYEAR(fecha_actual) + u.id, 8)
                         END
 
-                    -- Tecnologia/ex-Operaciones: bastante overtime, sobre todo en febrero, abril, septiembre y noviembre.
-                    WHEN u.department_id = 1 THEN
+                    -- PROBLEM: único usuario que pasa el límite legal anual.
+                    WHEN u.id = 11 THEN
                         CASE
-                            WHEN DAY(fecha_actual) >= 26 AND dow BETWEEN 2 AND 6 AND u.id IN (2,3,10,11,12)
-                                THEN 55 + MOD(DAYOFYEAR(fecha_actual) * 9 + u.id * 19, 96)
-                            WHEN MONTH(fecha_actual) IN (2,4,9,11) AND MOD(DAYOFYEAR(fecha_actual) * 41 + u.id * 31, 100) < 38
-                                THEN 75 + MOD(DAYOFYEAR(fecha_actual) * 17 + u.id * 23, 121)
-                            WHEN MOD(DAYOFYEAR(fecha_actual) * 41 + u.id * 31, 100) < CASE WHEN u.id IN (2,3,10,11,12) THEN 28 ELSE 14 END
-                                THEN 35 + MOD(DAYOFYEAR(fecha_actual) * 13 + u.id * 11, 86)
-                            WHEN MOD(DAYOFYEAR(fecha_actual) * 43 + u.id * 17, 100) < 9
-                                THEN -(30 + MOD(DAYOFYEAR(fecha_actual) * 7 + u.id * 5, 91))
-                            ELSE MOD(DAYOFYEAR(fecha_actual) * 5 + u.id * 3, 21)
+                            WHEN MOD(DAYOFYEAR(fecha_actual) * 31 + u.id * 17, 100) < 35
+                                THEN 30 + MOD(DAYOFYEAR(fecha_actual) * 11 + u.id * 13, 51)
+                            WHEN MOD(DAYOFYEAR(fecha_actual) * 31 + u.id * 17, 100) < 60
+                                THEN 10 + MOD(DAYOFYEAR(fecha_actual) * 7 + u.id * 19, 26)
+                            WHEN MOD(DAYOFYEAR(fecha_actual) * 41 + u.id * 23, 100) < 5
+                                THEN -(15 + MOD(DAYOFYEAR(fecha_actual) * 5 + u.id * 11, 26))
+                            ELSE MOD(DAYOFYEAR(fecha_actual) * 3 + u.id, 9)
                         END
 
-                    -- Ventas: picos en marzo, junio, octubre y diciembre; trabaja sabados.
-                    WHEN u.department_id = 2 THEN
+                    -- HIGH: cerca del límite pero sin pasarlo.
+                    WHEN u.id IN (2, 28, 36) THEN
                         CASE
-                            WHEN MONTH(fecha_actual) IN (3,6,10,12) AND MOD(DAYOFYEAR(fecha_actual) * 31 + u.id * 17, 100) < 36
-                                THEN 45 + MOD(DAYOFYEAR(fecha_actual) * 13 + u.id * 29, 81)
-                            WHEN DAY(fecha_actual) BETWEEN 25 AND 31
-                                THEN 20 + MOD(DAYOFYEAR(fecha_actual) * 11 + u.id * 7, 61)
-                            WHEN MOD(DAYOFYEAR(fecha_actual) * 31 + u.id * 17, 100) < 20
-                                THEN 25 + MOD(DAYOFYEAR(fecha_actual) * 7 + u.id * 13, 56)
-                            WHEN MOD(DAYOFYEAR(fecha_actual) * 29 + u.id * 19, 100) < 10
-                                THEN -(15 + MOD(DAYOFYEAR(fecha_actual) * 5 + u.id * 3, 46))
-                            ELSE MOD(DAYOFYEAR(fecha_actual) + u.id, 13)
+                            WHEN MOD(DAYOFYEAR(fecha_actual) * 29 + u.id * 23, 100) < 30
+                                THEN 25 + MOD(DAYOFYEAR(fecha_actual) * 13 + u.id * 17, 36)
+                            WHEN MOD(DAYOFYEAR(fecha_actual) * 29 + u.id * 23, 100) < 58
+                                THEN 5 + MOD(DAYOFYEAR(fecha_actual) * 7 + u.id * 11, 21)
+                            WHEN MOD(DAYOFYEAR(fecha_actual) * 37 + u.id * 19, 100) < 7
+                                THEN -(15 + MOD(DAYOFYEAR(fecha_actual) * 3 + u.id * 13, 26))
+                            ELSE MOD(DAYOFYEAR(fecha_actual) * 5 + u.id, 11)
                         END
 
-                    -- RRHH: menos overtime, pero con salidas antes y algun pico de cierre.
-                    WHEN u.department_id = 3 THEN
+                    -- MILD: overtime ocasional, dentro del rango cómodo.
+                    WHEN u.id IN (3, 6, 13, 17, 22, 25, 29) THEN
                         CASE
-                            WHEN dow = 6 AND MOD(DAYOFYEAR(fecha_actual) * 23 + u.id * 17, 100) < 12
-                                THEN 30 + MOD(DAYOFYEAR(fecha_actual) * 5 + u.id * 11, 51)
-                            WHEN MONTH(fecha_actual) IN (1,6,12) AND MOD(DAYOFYEAR(fecha_actual) * 23 + u.id * 17, 100) < 24
-                                THEN 30 + MOD(DAYOFYEAR(fecha_actual) * 7 + u.id * 13, 71)
-                            WHEN MOD(DAYOFYEAR(fecha_actual) * 23 + u.id * 17, 100) < 14
-                                THEN 20 + MOD(DAYOFYEAR(fecha_actual) * 11 + u.id * 5, 56)
-                            WHEN MOD(DAYOFYEAR(fecha_actual) * 47 + u.id * 7, 100) < 14
-                                THEN -(20 + MOD(DAYOFYEAR(fecha_actual) * 3 + u.id * 17, 71))
-                            ELSE MOD(DAYOFYEAR(fecha_actual) * 2 + u.id, 16)
+                            WHEN MOD(DAYOFYEAR(fecha_actual) * 23 + u.id * 19, 100) < 18
+                                THEN 20 + MOD(DAYOFYEAR(fecha_actual) * 7 + u.id * 13, 26)
+                            WHEN MOD(DAYOFYEAR(fecha_actual) * 23 + u.id * 19, 100) < 42
+                                THEN 5 + MOD(DAYOFYEAR(fecha_actual) * 5 + u.id * 11, 16)
+                            WHEN MOD(DAYOFYEAR(fecha_actual) * 41 + u.id * 7, 100) < 9
+                                THEN -(12 + MOD(DAYOFYEAR(fecha_actual) * 3 + u.id, 28))
+                            ELSE MOD(DAYOFYEAR(fecha_actual) * 2 + u.id, 11)
                         END
 
-                    ELSE 0
+                    -- NORMAL: gran mayoría. Cierra en hora salvo días puntuales.
+                    ELSE
+                        CASE
+                            WHEN MOD(DAYOFYEAR(fecha_actual) * 19 + u.id * 17, 100) < 6
+                                THEN 12 + MOD(DAYOFYEAR(fecha_actual) * 7 + u.id * 11, 21)
+                            WHEN MOD(DAYOFYEAR(fecha_actual) * 19 + u.id * 17, 100) < 18
+                                THEN MOD(DAYOFYEAR(fecha_actual) * 5 + u.id * 7, 11)
+                            WHEN MOD(DAYOFYEAR(fecha_actual) * 31 + u.id * 13, 100) < 9
+                                THEN -(10 + MOD(DAYOFYEAR(fecha_actual) * 3 + u.id, 26))
+                            ELSE MOD(DAYOFYEAR(fecha_actual) + u.id, 7)
+                        END
                 END AS out_offset,
 
                 -- Fichajes abiertos reales.
@@ -721,6 +779,13 @@ BEGIN
                 AND NOT (u.id = 7  AND fecha_actual IN ('2026-04-14'))
                 AND NOT (u.id = 9  AND fecha_actual IN ('2026-05-11', '2026-10-20'))
                 AND NOT (u.id = 12 AND fecha_actual IN ('2026-02-06', '2026-08-24'))
+                AND NOT (u.id = 14 AND fecha_actual IN ('2026-03-12', '2026-09-08'))
+                AND NOT (u.id = 17 AND fecha_actual IN ('2026-05-19'))
+                AND NOT (u.id = 21 AND fecha_actual IN ('2026-04-09', '2026-10-15'))
+                AND NOT (u.id = 24 AND fecha_actual IN ('2026-02-13', '2026-07-23'))
+                AND NOT (u.id = 30 AND fecha_actual IN ('2026-06-25'))
+                AND NOT (u.id = 33 AND fecha_actual IN ('2026-03-04', '2026-11-05'))
+                AND NOT (u.id = 37 AND fecha_actual IN ('2026-09-22'))
         ) x;
 
         SET fecha_actual = DATE_ADD(fecha_actual, INTERVAL 1 DAY);
@@ -739,16 +804,31 @@ DROP PROCEDURE IF EXISTS insertar_fichajes_2026_realistas;
 /* ========================================================= */
 
 -- Primer tramo de trabajo. En jornadas largas llega hasta antes de comer.
+-- Proyecto principal según grupo, rotando entre opciones para que no quede plano.
 INSERT INTO fichaje_entries (fichaje_id, project_id, started_at, ended_at)
 SELECT
     f.id,
     CASE
-        WHEN u.department_id = 2 AND u.group_id = 3 THEN 4  -- Ventas Comercial -> Captacion Clientes
-        WHEN u.department_id = 2 THEN 3                     -- Ventas resto -> CRM Ventas
-        WHEN u.department_id = 3 THEN 5                     -- RRHH -> Seleccion Tecnicos
-        WHEN u.group_id IN (6, 7) THEN 6                    -- Ex-Operaciones -> Distribucion
-        WHEN u.group_id = 1 THEN 2                          -- Backend -> App Movil
-        ELSE 1                                              -- Tecnologia resto -> Portal Web
+        -- Ventas Comercial: Captación / Renovaciones
+        WHEN u.department_id = 2 AND u.group_id = 3 THEN
+            CASE MOD(u.id, 2) WHEN 0 THEN 12 ELSE 4 END
+        -- Ventas Preventa: Upselling / Tier Premium
+        WHEN u.department_id = 2 AND u.group_id = 4 THEN
+            CASE MOD(u.id, 2) WHEN 0 THEN 14 ELSE 13 END
+        -- Ventas resto -> CRM
+        WHEN u.department_id = 2 THEN 3
+        -- RRHH: Selección / Onboarding / Formación
+        WHEN u.department_id = 3 THEN
+            CASE MOD(u.id, 3) WHEN 0 THEN 16 WHEN 1 THEN 15 ELSE 5 END
+        -- Tech Logística/Almacén -> Distribución
+        WHEN u.group_id IN (6, 7) THEN 6
+        -- Backend: App Móvil / API Backoffice / Migración Cloud
+        WHEN u.group_id = 1 THEN
+            CASE MOD(u.id, 3) WHEN 0 THEN 11 WHEN 1 THEN 7 ELSE 2 END
+        -- Frontend: Mobile iOS / Portal Web
+        WHEN u.group_id = 2 THEN
+            CASE MOD(u.id, 2) WHEN 0 THEN 9 ELSE 1 END
+        ELSE 1
     END AS project_id,
     f.clock_in,
     CASE
@@ -762,15 +842,23 @@ SELECT
 FROM fichajes f
 INNER JOIN users u ON u.id = f.user_id;
 
--- Segundo tramo de trabajo despues de la pausa, con otro proyecto en muchos casos.
+-- Segundo tramo de trabajo despues de la pausa, con otro proyecto para variar.
 INSERT INTO fichaje_entries (fichaje_id, project_id, started_at, ended_at)
 SELECT
     f.id,
     CASE
-        WHEN u.department_id = 3 THEN 5
-        WHEN u.group_id IN (6, 7) THEN 6
-        WHEN u.group_id = 1 THEN 1
-        WHEN u.group_id = 2 THEN 2
+        -- RRHH: Formación / Selección / Onboarding (rotar diferente del primer tramo)
+        WHEN u.department_id = 3 THEN
+            CASE MOD(u.id, 3) WHEN 0 THEN 5 WHEN 1 THEN 16 ELSE 15 END
+        -- Logística/Almacén: Distribución / Dashboard Analytics
+        WHEN u.group_id IN (6, 7) THEN
+            CASE MOD(u.id, 2) WHEN 0 THEN 8 ELSE 6 END
+        -- Backend: rotar a otro proyecto tech
+        WHEN u.group_id = 1 THEN
+            CASE MOD(u.id, 4) WHEN 0 THEN 1 WHEN 1 THEN 10 WHEN 2 THEN 8 ELSE 11 END
+        -- Frontend: Refactor Legacy / Portal / Dashboard
+        WHEN u.group_id = 2 THEN
+            CASE MOD(u.id, 3) WHEN 0 THEN 10 WHEN 1 THEN 8 ELSE 1 END
         ELSE 1
     END AS project_id,
     DATE_ADD(
