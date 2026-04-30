@@ -35,6 +35,16 @@ export async function createDepartment(data: CreateDepartmentRow): Promise<numbe
   return result.insertId;
 }
 
+export async function updateDepartmentName(
+  departmentId: number,
+  name: string,
+): Promise<void> {
+  await pool.query(
+    "UPDATE departments SET name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+    [name, departmentId],
+  )
+}
+
 export async function findDepartmentsByCompanyId(
   companyId: number,
 ): Promise<DepartmentRow[]> {

@@ -120,6 +120,28 @@ export async function findUsersByDepartmentId(departmentId: number): Promise<Use
   return rows;
 }
 
+export async function findSuperadminsByCompanyId(
+  companyId: number,
+): Promise<Pick<UserData, "id" | "name" | "email" | "is_active">[]> {
+  const [rows] = await pool.query<UserRow[]>(
+    `SELECT u.id, u.name, u.email, u.is_active
+     FROM users u
+     JOIN departments d ON u.department_id = d.id
+     WHERE d.company_id = ? AND u.role = 'SUPERADMIN'
+     ORDER BY u.name ASC`,
+    [companyId],
+  )
+  return rows
+}
+
+export async function deleteUserById(userId: number): Promise<boolean> {
+  const [result] = await pool.query<ResultSetHeader>(
+    "DELETE FROM users WHERE id = ? LIMIT 1",
+    [userId],
+  );
+  return result.affectedRows > 0;
+}
+
 export async function updateUserById(
   userId: number,
   data: UpdateUserRow,
