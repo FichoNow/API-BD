@@ -4,6 +4,7 @@ import {
   UpdateUserRow,
   UserRow,
 } from "../../types/db/user-row-type.js";
+import { UserData } from "../../types/models/user.js";
 
 import { pool } from "../pool.js";
 

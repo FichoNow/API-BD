@@ -6,8 +6,8 @@ import {
 import {
   PatchProjectBody,
   PatchProjectBodySchema,
-} from "../../../../types/dto/admin/patch-project-body.js";
-import { PatchProjectResponse } from "../../../../types/dto/admin/patch-project-response.js";
+} from "../../../../types/dto/admin/projects/patch-project-body.js";
+import { PatchProjectResponse } from "../../../../types/dto/admin/projects/patch-project-response.js";
 import { updateProjectService } from "../../../../services/admin/projects/update-project-service.js";
 
 /**

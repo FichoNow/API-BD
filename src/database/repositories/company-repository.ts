@@ -1,7 +1,7 @@
 import { ResultSetHeader } from "mysql2/promise";
 import { CompanyRow, CreateCompanyRow } from "../../types/db/company-row-type.js";
 import { pool } from "../pool.js";
-import { PatchCompanyBody } from "../../types/dto/superadmin/patch-company-body.js";
+import { PatchCompanyBody } from "../../types/dto/superadmin/company/patch-company-body.js";
 
 export async function findCompanyById(
   companyId: number,

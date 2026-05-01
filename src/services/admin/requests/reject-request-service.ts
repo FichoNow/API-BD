@@ -6,8 +6,8 @@ import {
 } from "../../../database/repositories/requests/leave-request-repository.js";
 import { findLeaveRequestStatusByCode } from "../../../database/repositories/requests/leave-request-catalog-repository.js";
 import { JwtClaims } from "../../../types/dto/jwt/jwt-claims-dto.js";
-import { ReviewRequestBody } from "../../../types/dto/admin/review-request-body.js";
-import { ReviewRequestResponse } from "../../../types/dto/admin/review-request-response.js";
+import { ReviewRequestBody } from "../../../types/dto/admin/requests/review-request-body.js";
+import { ReviewRequestResponse } from "../../../types/dto/admin/requests/review-request-response.js";
 import { ResponseError } from "../../../types/express/response-type.js";
 
 /**

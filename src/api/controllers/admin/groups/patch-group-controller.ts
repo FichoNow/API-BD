@@ -3,8 +3,8 @@ import { BodyResponse, ResponseError } from "../../../../types/express/response-
 import {
   PatchGroupBody,
   PatchGroupBodySchema,
-} from "../../../../types/dto/admin/patch-group-body.js";
-import { GroupResponse } from "../../../../types/dto/admin/group-response.js";
+} from "../../../../types/dto/admin/groups/patch-group-body.js";
+import { GroupResponse } from "../../../../types/dto/admin/groups/group-response.js";
 import { updateGroupService } from "../../../../services/admin/groups/update-group-service.js";
 
 export async function patchGroupController(

@@ -1,6 +1,6 @@
 import { getEmployeeRanking } from "../../../database/repositories/stats-repository.js";
 import { JwtClaims } from "../../../types/dto/jwt/jwt-claims-dto.js";
-import { RankingResponse } from "../../../types/dto/admin/get-stats-response.js";
+import { RankingResponse } from "../../../types/dto/admin/stats/get-stats-response.js";
 import { assertDepartmentAccess, parsePeriod } from "./stats-helpers.js";
 
 export async function getRankingService(

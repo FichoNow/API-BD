@@ -5,7 +5,7 @@ import {
   getBreaksStats, getOvertimeYearly,
 } from "../../../database/repositories/stats-repository.js";
 import { JwtClaims } from "../../../types/dto/jwt/jwt-claims-dto.js";
-import { UserStatsResponse } from "../../../types/dto/admin/get-stats-response.js";
+import { UserStatsResponse } from "../../../types/dto/admin/stats/get-stats-response.js";
 import { ResponseError } from "../../../types/express/response-type.js";
 import {
   assertDepartmentAccess, localDate, parsePeriod, fmtDayLabel,

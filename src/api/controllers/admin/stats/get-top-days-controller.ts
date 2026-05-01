@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { BodyResponse, ResponseError } from "../../../../types/express/response-type.js";
-import { TopDaysResponse } from "../../../../types/dto/admin/get-stats-response.js";
+import { TopDaysResponse } from "../../../../types/dto/admin/stats/get-stats-response.js";
 import { getTopDaysService } from "../../../../services/admin/stats/get-top-days-service.js";
 
 export async function getTopDaysController(

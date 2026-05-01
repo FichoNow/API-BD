@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { BodyResponse, ResponseError } from "../../../../types/express/response-type.js";
-import { OverviewResponse } from "../../../../types/dto/admin/get-stats-response.js";
+import { OverviewResponse } from "../../../../types/dto/admin/stats/get-stats-response.js";
 import { getOverviewService } from "../../../../services/admin/stats/get-overview-service.js";
 
 export async function getOverviewController(

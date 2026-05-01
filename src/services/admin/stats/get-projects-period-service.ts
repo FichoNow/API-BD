@@ -1,6 +1,6 @@
 import { getProjectHours } from "../../../database/repositories/stats-repository.js";
 import { JwtClaims } from "../../../types/dto/jwt/jwt-claims-dto.js";
-import { ProjectsPeriodResponse } from "../../../types/dto/admin/get-stats-response.js";
+import { ProjectsPeriodResponse } from "../../../types/dto/admin/stats/get-stats-response.js";
 import { assertDepartmentAccess, parsePeriod } from "./stats-helpers.js";
 
 export async function getProjectsPeriodService(

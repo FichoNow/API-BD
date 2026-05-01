@@ -3,8 +3,8 @@ import { BodyResponse, ResponseError } from "../../../../types/express/response-
 import {
   ReviewRequestBody,
   ReviewRequestBodySchema,
-} from "../../../../types/dto/admin/review-request-body.js";
-import { ReviewRequestResponse } from "../../../../types/dto/admin/review-request-response.js";
+} from "../../../../types/dto/admin/requests/review-request-body.js";
+import { ReviewRequestResponse } from "../../../../types/dto/admin/requests/review-request-response.js";
 import { approveRequestService } from "../../../../services/admin/requests/approve-request-service.js";
 
 /**

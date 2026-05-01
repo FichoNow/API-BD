@@ -5,8 +5,8 @@ import {
   findProjectByNameAndDepartment,
   updateProjectById,
 } from "../../../database/repositories/project-repository.js";
-import { PatchProjectBody } from "../../../types/dto/admin/patch-project-body.js";
-import { PatchProjectResponse } from "../../../types/dto/admin/patch-project-response.js";
+import { PatchProjectBody } from "../../../types/dto/admin/projects/patch-project-body.js";
+import { PatchProjectResponse } from "../../../types/dto/admin/projects/patch-project-response.js";
 import { JwtClaims } from "../../../types/dto/jwt/jwt-claims-dto.js";
 import { ResponseError } from "../../../types/express/response-type.js";
 

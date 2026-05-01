@@ -1,7 +1,7 @@
 import { findDepartmentById } from "../../../database/repositories/department-repository.js";
 import { findUsersByDepartmentId } from "../../../database/repositories/user-repository.js";
 import { JwtClaims } from "../../../types/dto/jwt/jwt-claims-dto.js";
-import { GetUsersResponse } from "../../../types/dto/admin/get-users-response.js";
+import { GetUsersResponse } from "../../../types/dto/admin/users/get-users-response.js";
 import { ResponseError } from "../../../types/express/response-type.js";
 
 /**

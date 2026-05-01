@@ -1,7 +1,7 @@
 import { findDepartmentById } from "../../../database/repositories/department-repository.js";
 import { getProjectUserBreakdown, getAllTimeProjectUserBreakdown } from "../../../database/repositories/stats-repository.js";
 import { JwtClaims } from "../../../types/dto/jwt/jwt-claims-dto.js";
-import { GetProjectStatsResponse } from "../../../types/dto/admin/get-stats-response.js";
+import { GetProjectStatsResponse } from "../../../types/dto/admin/stats/get-stats-response.js";
 import { ResponseError } from "../../../types/express/response-type.js";
 
 const MONTH_LABELS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];

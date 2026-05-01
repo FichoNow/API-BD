@@ -3,8 +3,8 @@ import { BodyResponse, ResponseError } from "../../../../types/express/response-
 import {
   CreateGroupBody,
   CreateGroupBodySchema,
-} from "../../../../types/dto/admin/create-group-body.js";
-import { GroupResponse } from "../../../../types/dto/admin/group-response.js";
+} from "../../../../types/dto/admin/groups/create-group-body.js";
+import { GroupResponse } from "../../../../types/dto/admin/groups/group-response.js";
 import { createGroupService } from "../../../../services/admin/groups/create-group-service.js";
 
 export async function createGroupController(

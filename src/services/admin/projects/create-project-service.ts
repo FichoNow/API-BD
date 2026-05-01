@@ -1,13 +1,13 @@
 import { findGroupById } from "../../../database/repositories/work-group-repository.js";
 import { findDepartmentById } from "../../../database/repositories/department-repository.js";
 import { ResponseError } from "../../../types/express/response-type.js";
-import { CreateProjectBody } from "../../../types/dto/admin/create-project-body.js";
+import { CreateProjectBody } from "../../../types/dto/admin/projects/create-project-body.js";
 import { JwtClaims } from "../../../types/dto/jwt/jwt-claims-dto.js";
 import {
   createProject,
   findProjectByNameAndDepartment,
 } from "../../../database/repositories/project-repository.js";
-import { CreateProjectResponse } from "../../../types/dto/admin/create-project-response.js";
+import { CreateProjectResponse } from "../../../types/dto/admin/projects/create-project-response.js";
 
 export async function createProjectService(
   body: CreateProjectBody,

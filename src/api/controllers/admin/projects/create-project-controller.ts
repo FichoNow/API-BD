@@ -6,9 +6,9 @@ import {
 import {
   CreateProjectBody,
   CreateProjectBodySchema,
-} from "../../../../types/dto/admin/create-project-body.js";
+} from "../../../../types/dto/admin/projects/create-project-body.js";
 import { createProjectService } from "../../../../services/admin/projects/create-project-service.js";
-import { CreateProjectResponse } from "../../../../types/dto/admin/create-project-response.js";
+import { CreateProjectResponse } from "../../../../types/dto/admin/projects/create-project-response.js";
 
 /**
  * Controller encargado de gestionar la creación de un proyecto nuevo.

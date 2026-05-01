@@ -4,8 +4,8 @@ import {
 } from "../../../database/repositories/user-repository.js";
 import { findGroupById } from "../../../database/repositories/work-group-repository.js";
 import { findDepartmentById } from "../../../database/repositories/department-repository.js";
-import { CreateUserBody } from "../../../types/dto/admin/create-user-body.js";
-import { CreateUserResponse } from "../../../types/dto/admin/create-user-response.js";
+import { CreateUserBody } from "../../../types/dto/admin/users/create-user-body.js";
+import { CreateUserResponse } from "../../../types/dto/admin/users/create-user-response.js";
 import { JwtClaims } from "../../../types/dto/jwt/jwt-claims-dto.js";
 import { hashPassword } from "../../auth/password-hash-service.js";
 import { ResponseError } from "../../../types/express/response-type.js";

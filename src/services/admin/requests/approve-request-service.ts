@@ -11,8 +11,8 @@ import {
 import { findTipoExcepcionByCode } from "../../../database/repositories/horarios/tipo-excepcion-repository.js";
 import { createExcepcionCalendario } from "../../../database/repositories/horarios/excepcion-calendario-repository.js";
 import { JwtClaims } from "../../../types/dto/jwt/jwt-claims-dto.js";
-import { ReviewRequestBody } from "../../../types/dto/admin/review-request-body.js";
-import { ReviewRequestResponse } from "../../../types/dto/admin/review-request-response.js";
+import { ReviewRequestBody } from "../../../types/dto/admin/requests/review-request-body.js";
+import { ReviewRequestResponse } from "../../../types/dto/admin/requests/review-request-response.js";
 import { ResponseError } from "../../../types/express/response-type.js";
 
 /**

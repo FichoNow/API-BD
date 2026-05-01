@@ -2,7 +2,7 @@ import { findGroupsByDepartmentId } from "../../../database/repositories/work-gr
 import { findDepartmentById } from "../../../database/repositories/department-repository.js";
 import { JwtClaims } from "../../../types/dto/jwt/jwt-claims-dto.js";
 import { ResponseError } from "../../../types/express/response-type.js";
-import { GroupsListResponse } from "../../../types/dto/admin/group-response.js";
+import { GroupsListResponse } from "../../../types/dto/admin/groups/group-response.js";
 
 export async function listGroupsService(
   departmentId: number,

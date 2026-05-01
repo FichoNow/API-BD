@@ -1,7 +1,7 @@
 import { findDepartmentById } from "../../../database/repositories/department-repository.js";
 import { findLeaveRequestsByDepartmentId } from "../../../database/repositories/requests/leave-request-repository.js";
 import { JwtClaims } from "../../../types/dto/jwt/jwt-claims-dto.js";
-import { GetAdminRequestsResponse } from "../../../types/dto/admin/get-admin-requests-response.js";
+import { GetAdminRequestsResponse } from "../../../types/dto/admin/requests/get-admin-requests-response.js";
 import { ResponseError } from "../../../types/express/response-type.js";
 
 /**

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { BodyResponse, ResponseError } from "../../../../types/express/response-type.js";
-import { GroupsListResponse } from "../../../../types/dto/admin/group-response.js";
+import { GroupsListResponse } from "../../../../types/dto/admin/groups/group-response.js";
 import { listGroupsService } from "../../../../services/admin/groups/list-groups-service.js";
 
 export async function listGroupsController(

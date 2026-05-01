@@ -5,8 +5,8 @@ import { BodyResponse } from "../../../../types/express/response-type.js";
 import {
   PatchUserBody,
   PatchUserBodySchema,
-} from "../../../../types/dto/admin/patch-user-body.js";
-import { PatchUserResponse } from "../../../../types/dto/admin/patch-user-response.js";
+} from "../../../../types/dto/admin/users/patch-user-body.js";
+import { PatchUserResponse } from "../../../../types/dto/admin/users/patch-user-response.js";
 
 /**
  * Controller del endpoint de actualización de usuario (PATCH /admin/user/:id).

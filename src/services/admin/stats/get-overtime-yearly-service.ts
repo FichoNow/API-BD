@@ -1,6 +1,6 @@
 import { getOvertimeYearly } from "../../../database/repositories/stats-repository.js";
 import { JwtClaims } from "../../../types/dto/jwt/jwt-claims-dto.js";
-import { OvertimeYearlyResponse } from "../../../types/dto/admin/get-stats-response.js";
+import { OvertimeYearlyResponse } from "../../../types/dto/admin/stats/get-stats-response.js";
 import { assertDepartmentAccess, LEGAL_OVERTIME_LIMIT_MINUTES } from "./stats-helpers.js";
 
 export async function getOvertimeYearlyService(

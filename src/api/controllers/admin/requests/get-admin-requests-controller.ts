@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { BodyResponse, ResponseError } from "../../../../types/express/response-type.js";
-import { GetAdminRequestsResponse } from "../../../../types/dto/admin/get-admin-requests-response.js";
+import { GetAdminRequestsResponse } from "../../../../types/dto/admin/requests/get-admin-requests-response.js";
 import { getAdminRequestsService } from "../../../../services/admin/requests/get-admin-requests-service.js";
 
 /**

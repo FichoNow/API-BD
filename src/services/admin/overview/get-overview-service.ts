@@ -1,7 +1,7 @@
 import { findCompanyById } from "../../../database/repositories/company-repository.js";
 import { findDepartmentById, findDepartmentsByCompanyId } from "../../../database/repositories/department-repository.js";
 import { JwtClaims } from "../../../types/dto/jwt/jwt-claims-dto.js";
-import { GetCompanyInfoResponse } from "../../../types/dto/admin/get-overview-response.js";
+import { GetCompanyInfoResponse } from "../../../types/dto/admin/overview/get-overview-response.js";
 import { ResponseError } from "../../../types/express/response-type.js";
 
 export async function getCompanyInfoService(claims: JwtClaims): Promise<GetCompanyInfoResponse> {

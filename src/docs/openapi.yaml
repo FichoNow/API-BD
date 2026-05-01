@@ -31,6 +31,19 @@ tags:
       y que el usuario tenga rol `ADMINISTRATOR` o `SUPERADMIN`.
       Todas las acciones se realizan automáticamente en el contexto de la empresa
       a la que pertenece el administrador autenticado — no se puede operar sobre otras empresas.
+  - name: "Admin › Users"
+    description: Gestión de usuarios dentro de la empresa del administrador autenticado.
+  - name: "Admin › Projects"
+    description: Gestión de proyectos dentro de la empresa del administrador autenticado.
+  - name: "Admin › Groups"
+    description: Gestión de grupos de trabajo dentro de un departamento.
+  - name: "Admin › Requests"
+    description: Solicitudes de ausencia desde el panel admin (revisión, aprobación y rechazo).
+  - name: "Admin › Stats"
+    description: >
+      Estadísticas del panel admin. Todos los endpoints requieren `departmentId` como query param y
+      filtran automáticamente por la empresa del administrador. Si el rol es `ADMINISTRATOR`,
+      solo se permiten consultas sobre su propio departamento.
   - name: Superadmin
     description: >
       Endpoints exclusivos del superadministrador. Requieren `Authorization: Bearer <accessToken>`
@@ -688,6 +701,733 @@ components:
               type: integer
               example: 12
 
+    # ── Admin · Users ──────────────────
+
+    GetUsersResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 7
+              name:
+                type: string
+                example: Ana López
+              email:
+                type: string
+                format: email
+                example: ana@empresa.com
+              role:
+                type: string
+                enum: [USER, ADMINISTRATOR, SUPERADMIN]
+                example: USER
+              is_active:
+                type: boolean
+                example: true
+              must_change_password:
+                type: boolean
+                example: false
+              group_id:
+                type: integer
+                nullable: true
+                example: 3
+
+    DeleteUserResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 7
+
+    # ── Admin · Groups ─────────────────
+
+    WorkGroup:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 3
+        name:
+          type: string
+          example: Equipo Backend
+        department_id:
+          type: integer
+          example: 2
+
+    GetGroupsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkGroup"
+
+    GroupResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/WorkGroup"
+
+    DeleteGroupResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 3
+
+    # ── Admin · Requests ───────────────
+
+    AdminRequestItem:
+      type: object
+      description: Solicitud de ausencia tal y como la ve el panel admin (incluye datos del empleado y de la revisión).
+      properties:
+        id:
+          type: integer
+          example: 12
+        user_id:
+          type: integer
+          example: 7
+        employee_name:
+          type: string
+          example: Ana López
+        employee_email:
+          type: string
+          format: email
+          example: ana@empresa.com
+        department_id:
+          type: integer
+          example: 2
+        type:
+          type: string
+          enum: [VACATION, PERMISSION, SICK_LEAVE, MEDICAL_APPOINTMENT, DAY_OFF]
+          example: VACATION
+        start_date:
+          type: string
+          format: date
+          example: "2026-06-01"
+        end_date:
+          type: string
+          format: date
+          example: "2026-06-15"
+        start_time:
+          type: string
+          format: time
+          nullable: true
+          example: null
+        end_time:
+          type: string
+          format: time
+          nullable: true
+          example: null
+        status:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED, CANCELLED]
+          example: PENDING
+        comment:
+          type: string
+          nullable: true
+          example: "Vacaciones de verano"
+        reviewed_by:
+          type: integer
+          nullable: true
+          example: null
+        reviewed_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        review_comment:
+          type: string
+          nullable: true
+          example: null
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-04-15T09:30:00.000Z"
+
+    GetAdminRequestsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminRequestItem"
+
+    ReviewRequestResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 12
+            status:
+              type: string
+              enum: [APPROVED, REJECTED]
+              example: APPROVED
+            reviewed_by:
+              type: integer
+              example: 1
+            reviewed_at:
+              type: string
+              format: date-time
+              example: "2026-04-15T10:30:00.000Z"
+            review_comment:
+              type: string
+              nullable: true
+              example: "Aprobado sin condiciones"
+
+    # ── Admin · Stats ──────────────────
+
+    DayStats:
+      type: object
+      properties:
+        weekday:
+          type: integer
+          example: 1
+        date:
+          type: string
+          format: date
+          example: "2026-04-01"
+        regular_minutes:
+          type: integer
+          example: 480
+        overtime_minutes:
+          type: integer
+          example: 30
+
+    StatsOverviewResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            period_label:
+              type: string
+              example: "Abril 2026"
+            total_minutes:
+              type: integer
+              example: 9600
+            overtime_minutes:
+              type: integer
+              example: 240
+            punctuality_rate:
+              type: number
+              format: float
+              example: 0.92
+            active_absences:
+              type: integer
+              example: 2
+            pending_requests:
+              type: integer
+              example: 5
+            employees_active:
+              type: integer
+              example: 18
+            employees_total:
+              type: integer
+              example: 20
+            daily:
+              type: array
+              items:
+                $ref: "#/components/schemas/DayStats"
+            total_minutes_prev:
+              type: integer
+              example: 9100
+            overtime_minutes_prev:
+              type: integer
+              example: 200
+            punctuality_rate_prev:
+              type: number
+              format: float
+              example: 0.89
+
+    StatsRankingResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            employees:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 7
+                  name:
+                    type: string
+                    example: Ana López
+                  regular_minutes:
+                    type: integer
+                    example: 9000
+                  overtime_minutes:
+                    type: integer
+                    example: 300
+                  total_minutes:
+                    type: integer
+                    example: 9300
+                  punctuality_rate:
+                    type: number
+                    format: float
+                    example: 0.95
+
+    StatsProjectsPeriodResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            projects:
+              type: array
+              items:
+                type: object
+                properties:
+                  project_name:
+                    type: string
+                    example: Proyecto Alpha
+                  minutes:
+                    type: integer
+                    example: 1200
+
+    StatsActiveNowResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            active:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 7
+                  name:
+                    type: string
+                    example: Ana López
+                  clock_in:
+                    type: string
+                    format: date-time
+                    example: "2026-04-15T08:00:00.000Z"
+
+    StatsHourlyResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            distribution:
+              type: array
+              items:
+                type: object
+                properties:
+                  hour:
+                    type: integer
+                    minimum: 0
+                    maximum: 23
+                    example: 9
+                  count:
+                    type: integer
+                    example: 14
+
+    StatsAbsencesResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            reasons:
+              type: array
+              items:
+                type: object
+                properties:
+                  reason:
+                    type: string
+                    example: SICK_LEAVE
+                  count:
+                    type: integer
+                    example: 3
+
+    StatsTopDaysResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            days:
+              type: array
+              items:
+                type: object
+                properties:
+                  date:
+                    type: string
+                    format: date
+                    example: "2026-04-15"
+                  day_label:
+                    type: string
+                    example: "Mié 15 abr"
+                  total_minutes:
+                    type: integer
+                    example: 540
+
+    StatsBreaksResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            total_break_minutes:
+              type: integer
+              example: 1500
+            fichajes_with_break:
+              type: integer
+              example: 50
+            total_fichajes:
+              type: integer
+              example: 80
+            avg_break_minutes:
+              type: integer
+              example: 30
+
+    StatsOvertimeYearlyResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            entries:
+              type: array
+              items:
+                type: object
+                properties:
+                  user_id:
+                    type: integer
+                    example: 7
+                  user_name:
+                    type: string
+                    example: Ana López
+                  overtime_minutes:
+                    type: integer
+                    example: 4200
+                  legal_limit_minutes:
+                    type: integer
+                    example: 4800
+                  pct_of_limit:
+                    type: number
+                    format: float
+                    example: 0.875
+
+    StatsGroupsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            groups:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 3
+                  name:
+                    type: string
+                    example: Equipo Backend
+
+    StatsUserProjectHoursResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            rows:
+              type: array
+              items:
+                type: object
+                properties:
+                  user_id:
+                    type: integer
+                    example: 7
+                  user_name:
+                    type: string
+                    example: Ana López
+                  project_name:
+                    type: string
+                    example: Proyecto Alpha
+                  minutes:
+                    type: integer
+                    example: 480
+
+    StatsUserResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            period_label:
+              type: string
+              example: "Abril 2026"
+            total_minutes:
+              type: integer
+              example: 9600
+            overtime_minutes:
+              type: integer
+              example: 240
+            punctuality_rate:
+              type: number
+              format: float
+              example: 0.92
+            active_absences:
+              type: integer
+              example: 1
+            pending_requests:
+              type: integer
+              example: 0
+            daily:
+              type: array
+              items:
+                $ref: "#/components/schemas/DayStats"
+            total_minutes_prev:
+              type: integer
+              example: 9100
+            overtime_minutes_prev:
+              type: integer
+              example: 200
+            punctuality_rate_prev:
+              type: number
+              format: float
+              example: 0.90
+            project_hours:
+              type: array
+              items:
+                type: object
+                properties:
+                  project_name:
+                    type: string
+                    example: Proyecto Alpha
+                  minutes:
+                    type: integer
+                    example: 480
+            top_days:
+              type: array
+              items:
+                type: object
+                properties:
+                  date:
+                    type: string
+                    format: date
+                    example: "2026-04-15"
+                  day_label:
+                    type: string
+                    example: "Mié 15 abr"
+                  total_minutes:
+                    type: integer
+                    example: 540
+            breaks:
+              type: object
+              properties:
+                total_break_minutes:
+                  type: integer
+                  example: 600
+                fichajes_with_break:
+                  type: integer
+                  example: 18
+                total_fichajes:
+                  type: integer
+                  example: 20
+                avg_break_minutes:
+                  type: integer
+                  example: 30
+            overtime_yearly:
+              type: array
+              items:
+                type: object
+                properties:
+                  user_id:
+                    type: integer
+                    example: 7
+                  user_name:
+                    type: string
+                    example: Ana López
+                  overtime_minutes:
+                    type: integer
+                    example: 4200
+                  legal_limit_minutes:
+                    type: integer
+                    example: 4800
+                  pct_of_limit:
+                    type: number
+                    format: float
+                    example: 0.875
+
+    StatsProjectStatsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            project_name:
+              type: string
+              example: Proyecto Alpha
+            total_minutes:
+              type: integer
+              example: 4800
+            period_label:
+              type: string
+              example: "Abril 2026"
+            users:
+              type: array
+              items:
+                type: object
+                properties:
+                  user_id:
+                    type: integer
+                    example: 7
+                  user_name:
+                    type: string
+                    example: Ana López
+                  minutes:
+                    type: integer
+                    example: 1200
+
+    StatsProjectsOverviewResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            projects:
+              type: array
+              items:
+                type: object
+                properties:
+                  project_name:
+                    type: string
+                    example: Proyecto Alpha
+                  minutes:
+                    type: integer
+                    example: 4800
+                  user_count:
+                    type: integer
+                    example: 5
+            total_minutes:
+              type: integer
+              example: 14400
+            total_projects:
+              type: integer
+              example: 3
+
+    # ── Superadmin ─────────────────────
+
+    GetCompanyResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            name:
+              type: string
+              example: Gimbernat S.L.
+            cif_nif:
+              type: string
+              example: B12345678
+            email:
+              type: string
+              format: email
+              example: contacto@gimbernat.com
+            address_line:
+              type: string
+              example: Calle Mayor, 1
+            city:
+              type: string
+              example: Barcelona
+            postal_code:
+              type: string
+              example: "08001"
+
+    PostDepartmentResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 5
+            name:
+              type: string
+              example: Tecnología
+
+    PatchDepartmentResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 5
+            name:
+              type: string
+              example: Tecnología y Sistemas
+
+    GetSuperadminsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 1
+              name:
+                type: string
+                example: Juan García
+              email:
+                type: string
+                format: email
+                example: admin@gimbernat.com
+              is_active:
+                type: boolean
+                example: true
+
+    PostSuperadminResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 8
+            name:
+              type: string
+              example: María Pérez
+            email:
+              type: string
+              format: email
+              example: maria@gimbernat.com
+
 paths:
 
   # ─────────────────────────────────────────
@@ -1092,7 +1832,7 @@ paths:
 
   /admin/company-info:
     get:
-      tags: [Admin]
+      tags: ["Admin › Users"]
       summary: Info de empresa y departamentos
       description: |
         Devuelve el nombre de la empresa y la lista de departamentos visibles para el administrador autenticado.
@@ -1128,10 +1868,84 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /admin/users:
+    get:
+      tags: ["Admin › Users"]
+      summary: Listar usuarios de un departamento
+      description: |
+        Devuelve la lista de usuarios de un departamento concreto.
+
+        **Reglas de negocio**
+        - El `departmentId` es obligatorio (query param).
+        - El departamento debe pertenecer a la empresa del administrador autenticado.
+        - Si el rol es `ADMINISTRATOR`, solo puede consultar usuarios de su propio departamento.
+        - Si el rol es `SUPERADMIN`, puede consultar cualquier departamento de su empresa.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: departmentId
+          in: query
+          required: true
+          description: ID del departamento del que se quieren listar los usuarios.
+          schema:
+            type: integer
+            example: 2
+      responses:
+        "200":
+          description: Lista de usuarios del departamento.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetUsersResponse"
+        "400":
+          description: Query param `departmentId` ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BAD_REQUEST
+                  message: El parámetro departmentId es requerido y debe ser un número válido
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "403":
+          description: Token válido pero el usuario no tiene rol ADMINISTRATOR ni SUPERADMIN, o un ADMINISTRATOR intenta acceder a un departamento que no es el suyo.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: FORBIDDEN
+                  message: No autorizado
+        "404":
+          description: Departamento no encontrado o pertenece a otra empresa.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: DEPARTMENT_NOT_FOUND
+                  message: Departamento no encontrado.
+
   /admin/user:
     post:
-      tags: [Admin]
-      summary: Crear usuario
+      tags: ["Admin › Users"]
+      summary: Crear usuario individual
       description: |
         Crea un nuevo usuario con rol `USER` o `ADMINISTRATOR`.
 
@@ -1249,9 +2063,8 @@ paths:
                   code: USER_NOT_FOUND
                   message: Error al crear el usuario.
 
-  /admin/users:
     post:
-      tags: [Admin]
+      tags: ["Admin › Users"]
       summary: Crear usuarios en bulk
       description: |
         Crea entre 2 y 50 usuarios en una sola petición.
@@ -1356,7 +2169,7 @@ paths:
 
   /admin/user/{id}:
     patch:
-      tags: [Admin]
+      tags: ["Admin › Users"]
       summary: Editar usuario
       description: |
         Actualiza los datos de un usuario con rol `USER`.
@@ -1486,9 +2299,95 @@ paths:
                   code: UPDATE_FAILED
                   message: Error al actualizar el usuario.
 
+    delete:
+      tags: ["Admin › Users"]
+      summary: Eliminar usuario
+      description: |
+        Elimina un usuario de la empresa del administrador autenticado.
+
+        **Reglas de negocio**
+        - El usuario debe pertenecer a la misma empresa que el administrador autenticado.
+        - Si el rol del solicitante es `ADMINISTRATOR`, solo puede eliminar usuarios de su propio departamento.
+        - **No se puede eliminar a uno mismo** (`CANNOT_DELETE_SELF`).
+        - **No se puede eliminar a un `SUPERADMIN`** desde este endpoint (`CANNOT_DELETE_SUPERADMIN`).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del usuario a eliminar.
+          schema:
+            type: integer
+            example: 7
+      responses:
+        "200":
+          description: Usuario eliminado correctamente. Devuelve el ID del usuario eliminado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteUserResponse"
+        "400":
+          description: ID inválido o intento de eliminarse a uno mismo.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: CANNOT_DELETE_SELF
+                  message: No puedes eliminar tu propio usuario.
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "403":
+          description: El usuario es `SUPERADMIN` o un `ADMINISTRATOR` intenta eliminar a alguien de otro departamento.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: CANNOT_DELETE_SUPERADMIN
+                  message: No se puede eliminar un usuario superadmin desde aquí.
+        "404":
+          description: Usuario no encontrado o pertenece a otra empresa.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: USER_NOT_FOUND
+                  message: Usuario no encontrado
+        "500":
+          description: |
+            Error interno inesperado. Posibles causas reales:
+            - `USER_DELETE_FAILED` — el delete en BD devolvió un resultado inesperado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError"
+              example:
+                data: null
+                error:
+                  code: USER_DELETE_FAILED
+                  message: No se pudo eliminar el usuario.
+
   /admin/project:
     post:
-      tags: [Admin]
+      tags: ["Admin › Projects"]
       summary: Crear proyecto
       description: |
         Crea un nuevo proyecto en la empresa del administrador autenticado.
@@ -1585,7 +2484,7 @@ paths:
 
   /admin/project/{id}:
     patch:
-      tags: [Admin]
+      tags: ["Admin › Projects"]
       summary: Editar proyecto
       description: |
         Actualiza los datos de un proyecto existente.

@@ -3,11 +3,11 @@ import {
   BodyResponse,
   ResponseError,
 } from "../../../../types/express/response-type.js";
-import { CreateUsersResponse } from "../../../../types/dto/admin/create-users-response.js";
+import { CreateUsersResponse } from "../../../../types/dto/admin/users/create-users-response.js";
 import {
   CreateUsersBody,
   CreateUsersBodySchema,
-} from "../../../../types/dto/admin/create-users-body.js";
+} from "../../../../types/dto/admin/users/create-users-body.js";
 import { createUsersService } from "../../../../services/admin/users/create-users-service.js";
 
 /**

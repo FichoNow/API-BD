@@ -4,8 +4,8 @@ import {
   updateGroupById,
 } from "../../../database/repositories/work-group-repository.js";
 import { findDepartmentById } from "../../../database/repositories/department-repository.js";
-import { PatchGroupBody } from "../../../types/dto/admin/patch-group-body.js";
-import { GroupResponse } from "../../../types/dto/admin/group-response.js";
+import { PatchGroupBody } from "../../../types/dto/admin/groups/patch-group-body.js";
+import { GroupResponse } from "../../../types/dto/admin/groups/group-response.js";
 import { JwtClaims } from "../../../types/dto/jwt/jwt-claims-dto.js";
 import { ResponseError } from "../../../types/express/response-type.js";
 
