@@ -1942,6 +1942,110 @@ paths:
                   code: DEPARTMENT_NOT_FOUND
                   message: Departamento no encontrado.
 
+    post:
+      tags: ["Admin › Users"]
+      summary: Crear usuarios en bulk
+      description: |
+        Crea entre 2 y 50 usuarios en una sola petición.
+
+        **Reglas de negocio**
+        - Todos los usuarios se crean en la empresa (`company_id`) del administrador autenticado.
+        - Cada `group_id` debe pertenecer a esa misma empresa.
+        - Ningún email puede estar ya registrado en el sistema.
+        - Las validaciones se ejecutan **todas antes de crear** — si hay errores, no se crea ningún usuario y se devuelven todos los mensajes de error en el campo `message`, separados por saltos de línea.
+        - Los usuarios válidos se crean en paralelo.
+        - `must_change_password` se activa a `true` automáticamente en todos los usuarios creados — deberán cambiar su contraseña en el primer acceso.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              minItems: 2
+              maxItems: 50
+              items:
+                type: object
+                required: [department_id, email, name, role, password, is_active]
+                properties:
+                  department_id:
+                    type: integer
+                    example: 2
+                  group_id:
+                    type: integer
+                    nullable: true
+                    example: 3
+                  email:
+                    type: string
+                    format: email
+                    example: nuevo@empresa.com
+                  name:
+                    type: string
+                    example: Ana López
+                  role:
+                    type: string
+                    enum: [USER, ADMINISTRATOR, SUPERADMIN]
+                  password:
+                    type: string
+                    example: contraseñaSegura789
+                  is_active:
+                    type: boolean
+                    example: true
+      responses:
+        "201":
+          description: Todos los usuarios creados correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateUsersResponse"
+        "400":
+          description: Body inválido, campos faltantes, o array fuera del rango permitido (menos de 2 o más de 50 elementos).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BAD_REQUEST
+                  message: Cuerpo de la solicitud inválido
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "403":
+          description: Token válido pero el usuario no tiene rol ADMINISTRATOR.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: FORBIDDEN
+                  message: No autorizado
+        "409":
+          description: |
+            Uno o más usuarios no pasaron validación. No se ha creado ningún usuario.
+            El campo `message` contiene todos los errores encontrados, uno por línea.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BULK_USER_VALIDATION_ERROR
+                  message: "El grupo del usuario a@empresa.com no existe.\nYa existe un usuario con el email b@empresa.com."
+
   /admin/user:
     post:
       tags: ["Admin › Users"]
@@ -2062,110 +2166,6 @@ paths:
                 error:
                   code: USER_NOT_FOUND
                   message: Error al crear el usuario.
-
-    post:
-      tags: ["Admin › Users"]
-      summary: Crear usuarios en bulk
-      description: |
-        Crea entre 2 y 50 usuarios en una sola petición.
-
-        **Reglas de negocio**
-        - Todos los usuarios se crean en la empresa (`company_id`) del administrador autenticado.
-        - Cada `group_id` debe pertenecer a esa misma empresa.
-        - Ningún email puede estar ya registrado en el sistema.
-        - Las validaciones se ejecutan **todas antes de crear** — si hay errores, no se crea ningún usuario y se devuelven todos los mensajes de error en el campo `message`, separados por saltos de línea.
-        - Los usuarios válidos se crean en paralelo.
-        - `must_change_password` se activa a `true` automáticamente en todos los usuarios creados — deberán cambiar su contraseña en el primer acceso.
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: array
-              minItems: 2
-              maxItems: 50
-              items:
-                type: object
-                required: [department_id, email, name, role, password, is_active]
-                properties:
-                  department_id:
-                    type: integer
-                    example: 2
-                  group_id:
-                    type: integer
-                    nullable: true
-                    example: 3
-                  email:
-                    type: string
-                    format: email
-                    example: nuevo@empresa.com
-                  name:
-                    type: string
-                    example: Ana López
-                  role:
-                    type: string
-                    enum: [USER, ADMINISTRATOR, SUPERADMIN]
-                  password:
-                    type: string
-                    example: contraseñaSegura789
-                  is_active:
-                    type: boolean
-                    example: true
-      responses:
-        "201":
-          description: Todos los usuarios creados correctamente.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CreateUsersResponse"
-        "400":
-          description: Body inválido, campos faltantes, o array fuera del rango permitido (menos de 2 o más de 50 elementos).
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-              example:
-                data: null
-                error:
-                  code: BAD_REQUEST
-                  message: Cuerpo de la solicitud inválido
-        "401":
-          description: Token ausente o inválido. Lanzado por el middleware antes de llegar al controller.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-              example:
-                data: null
-                error:
-                  code: MISSING_AUTH_HEADER
-                  message: No autorizado
-        "403":
-          description: Token válido pero el usuario no tiene rol ADMINISTRATOR.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-              example:
-                data: null
-                error:
-                  code: FORBIDDEN
-                  message: No autorizado
-        "409":
-          description: |
-            Uno o más usuarios no pasaron validación. No se ha creado ningún usuario.
-            El campo `message` contiene todos los errores encontrados, uno por línea.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-              example:
-                data: null
-                error:
-                  code: BULK_USER_VALIDATION_ERROR
-                  message: "El grupo del usuario a@empresa.com no existe.\nYa existe un usuario con el email b@empresa.com."
 
   /admin/user/{id}:
     patch:
@@ -2634,7 +2634,7 @@ paths:
                   example: "2026-03-29T08:30:00.000Z"
       responses:
         "201":
-          description: Fichaje creado correctamente.
+          description: Fichaje creado correctamente. Devuelve el ID del nuevo fichaje.
           content:
             application/json:
               schema:
@@ -2650,6 +2650,36 @@ paths:
                 error:
                   code: BAD_REQUEST
                   message: Cuerpo de la solicitud inválido
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+
+    get:
+      tags: ["User › Fichajes"]
+      summary: Obtener fichajes
+      description: |
+        Devuelve los últimos 20 fichajes del usuario autenticado, ordenados por `clock_in` descendente.
+
+        **Reglas de negocio**
+        - Solo se devuelven los fichajes del usuario propietario del token.
+        - Se devuelven como máximo 20 registros.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Lista de fichajes obtenida correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetFichajesResponse"
         "401":
           description: Token ausente o inválido.
           content:
@@ -2921,37 +2951,6 @@ paths:
                 error:
                   code: FICHAJE_NOT_FOUND
                   message: Fichaje no encontrado.
-
-  /user/fichajes:
-    get:
-      tags: ["User › Fichajes"]
-      summary: Obtener fichajes
-      description: |
-        Devuelve los últimos 20 fichajes del usuario autenticado, ordenados por `clock_in` descendente.
-
-        **Reglas de negocio**
-        - Solo se devuelven los fichajes del usuario propietario del token.
-        - Se devuelven como máximo 20 registros.
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: Lista de fichajes obtenida correctamente.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/GetFichajesResponse"
-        "401":
-          description: Token ausente o inválido.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-              example:
-                data: null
-                error:
-                  code: MISSING_AUTH_HEADER
-                  message: No autorizado
 
   /user/fichajes/{id}:
     delete:
@@ -4022,12 +4021,70 @@ paths:
                   message: Empresa no encontrada
 
 
+  /superadmin/company:
+    get:
+      tags: [Superadmin]
+      summary: Obtener datos de la empresa propia
+      description: |
+        Devuelve los datos completos de la empresa a la que pertenece el SUPERADMIN autenticado.
+
+        **Reglas de negocio**
+        - La empresa se obtiene automáticamente del JWT — no se puede consultar otra empresa.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Datos de la empresa.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetCompanyResponse"
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "403":
+          description: Token válido pero el usuario no tiene rol SUPERADMIN.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: FORBIDDEN
+                  message: No autorizado
+        "404":
+          description: Empresa no encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: COMPANY_NOT_FOUND
+                  message: Empresa no encontrada
+
   /superadmin/department:
     post:
       tags: [Superadmin]
       summary: Crear departamento
-      description: Crea un nuevo departamento en la empresa del superadmin autenticado.
-      security: [{ bearerAuth: [] }]
+      description: |
+        Crea un nuevo departamento en la empresa del SUPERADMIN autenticado.
+
+        **Reglas de negocio**
+        - El departamento se crea automáticamente en la empresa del SUPERADMIN — no se puede crear en otra empresa.
+        - El nombre no puede repetirse dentro de la misma empresa.
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -4042,73 +4099,1452 @@ paths:
                   example: Tecnología
       responses:
         "201":
-          description: Departamento creado.
+          description: Departamento creado correctamente.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      id: { type: integer }
-                      name: { type: string }
-        "409":
-          description: Ya existe un departamento con ese nombre.
+                $ref: "#/components/schemas/PostDepartmentResponse"
+        "400":
+          description: Body inválido o nombre ausente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BAD_REQUEST
+                  message: Cuerpo de la solicitud inválido
         "401":
-          description: Token no proporcionado o inválido.
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "403":
+          description: Token válido pero el usuario no tiene rol SUPERADMIN.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: FORBIDDEN
+                  message: No autorizado
+        "409":
+          description: Ya existe un departamento con ese nombre en la empresa.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: DEPARTMENT_ALREADY_EXISTS
+                  message: Ya existe un departamento con ese nombre.
 
-  /admin/stats/department:
-    get:
-      tags: [Admin]
-      summary: Estadísticas del departamento
-      description: Devuelve métricas semanales o mensuales del departamento completo.
-      security: [{ bearerAuth: [] }]
+  /superadmin/department/{id}:
+    patch:
+      tags: [Superadmin]
+      summary: Editar nombre de un departamento
+      description: |
+        Actualiza el nombre de un departamento de la empresa del SUPERADMIN autenticado.
+
+        **Reglas de negocio**
+        - El departamento debe pertenecer a la empresa del SUPERADMIN.
+        - El nuevo nombre no puede coincidir con el de otro departamento de la misma empresa.
+      security:
+        - bearerAuth: []
       parameters:
-        - in: query
-          name: departmentId
+        - name: id
+          in: path
           required: true
-          schema: { type: integer }
-        - in: query
-          name: month
-          schema: { type: integer, minimum: 1, maximum: 12 }
-          description: Mes a consultar (omitir para semana actual).
-        - in: query
-          name: year
-          schema: { type: integer }
+          description: ID del departamento a editar.
+          schema:
+            type: integer
+            example: 5
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 150
+                  example: Tecnología y Sistemas
       responses:
         "200":
-          description: Estadísticas del departamento.
+          description: Departamento actualizado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatchDepartmentResponse"
+        "400":
+          description: ID inválido o body con nombre inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BAD_REQUEST
+                  message: Nombre inválido
         "401":
-          description: Token no proporcionado o inválido.
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "403":
+          description: Token válido pero el usuario no tiene rol SUPERADMIN.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: FORBIDDEN
+                  message: No autorizado
         "404":
-          description: Departamento no encontrado.
+          description: Departamento no encontrado o pertenece a otra empresa.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: DEPARTMENT_NOT_FOUND
+                  message: Departamento no encontrado.
+        "409":
+          description: Ya existe otro departamento con ese nombre en la empresa.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: DEPARTMENT_ALREADY_EXISTS
+                  message: Ya existe un departamento con ese nombre.
+
+  /superadmin/superadmins:
+    get:
+      tags: [Superadmin]
+      summary: Listar superadmins de la empresa
+      description: |
+        Devuelve la lista de usuarios con rol `SUPERADMIN` de la empresa del autenticado.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Lista de superadmins de la empresa.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetSuperadminsResponse"
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "403":
+          description: Token válido pero el usuario no tiene rol SUPERADMIN.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: FORBIDDEN
+                  message: No autorizado
+
+  /superadmin/superadmin:
+    post:
+      tags: [Superadmin]
+      summary: Crear nuevo superadmin
+      description: |
+        Crea un nuevo usuario con rol `SUPERADMIN` en la empresa del autenticado.
+
+        **Reglas de negocio**
+        - El email no puede estar ya registrado en el sistema.
+        - La contraseña debe tener al menos 6 caracteres.
+        - El usuario se crea automáticamente en la empresa del SUPERADMIN autenticado.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 150
+                  example: María Pérez
+                email:
+                  type: string
+                  format: email
+                  example: maria@gimbernat.com
+                password:
+                  type: string
+                  minLength: 6
+                  example: contraseñaSegura123
+      responses:
+        "201":
+          description: Superadmin creado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostSuperadminResponse"
+        "400":
+          description: Body inválido, datos ausentes o contraseña demasiado corta.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BAD_REQUEST
+                  message: Datos inválidos
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "403":
+          description: Token válido pero el usuario no tiene rol SUPERADMIN.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: FORBIDDEN
+                  message: No autorizado
+        "409":
+          description: El email ya está registrado en el sistema.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: EMAIL_ALREADY_EXISTS
+                  message: Ya existe un usuario con ese email.
+
+  # ─────────────────────────────────────────
+  # ADMIN › GROUPS
+  # ─────────────────────────────────────────
+
+  /admin/groups:
+    get:
+      tags: ["Admin › Groups"]
+      summary: Listar grupos de un departamento
+      description: |
+        Devuelve los grupos de trabajo de un departamento concreto.
+
+        **Reglas de negocio**
+        - El `departmentId` es obligatorio (query param).
+        - El departamento debe pertenecer a la empresa del administrador autenticado.
+        - Si el rol es `ADMINISTRATOR`, solo se permiten consultas sobre su propio departamento.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: departmentId
+          in: query
+          required: true
+          description: ID del departamento del que se quieren listar los grupos.
+          schema:
+            type: integer
+            example: 2
+      responses:
+        "200":
+          description: Lista de grupos del departamento.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetGroupsResponse"
+        "400":
+          description: Query param `departmentId` ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BAD_REQUEST
+                  message: El parámetro departmentId es requerido y debe ser un número válido
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "403":
+          description: El usuario no tiene rol ADMINISTRATOR/SUPERADMIN, o un ADMINISTRATOR intenta acceder a otro departamento.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Departamento no encontrado o pertenece a otra empresa.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: DEPARTMENT_NOT_FOUND
+                  message: Departamento no encontrado.
+
+  /admin/group:
+    post:
+      tags: ["Admin › Groups"]
+      summary: Crear grupo
+      description: |
+        Crea un nuevo grupo de trabajo dentro de un departamento.
+
+        **Reglas de negocio**
+        - El departamento debe pertenecer a la empresa del administrador autenticado.
+        - Si el rol es `ADMINISTRATOR`, solo puede crear grupos en su propio departamento.
+        - El nombre del grupo no puede repetirse dentro del mismo departamento.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [department_id, name]
+              properties:
+                department_id:
+                  type: integer
+                  example: 2
+                name:
+                  type: string
+                  minLength: 1
+                  example: Equipo Backend
+      responses:
+        "201":
+          description: Grupo creado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupResponse"
+        "400":
+          description: Body inválido o campos faltantes.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BAD_REQUEST
+                  message: Cuerpo de la solicitud inválido
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Sin permisos para operar sobre el departamento indicado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Departamento no encontrado o pertenece a otra empresa.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: DEPARTMENT_NOT_FOUND
+                  message: Departamento no encontrado.
+        "409":
+          description: Ya existe un grupo con ese nombre en el departamento.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: GROUP_ALREADY_EXISTS
+                  message: Ya existe un grupo con ese nombre.
+
+  /admin/group/{id}:
+    patch:
+      tags: ["Admin › Groups"]
+      summary: Editar nombre de grupo
+      description: |
+        Actualiza el nombre de un grupo existente.
+
+        **Reglas de negocio**
+        - El grupo debe pertenecer a un departamento de la empresa del administrador.
+        - Si el rol es `ADMINISTRATOR`, solo puede editar grupos de su propio departamento.
+        - Al menos un campo debe estar presente en el body.
+        - El nuevo nombre no puede coincidir con el de otro grupo del mismo departamento.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del grupo a editar.
+          schema:
+            type: integer
+            example: 3
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Al menos uno de los campos es obligatorio.
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  example: Equipo Backend Senior
+      responses:
+        "200":
+          description: Grupo actualizado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupResponse"
+        "400":
+          description: ID inválido o body sin campos válidos.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: INVALID_GROUP_ID
+                  message: ID de grupo no válido
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Sin permisos para editar este grupo.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Grupo no encontrado o pertenece a otra empresa.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: GROUP_NOT_FOUND
+                  message: Grupo no encontrado.
+        "409":
+          description: Ya existe otro grupo con ese nombre en el departamento.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: GROUP_ALREADY_EXISTS
+                  message: Ya existe un grupo con ese nombre.
+
+    delete:
+      tags: ["Admin › Groups"]
+      summary: Eliminar grupo
+      description: |
+        Elimina un grupo de trabajo.
+
+        **Reglas de negocio**
+        - El grupo debe pertenecer a un departamento de la empresa del administrador.
+        - Si el rol es `ADMINISTRATOR`, solo puede eliminar grupos de su propio departamento.
+        - **No se puede eliminar un grupo que tenga empleados asignados** — primero hay que reasignarlos.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del grupo a eliminar.
+          schema:
+            type: integer
+            example: 3
+      responses:
+        "200":
+          description: Grupo eliminado correctamente. Devuelve el ID del grupo eliminado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteGroupResponse"
+        "400":
+          description: ID inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: INVALID_GROUP_ID
+                  message: ID de grupo no válido
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Sin permisos para eliminar este grupo.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Grupo no encontrado o pertenece a otra empresa.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: GROUP_NOT_FOUND
+                  message: Grupo no encontrado.
+        "409":
+          description: El grupo tiene empleados asignados y no puede eliminarse.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: GROUP_HAS_USERS
+                  message: "No se puede eliminar: el grupo tiene 4 empleado(s) asignado(s)."
+        "500":
+          description: Error interno al eliminar.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError"
+              example:
+                data: null
+                error:
+                  code: GROUP_DELETE_FAILED
+                  message: No se pudo eliminar el grupo.
+
+  # ─────────────────────────────────────────
+  # ADMIN › REQUESTS
+  # ─────────────────────────────────────────
+
+  /admin/requests:
+    get:
+      tags: ["Admin › Requests"]
+      summary: Listar solicitudes de ausencia (panel admin)
+      description: |
+        Devuelve todas las solicitudes de ausencia de los empleados de un departamento concreto.
+        Incluye datos del empleado y de la revisión (revisor, fecha, comentario).
+
+        **Reglas de negocio**
+        - El `departmentId` es obligatorio (query param).
+        - El departamento debe pertenecer a la empresa del administrador.
+        - Si el rol es `ADMINISTRATOR`, solo puede consultar las solicitudes de su propio departamento.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: departmentId
+          in: query
+          required: true
+          description: ID del departamento del que se quieren listar las solicitudes.
+          schema:
+            type: integer
+            example: 2
+      responses:
+        "200":
+          description: Lista de solicitudes del departamento.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetAdminRequestsResponse"
+        "400":
+          description: Query param `departmentId` ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BAD_REQUEST
+                  message: El parámetro departmentId es requerido y debe ser un número válido
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Sin permisos para consultar este departamento.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Departamento no encontrado o pertenece a otra empresa.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/requests/{id}/approve:
+    patch:
+      tags: ["Admin › Requests"]
+      summary: Aprobar solicitud de ausencia
+      description: |
+        Aprueba una solicitud de ausencia de un empleado.
+
+        **Reglas de negocio**
+        - La solicitud debe pertenecer a un usuario de la empresa del administrador.
+        - Si el rol es `ADMINISTRATOR`, solo puede aprobar solicitudes de su propio departamento.
+        - Solo se pueden aprobar solicitudes en estado `PENDING`.
+        - El campo `reviewed_by` queda registrado automáticamente con el ID del admin autenticado.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la solicitud a aprobar.
+          schema:
+            type: integer
+            example: 12
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Body opcional. Solo permite enviar un comentario de revisión.
+              properties:
+                review_comment:
+                  type: string
+                  maxLength: 255
+                  nullable: true
+                  example: "Aprobado sin condiciones"
+      responses:
+        "200":
+          description: Solicitud aprobada correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewRequestResponse"
+        "400":
+          description: ID inválido, body inválido o solicitud no está en estado PENDING.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: INVALID_REQUEST_ID
+                  message: ID de solicitud no válido
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Sin permisos para aprobar esta solicitud.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Solicitud no encontrada o pertenece a otra empresa.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: REQUEST_NOT_FOUND
+                  message: Solicitud no encontrada.
+
+  /admin/requests/{id}/reject:
+    patch:
+      tags: ["Admin › Requests"]
+      summary: Rechazar solicitud de ausencia
+      description: |
+        Rechaza una solicitud de ausencia de un empleado.
+
+        **Reglas de negocio**
+        - La solicitud debe pertenecer a un usuario de la empresa del administrador.
+        - Si el rol es `ADMINISTRATOR`, solo puede rechazar solicitudes de su propio departamento.
+        - Solo se pueden rechazar solicitudes en estado `PENDING`.
+        - El campo `reviewed_by` queda registrado automáticamente con el ID del admin autenticado.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la solicitud a rechazar.
+          schema:
+            type: integer
+            example: 12
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Body opcional. Solo permite enviar un comentario de revisión.
+              properties:
+                review_comment:
+                  type: string
+                  maxLength: 255
+                  nullable: true
+                  example: "Rechazado por solapamiento con otra solicitud"
+      responses:
+        "200":
+          description: Solicitud rechazada correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewRequestResponse"
+        "400":
+          description: ID inválido, body inválido o solicitud no está en estado PENDING.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: INVALID_REQUEST_ID
+                  message: ID de solicitud no válido
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Sin permisos para rechazar esta solicitud.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Solicitud no encontrada o pertenece a otra empresa.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: REQUEST_NOT_FOUND
+                  message: Solicitud no encontrada.
+
+  # ─────────────────────────────────────────
+  # ADMIN › STATS
+  # ─────────────────────────────────────────
+
+  /admin/stats/overview:
+    get:
+      tags: ["Admin › Stats"]
+      summary: Resumen general del departamento
+      description: |
+        Devuelve métricas globales del departamento para el periodo indicado:
+        minutos totales, horas extra, puntualidad, ausencias activas, solicitudes pendientes,
+        empleados activos y desglose diario.
+        Incluye además los valores del periodo anterior para comparativa.
+
+        **Reglas de negocio**
+        - Si se omiten `month` y `year`, se devuelve la **semana actual**.
+        - Si solo se proporciona `month`, se asume el año actual.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: departmentId
+          in: query
+          required: true
+          description: ID del departamento a consultar.
+          schema:
+            type: integer
+            example: 2
+        - name: month
+          in: query
+          description: Mes (1-12). Omitir para semana actual.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+            example: 4
+        - name: year
+          in: query
+          description: Año a consultar.
+          schema:
+            type: integer
+            example: 2026
+        - name: groupId
+          in: query
+          description: Filtrar por un grupo concreto del departamento.
+          schema:
+            type: integer
+            example: 3
+      responses:
+        "200":
+          description: Resumen del departamento.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsOverviewResponse"
+        "400":
+          description: Query params inválidos o `departmentId` ausente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Sin permisos para consultar este departamento.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/stats/ranking:
+    get:
+      tags: ["Admin › Stats"]
+      summary: Ranking de empleados por horas
+      description: |
+        Devuelve el ranking de empleados del departamento ordenado por minutos totales (regulares + extra),
+        incluyendo su tasa de puntualidad.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: departmentId
+          in: query
+          required: true
+          schema:
+            type: integer
+            example: 2
+        - name: month
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+            example: 4
+        - name: year
+          in: query
+          schema:
+            type: integer
+            example: 2026
+        - name: groupId
+          in: query
+          schema:
+            type: integer
+            example: 3
+      responses:
+        "200":
+          description: Ranking de empleados.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsRankingResponse"
+        "400":
+          description: Query params inválidos.
+        "401":
+          description: Token ausente o inválido.
+        "403":
+          description: Sin permisos para consultar este departamento.
+
+  /admin/stats/projects-period:
+    get:
+      tags: ["Admin › Stats"]
+      summary: Horas por proyecto en un periodo
+      description: |
+        Devuelve los minutos trabajados por proyecto dentro del departamento (y opcionalmente filtrado por usuario o grupo)
+        para el periodo indicado.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: departmentId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: month
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+        - name: year
+          in: query
+          schema:
+            type: integer
+        - name: groupId
+          in: query
+          schema:
+            type: integer
+        - name: userId
+          in: query
+          description: Filtrar por un empleado concreto.
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Horas por proyecto en el periodo.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsProjectsPeriodResponse"
+        "400":
+          description: Query params inválidos.
+        "401":
+          description: Token ausente o inválido.
+        "403":
+          description: Sin permisos para consultar este departamento.
+
+  /admin/stats/active-now:
+    get:
+      tags: ["Admin › Stats"]
+      summary: Empleados actualmente activos
+      description: |
+        Devuelve los empleados del departamento que tienen un fichaje **abierto** en este momento
+        (con `clock_in` registrado y sin `clock_out`).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: departmentId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: groupId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Lista de empleados activos en este momento.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsActiveNowResponse"
+        "400":
+          description: Query params inválidos.
+        "401":
+          description: Token ausente o inválido.
+        "403":
+          description: Sin permisos para consultar este departamento.
+
+  /admin/stats/hourly:
+    get:
+      tags: ["Admin › Stats"]
+      summary: Distribución horaria de fichajes
+      description: |
+        Devuelve cuántos fichajes se inician en cada hora del día (0-23) durante el periodo indicado.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: departmentId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: month
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+        - name: year
+          in: query
+          schema:
+            type: integer
+        - name: groupId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Distribución horaria.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsHourlyResponse"
+        "400":
+          description: Query params inválidos.
+        "401":
+          description: Token ausente o inválido.
+        "403":
+          description: Sin permisos para consultar este departamento.
+
+  /admin/stats/absences:
+    get:
+      tags: ["Admin › Stats"]
+      summary: Conteo de ausencias por motivo
+      description: |
+        Devuelve el conteo de ausencias agrupadas por su motivo (`reason`) durante el periodo.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: departmentId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: month
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+        - name: year
+          in: query
+          schema:
+            type: integer
+        - name: groupId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Conteo de ausencias por motivo.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsAbsencesResponse"
+        "400":
+          description: Query params inválidos.
+        "401":
+          description: Token ausente o inválido.
+        "403":
+          description: Sin permisos para consultar este departamento.
+
+  /admin/stats/top-days:
+    get:
+      tags: ["Admin › Stats"]
+      summary: Días con más horas trabajadas
+      description: |
+        Devuelve los días con más minutos trabajados del departamento (y opcionalmente de un usuario o grupo concreto)
+        en el periodo indicado.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: departmentId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: month
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+        - name: year
+          in: query
+          schema:
+            type: integer
+        - name: groupId
+          in: query
+          schema:
+            type: integer
+        - name: userId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Lista de días top.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsTopDaysResponse"
+        "400":
+          description: Query params inválidos.
+        "401":
+          description: Token ausente o inválido.
+        "403":
+          description: Sin permisos para consultar este departamento.
+
+  /admin/stats/breaks:
+    get:
+      tags: ["Admin › Stats"]
+      summary: Estadísticas de descansos
+      description: |
+        Devuelve los minutos totales de descanso del departamento, cuántos fichajes incluyeron
+        algún descanso y la media de minutos por fichaje.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: departmentId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: month
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+        - name: year
+          in: query
+          schema:
+            type: integer
+        - name: groupId
+          in: query
+          schema:
+            type: integer
+        - name: userId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Estadísticas de descansos.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsBreaksResponse"
+        "400":
+          description: Query params inválidos.
+        "401":
+          description: Token ausente o inválido.
+        "403":
+          description: Sin permisos para consultar este departamento.
+
+  /admin/stats/overtime-yearly:
+    get:
+      tags: ["Admin › Stats"]
+      summary: Horas extra anuales por empleado
+      description: |
+        Devuelve, para cada empleado del departamento (o filtrado por grupo/usuario), las horas extra
+        acumuladas en el año, su límite legal y el porcentaje consumido.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: departmentId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: groupId
+          in: query
+          schema:
+            type: integer
+        - name: userId
+          in: query
+          schema:
+            type: integer
+        - name: year
+          in: query
+          description: Año a consultar (por defecto, el año actual).
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Horas extra anuales por empleado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsOvertimeYearlyResponse"
+        "400":
+          description: Query params inválidos.
+        "401":
+          description: Token ausente o inválido.
+        "403":
+          description: Sin permisos para consultar este departamento.
+
+  /admin/stats/groups:
+    get:
+      tags: ["Admin › Stats"]
+      summary: Listar grupos del departamento (selector de stats)
+      description: |
+        Devuelve la lista de grupos del departamento como `{ id, name }`.
+        Se utiliza para poblar selectores en la UI de estadísticas.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: departmentId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Lista de grupos del departamento.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsGroupsResponse"
+        "400":
+          description: Query params inválidos.
+        "401":
+          description: Token ausente o inválido.
+        "403":
+          description: Sin permisos para consultar este departamento.
+
+  /admin/stats/user-project-hours:
+    get:
+      tags: ["Admin › Stats"]
+      summary: Horas por usuario y proyecto
+      description: |
+        Devuelve un desglose con las horas trabajadas por cada usuario en cada proyecto del departamento
+        durante el periodo indicado.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: departmentId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: month
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+        - name: year
+          in: query
+          schema:
+            type: integer
+        - name: groupId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Filas user × project con minutos.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsUserProjectHoursResponse"
+        "400":
+          description: Query params inválidos.
+        "401":
+          description: Token ausente o inválido.
+        "403":
+          description: Sin permisos para consultar este departamento.
 
   /admin/stats/user/{userId}:
     get:
-      tags: [Admin]
-      summary: Estadísticas de un empleado
-      description: Devuelve métricas semanales o mensuales de un empleado concreto.
-      security: [{ bearerAuth: [] }]
+      tags: ["Admin › Stats"]
+      summary: Estadísticas completas de un empleado
+      description: |
+        Devuelve un objeto compuesto con todas las métricas relevantes de un empleado:
+        resumen del periodo, comparativa con el periodo anterior, horas por proyecto,
+        días top, descansos y horas extra anuales.
+      security:
+        - bearerAuth: []
       parameters:
-        - in: path
-          name: userId
+        - name: userId
+          in: path
           required: true
-          schema: { type: integer }
-        - in: query
-          name: departmentId
+          description: ID del empleado.
+          schema:
+            type: integer
+            example: 7
+        - name: departmentId
+          in: query
           required: true
-          schema: { type: integer }
-        - in: query
-          name: month
-          schema: { type: integer, minimum: 1, maximum: 12 }
-        - in: query
-          name: year
-          schema: { type: integer }
+          schema:
+            type: integer
+            example: 2
+        - name: month
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+        - name: year
+          in: query
+          schema:
+            type: integer
       responses:
         "200":
           description: Estadísticas del empleado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsUserResponse"
+        "400":
+          description: `userId` o `departmentId` inválidos.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
-          description: Token no proporcionado o inválido.
+          description: Token ausente o inválido.
+        "403":
+          description: Sin permisos para consultar este empleado.
         "404":
-          description: Departamento o usuario no encontrado.
+          description: Empleado no encontrado o pertenece a otra empresa.
+
+  /admin/stats/projects:
+    get:
+      tags: ["Admin › Stats"]
+      summary: Resumen general de proyectos del departamento
+      description: |
+        Devuelve un resumen con todos los proyectos del departamento: minutos trabajados,
+        número de empleados que han trabajado en cada uno y totales agregados.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: departmentId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Resumen de proyectos.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsProjectsOverviewResponse"
+        "400":
+          description: Query params inválidos.
+        "401":
+          description: Token ausente o inválido.
+        "403":
+          description: Sin permisos para consultar este departamento.
+
+  /admin/stats/project:
+    get:
+      tags: ["Admin › Stats"]
+      summary: Estadísticas de un proyecto concreto
+      description: |
+        Devuelve métricas de un proyecto del departamento: minutos totales,
+        desglose por empleado y label del periodo (mensual o todo el histórico).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: departmentId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: projectName
+          in: query
+          required: true
+          description: Nombre del proyecto a consultar.
+          schema:
+            type: string
+            example: Proyecto Alpha
+        - name: month
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+        - name: year
+          in: query
+          schema:
+            type: integer
+        - name: all_time
+          in: query
+          description: Si es `true`, ignora `month`/`year` y devuelve el histórico completo.
+          schema:
+            type: boolean
+            example: false
+      responses:
+        "200":
+          description: Estadísticas del proyecto.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsProjectStatsResponse"
+        "400":
+          description: `departmentId` o `projectName` ausentes.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BAD_REQUEST
+                  message: projectName es obligatorio
+        "401":
+          description: Token ausente o inválido.
+        "403":
+          description: Sin permisos para consultar este departamento.
+        "404":
+          description: Proyecto no encontrado en el departamento.
