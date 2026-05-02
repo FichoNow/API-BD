@@ -6,7 +6,7 @@ import { registerController } from "../controllers/auth/post-register-controller
 
 const loginRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  limit: 10, // máx 10 intentos por IP
+  limit: 50, // máx 50 intentos por IP
   message: { error: "Demasiados intentos. Inténtalo de nuevo en 15 minutos." },
   standardHeaders: true,
   legacyHeaders: false,
@@ -14,7 +14,7 @@ const loginRateLimit = rateLimit({
 
 const registerRateLimit = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hora
-  limit: 5, // máx 5 registros por IP
+  limit: 30, // máx 30 registros por IP
   message: { error: "Demasiados intentos. Inténtalo de nuevo en 1 hora." },
   standardHeaders: true,
   legacyHeaders: false,
