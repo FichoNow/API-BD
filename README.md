@@ -32,3 +32,9 @@ Compila el proyecto a la carpeta `dist/`.
 `npm run start`
 
 Ejecuta la versión compilada desde `dist/`.
+
+### Tests
+
+`npm run test`
+
+Ejecuta los tests de integración E2E. Requiere MySQL corriendo con la base de datos inicializada.
