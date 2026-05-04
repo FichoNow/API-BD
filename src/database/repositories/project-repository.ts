@@ -5,6 +5,7 @@ import {
   ProjectRow,
 } from "../../types/db/project-row-type.js";
 import { pool } from "../pool.js";
+//import { ro } from "date-fns/locale";
 
 /**
  * Busca un proyecto por su ID.
@@ -103,4 +104,22 @@ export async function updateProjectById(
   );
 
   return result.affectedRows > 0;
+}
+
+/**
+ * Busca todos los proyectos de un departamento.
+ * 
+ * Se usa desde el panel admin para listar proyectos del departamento seleccionado.
+ * 
+ * @param departmentId ID del departamento.
+ * @returns Lista de proyectos ordenados por fecha de creación descendente.
+ */
+export async function findProjectsByDepartmentId(
+  departmentId: number,
+): Promise<ProjectRow[]> {
+  const [rows] = await pool.query<ProjectRow[]>(
+    `SELECT * FROM projects WHERE department_id = ? ORDER BY created_at DESC`, [departmentId]
+  );
+
+  return rows;
 }
