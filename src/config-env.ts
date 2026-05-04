@@ -2,8 +2,6 @@ import "dotenv/config";
 import { z } from "zod";
 
 const envSchema = z.object({
-  NODE_ENV: z.enum(["development", "production"]),
-
   DATABASE_HOST: z.string().min(1),
   DATABASE_NAME: z.string().min(1),
   DATABASE_USER: z.string().min(1),
