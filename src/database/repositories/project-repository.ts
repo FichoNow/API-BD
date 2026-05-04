@@ -5,7 +5,6 @@ import {
   ProjectRow,
 } from "../../types/db/project-row-type.js";
 import { pool } from "../pool.js";
-//import { ro } from "date-fns/locale";
 
 /**
  * Busca un proyecto por su ID.
@@ -118,7 +117,8 @@ export async function findProjectsByDepartmentId(
   departmentId: number,
 ): Promise<ProjectRow[]> {
   const [rows] = await pool.query<ProjectRow[]>(
-    `SELECT * FROM projects WHERE department_id = ? ORDER BY created_at DESC`, [departmentId]
+    `SELECT * FROM projects WHERE department_id = ? ORDER BY created_at DESC`,
+    [departmentId],
   );
 
   return rows;

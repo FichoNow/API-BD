@@ -290,6 +290,21 @@ describe('Admin — usuarios', () => {
 // ══════════════════════════════════════════════════════════
 
 describe('Admin — proyectos', () => {
+  it('lista proyectos del departamento', async () => {
+    const { status, body } = await request(app)
+      .get(`/admin/projects?departmentId=${departmentId}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+    expect(status).toBe(200)
+    expect(Array.isArray(body.data)).toBe(true)
+  })
+
+  it('rechaza GET /admin/projects sin departmentId (400)', async () => {
+    const { status } = await request(app)
+      .get('/admin/projects')
+      .set('Authorization', `Bearer ${accessToken}`)
+    expect(status).toBe(400)
+  })
+
   it('crea un proyecto', async () => {
     const { status, body } = await request(app)
       .post('/admin/project')

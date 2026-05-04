@@ -2385,6 +2385,78 @@ paths:
                   code: USER_DELETE_FAILED
                   message: No se pudo eliminar el usuario.
 
+  /admin/projects:
+    get:
+      tags: ["Admin › Projects"]
+      summary: Listar proyectos del departamento
+      description: |
+        Devuelve todos los proyectos del departamento indicado.
+
+        **Reglas de negocio**
+        - `ADMINISTRATOR`: solo puede consultar su propio departamento.
+        - `SUPERADMIN`: puede consultar cualquier departamento de su empresa.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: departmentId
+          in: query
+          required: true
+          description: ID del departamento cuyos proyectos se quieren listar.
+          schema:
+            type: integer
+            example: 2
+      responses:
+        "200":
+          description: Lista de proyectos del departamento.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetProjectsResponse"
+        "400":
+          description: "`departmentId` ausente o no es un número válido."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: BAD_REQUEST
+                  message: El parámetro departmentId es requerido y debe ser un número válido
+        "401":
+          description: Token ausente o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: MISSING_AUTH_HEADER
+                  message: No autorizado
+        "403":
+          description: ADMINISTRATOR intentando consultar un departamento que no es el suyo.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: FORBIDDEN
+                  message: No autorizado
+        "404":
+          description: Departamento no encontrado o no pertenece a la empresa del token.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                data: null
+                error:
+                  code: DEPARTMENT_NOT_FOUND
+                  message: Departamento no encontrado
+
   /admin/project:
     post:
       tags: ["Admin › Projects"]

@@ -4,28 +4,24 @@ import { getProjectsService } from "../../../../services/admin/projects/get-proj
 import { GetProjectsResponse } from "../../../../types/dto/admin/projects/get-projects-response.js";
 
 /**
- * Controller del ednpoint GET /admin/projects.
- * 
+ * Controller del endpoint GET /admin/projects.
+ *
  * Su responsabilidad es:
- * 1. Leer y validar el query param 'departmentId'.
- * 2. Delegar al service 'getProjectsService'.
+ * 1. Leer y validar el query param `departmentId`.
+ * 2. Delegar al service `getProjectsService`.
  * 3. Devolver 200 con la lista de proyectos del departamento.
  */
 export async function getProjectsController(
-    req: Request,
-    res: Response<BodyResponse<GetProjectsResponse>>,
+  req: Request,
+  res: Response<BodyResponse<GetProjectsResponse>>,
 ) {
-    const departmentId = Number(req.query.departmentId);
+  const departmentId = Number(req.query.departmentId);
 
-    if(!departmentId || isNaN(departmentId) || departmentId <= 0) {
-        throw new ResponseError(
-            "El parámetro departmentId es requerido y debe ser un número válido",
-            400,
-            "BAD_REQUEST",
-        );
-    }
+  if (!departmentId || isNaN(departmentId) || departmentId <= 0) {
+    throw new ResponseError("El parámetro departmentId es requerido y debe ser un número válido", 400, "BAD_REQUEST");
+  }
 
-    const data = await getProjectsService(departmentId, req.jwtClaims!);
+  const data = await getProjectsService(departmentId, req.jwtClaims!);
 
-    return res.status(200).json({ data });
+  return res.status(200).json({ data });
 }
