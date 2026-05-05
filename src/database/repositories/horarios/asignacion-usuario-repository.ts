@@ -1,5 +1,9 @@
+import { ResultSetHeader } from "mysql2/promise";
 import { pool } from "../../pool.js";
-import { AsignacionUsuarioRow } from "../../../types/db/horarios/asignacion-usuario-row-type.js";
+import { 
+  AsignacionUsuarioRow,
+  CreateAsignacionUsuarioRow,
+} from "../../../types/db/horarios/asignacion-usuario-row-type.js";
 
 /**
  * Busca la asignación de plantilla de horario activa para un usuario en una fecha concreta.
@@ -24,4 +28,31 @@ export async function findAsignacionActivaByUserId(
   );
 
   return rows.length ? rows[0] : null;
+}
+
+/**
+ * Crea una asignación de plantilla de horario a un usuario.
+ *
+ * Indica que un usuario usará una plantilla concreta desde start_date
+ * hasta end_date. Si end_date es null, la asignación queda abierta.
+ */
+export async function createAsignacionUsuario(
+  data: CreateAsignacionUsuarioRow,
+): Promise<number> {
+  const [result] = await pool.query<ResultSetHeader>(
+    `INSERT INTO asignaciones_usuario (
+      user_id,
+      template_id,
+      start_date,
+      end_date
+    ) VALUES (?, ?, ?, ?)`,
+    [
+      data.user_id,
+      data.template_id,
+      data.start_date,
+      data.end_date,
+    ],
+  );
+
+  return result.insertId;
 }

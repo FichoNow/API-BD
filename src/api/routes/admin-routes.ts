@@ -5,6 +5,7 @@ import { projectsRouter }  from "./admin/projects-routes.js";
 import { requestsRouter }  from "./admin/requests-routes.js";
 import { statsRouter }     from "./admin/stats-routes.js";
 import { groupsRouter }    from "./admin/groups-routes.js";
+import { schedulesRouter } from "./admin/schedules-routes.js";
 
 export const adminRouter = Router();
 
@@ -14,3 +15,4 @@ adminRouter.use(projectsRouter);
 adminRouter.use(requestsRouter);
 adminRouter.use(statsRouter);
 adminRouter.use(groupsRouter);
+adminRouter.use(schedulesRouter);
