@@ -1,9 +1,11 @@
-import { ResultSetHeader } from "mysql2/promise";
+import { Pool, PoolConnection, ResultSetHeader } from "mysql2/promise";
 import { pool } from "../../pool.js";
-import { 
+import {
   DiaPlantillaRow,
-  CreateDiaPlantillaRow, 
+  CreateDiaPlantillaRow,
 } from "../../../types/db/horarios/dia-plantilla-row-type.js";
+
+type Executor = Pool | PoolConnection;
 
 /**
  * Obtiene todos los días de la semana definidos en una plantilla de horario.
@@ -23,14 +25,33 @@ export async function findDiasPlantillaByPlantillaId(
 }
 
 /**
+ * Borra todos los días de una plantilla de horario.
+ *
+ * Se usa al actualizar una plantilla: primero se borran los días previos
+ * y después se vuelven a insertar con los nuevos valores.
+ */
+export async function deleteDiasPlantillaByPlantillaId(
+  plantillaId: number,
+  executor: Executor = pool,
+): Promise<number> {
+  const [result] = await executor.query<ResultSetHeader>(
+    "DELETE FROM dias_plantilla WHERE template_id = ?",
+    [plantillaId],
+  );
+
+  return result.affectedRows;
+}
+
+/**
  * Crea un día dentro de una plantilla de horario.
  *
  * Se usa al crear una plantilla completa con sus días de lunes a domingo.
  */
 export async function createDiaPlantilla(
   data: CreateDiaPlantillaRow,
+  executor: Executor = pool,
 ): Promise<number> {
-  const [result] = await pool.query<ResultSetHeader>(
+  const [result] = await executor.query<ResultSetHeader>(
     `INSERT INTO dias_plantilla (
       template_id,
       weekday,

@@ -1,7 +1,12 @@
 import { findDepartmentById } from "../../../database/repositories/department-repository.js";
 import { findGroupById } from "../../../database/repositories/work-group-repository.js";
 import { findPlantillaHorarioById } from "../../../database/repositories/horarios/plantilla-horario-repository.js";
-import { createAsignacionGrupo } from "../../../database/repositories/horarios/asignacion-grupo-repository.js";
+import {
+  createAsignacionGrupo,
+  findOpenAsignacionGrupoBefore,
+  updateAsignacionGrupoEndDate,
+} from "../../../database/repositories/horarios/asignacion-grupo-repository.js";
+import { previousDay } from "../../../helpers/date.js";
 import { CreateGroupScheduleAssignmentBody } from "../../../types/dto/admin/schedules/create-group-schedule-assignment-body.js";
 import { CreateGroupScheduleAssignmentResponse } from "../../../types/dto/admin/schedules/create-group-schedule-assignment-response.js";
 import { JwtClaims } from "../../../types/dto/jwt/jwt-claims-dto.js";
@@ -16,6 +21,10 @@ import { ResponseError } from "../../../types/express/response-type.js";
  * - Grupo y plantilla deben pertenecer al mismo departamento.
  * - El departamento debe pertenecer a la empresa del admin.
  * - ADMINISTRATOR solo puede asignar horarios dentro de su propio departamento.
+ *
+ * Si el grupo tiene una asignación abierta (sin end_date) anterior al
+ * start_date de la nueva, se cierra automáticamente poniendo end_date al día
+ * anterior. Así no quedan dos plantillas activas a la vez para el mismo grupo.
  */
 export async function createGroupScheduleAssignmentService(
   body: CreateGroupScheduleAssignmentBody,
@@ -61,6 +70,18 @@ export async function createGroupScheduleAssignmentService(
 
   if (claims.role === "ADMINISTRATOR" && claims.department_id !== group.department_id) {
     throw new ResponseError("No autorizado", 403, "FORBIDDEN");
+  }
+
+  const previousOpen = await findOpenAsignacionGrupoBefore(
+    body.group_id,
+    body.start_date,
+  );
+
+  if (previousOpen) {
+    await updateAsignacionGrupoEndDate(
+      previousOpen.id,
+      previousDay(body.start_date),
+    );
   }
 
   const assignmentId = await createAsignacionGrupo({

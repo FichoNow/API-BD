@@ -5,6 +5,8 @@ import { postDepartmentController }    from "../controllers/superadmin/departmen
 import { patchDepartmentController }   from "../controllers/superadmin/department/patch-department-controller.js";
 import { getSuperadminsController }    from "../controllers/superadmin/superadmins/get-superadmins-controller.js";
 import { postSuperadminController }    from "../controllers/superadmin/superadmins/post-superadmin-controller.js";
+import { patchSuperadminController }   from "../controllers/superadmin/superadmins/patch-superadmin-controller.js";
+import { deleteSuperadminController }  from "../controllers/superadmin/superadmins/delete-superadmin-controller.js";
 
 export const superadminRouter = Router();
 
@@ -14,3 +16,5 @@ superadminRouter.post("/department",          postDepartmentController);   // Cr
 superadminRouter.patch("/department/:id",     patchDepartmentController);  // Editar nombre departamento
 superadminRouter.get("/superadmins",          getSuperadminsController);   // Listar superadmins
 superadminRouter.post("/superadmin",          postSuperadminController);   // Crear superadmin
+superadminRouter.patch("/superadmin/:id",     patchSuperadminController);  // Editar nombre/email superadmin
+superadminRouter.delete("/superadmin/:id",    deleteSuperadminController); // Eliminar superadmin (excepto owner)

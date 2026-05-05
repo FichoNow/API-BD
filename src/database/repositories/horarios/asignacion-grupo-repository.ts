@@ -1,7 +1,8 @@
-import { ResultSetHeader } from "mysql2/promise";
+import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { pool } from "../../pool.js";
-import { 
-  AsignacionGrupoRow, 
+import {
+  AsignacionGrupoRow,
+  AsignacionGrupoWithInfoRow,
   CreateAsignacionGrupoRow,
 } from "../../../types/db/horarios/asignacion-grupo-row-type.js";
 
@@ -30,6 +31,90 @@ export async function findAsignacionActivaByGrupoId(
 }
 
 /**
+ * Busca una asignación de horario de grupo por su ID.
+ */
+export async function findAsignacionGrupoById(
+  assignmentId: number,
+): Promise<AsignacionGrupoRow | null> {
+  const [rows] = await pool.query<AsignacionGrupoRow[]>(
+    "SELECT * FROM asignaciones_grupo WHERE id = ? LIMIT 1",
+    [assignmentId],
+  );
+
+  return rows.length ? rows[0] : null;
+}
+
+/**
+ * Devuelve todas las asignaciones de horario de los grupos de un departamento,
+ * junto con el nombre del grupo y el nombre de la plantilla.
+ */
+export async function findAsignacionesGrupoByDepartmentId(
+  departmentId: number,
+): Promise<AsignacionGrupoWithInfoRow[]> {
+  const [rows] = await pool.query<AsignacionGrupoWithInfoRow[]>(
+    `SELECT
+        a.id,
+        a.group_id,
+        a.template_id,
+        a.start_date,
+        a.end_date,
+        a.created_at,
+        a.updated_at,
+        g.name AS group_name,
+        t.name AS template_name
+     FROM asignaciones_grupo a
+     JOIN work_groups g ON g.id = a.group_id
+     JOIN plantillas_horario t ON t.id = a.template_id
+     WHERE g.department_id = ?
+     ORDER BY a.start_date DESC, a.id DESC`,
+    [departmentId],
+  );
+
+  return rows;
+}
+
+/**
+ * Busca la asignación abierta (sin end_date) anterior a una fecha concreta
+ * para el mismo grupo. Se usa para auto-cerrarla al crear una nueva.
+ */
+export async function findOpenAsignacionGrupoBefore(
+  groupId: number,
+  newStartDate: string,
+): Promise<AsignacionGrupoRow | null> {
+  const [rows] = await pool.query<AsignacionGrupoRow[]>(
+    `SELECT * FROM asignaciones_grupo
+     WHERE group_id = ?
+       AND end_date IS NULL
+       AND start_date < ?
+     ORDER BY start_date DESC
+     LIMIT 1`,
+    [groupId, newStartDate],
+  );
+
+  return rows.length ? rows[0] : null;
+}
+
+/**
+ * Cuenta cuántas asignaciones de grupo (vivas o futuras) usan una plantilla.
+ */
+export async function countAsignacionesGrupoByTemplateId(
+  templateId: number,
+  today: string,
+): Promise<number> {
+  interface CountRow extends RowDataPacket {
+    count: number;
+  }
+  const [rows] = await pool.query<CountRow[]>(
+    `SELECT COUNT(*) AS count
+     FROM asignaciones_grupo
+     WHERE template_id = ?
+       AND (end_date IS NULL OR end_date >= ?)`,
+    [templateId, today],
+  );
+  return Number(rows[0]?.count ?? 0);
+}
+
+/**
  * Crea una asignación de plantilla de horario a un grupo.
  *
  * Indica que un grupo usará una plantilla concreta desde start_date
@@ -54,4 +139,31 @@ export async function createAsignacionGrupo(
   );
 
   return result.insertId;
+}
+
+/**
+ * Actualiza el end_date de una asignación de grupo.
+ */
+export async function updateAsignacionGrupoEndDate(
+  assignmentId: number,
+  endDate: string,
+): Promise<boolean> {
+  const [result] = await pool.query<ResultSetHeader>(
+    "UPDATE asignaciones_grupo SET end_date = ? WHERE id = ? LIMIT 1",
+    [endDate, assignmentId],
+  );
+  return result.affectedRows > 0;
+}
+
+/**
+ * Borra una asignación de horario de grupo.
+ */
+export async function deleteAsignacionGrupoById(
+  assignmentId: number,
+): Promise<boolean> {
+  const [result] = await pool.query<ResultSetHeader>(
+    "DELETE FROM asignaciones_grupo WHERE id = ? LIMIT 1",
+    [assignmentId],
+  );
+  return result.affectedRows > 0;
 }

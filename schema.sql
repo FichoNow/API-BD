@@ -32,6 +32,7 @@ CREATE TABLE companies (
     address_line VARCHAR(200) NOT NULL,
     city VARCHAR(100) NOT NULL,
     postal_code VARCHAR(20) NOT NULL,
+    owner_id INT NULL,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -39,6 +40,8 @@ CREATE TABLE companies (
     UNIQUE KEY uq_companies_name (name),
     UNIQUE KEY uq_companies_cif_nif (cif_nif)
 );
+
+/* La FK a users se añade después de crear la tabla users (referencia circular) */
 
 /* ============= Tabla departments =============*/
 CREATE TABLE departments (
@@ -89,6 +92,12 @@ CREATE TABLE users (
         FOREIGN KEY (group_id) REFERENCES work_groups(id)
         ON DELETE SET NULL
 );
+
+/* FK companies.owner_id → users.id (se añade aquí porque es circular) */
+ALTER TABLE companies
+    ADD CONSTRAINT fk_companies_owner
+    FOREIGN KEY (owner_id) REFERENCES users(id)
+    ON DELETE SET NULL;
 
 /* ============= Tabla refresh_tokens =============*/
 CREATE TABLE refresh_tokens (
@@ -424,6 +433,9 @@ INSERT INTO users (department_id, group_id, email, name, role, is_active, passwo
 (3, 5, 'rrhh3@empresa.com',        'Alejandro Salas',   'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 36 HIGH
 (3, 5, 'rrhh4@empresa.com',        'Marina Lara',       'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'),  -- 37
 (3, 5, 'rrhh5@empresa.com',        'Adrián Quintana',   'USER',          TRUE, '$argon2id$v=19$m=65536,t=3,p=4$7Mr3vLjVxRIieUTmliBwkQ$/fNeCEn/sg3bP0Ncln3ryoU6iUnu+2ONnajYvy81TnQ'); -- 38
+
+-- Owner: el primer SUPERADMIN registrado en la empresa.
+UPDATE companies SET owner_id = 1 WHERE id = 1;
 
 -- ── Projects ───────────────────────────────────────────────
 INSERT INTO projects (department_id, group_id, name, is_active) VALUES

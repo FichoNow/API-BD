@@ -17,5 +17,6 @@ export async function getCompanyService(claims: JwtClaims): Promise<GetCompanyRe
     address_line: company.address_line,
     city:         company.city,
     postal_code:  company.postal_code,
+    owner_id:     company.owner_id,
   };
 }

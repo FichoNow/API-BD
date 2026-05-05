@@ -1,9 +1,11 @@
-import { ResultSetHeader } from "mysql2/promise";
+import { Pool, PoolConnection, ResultSetHeader } from "mysql2/promise";
 import { pool } from "../../pool.js";
-import { 
+import {
   PlantillaHorarioRow,
   CreatePlantillaHorarioRow,
 } from "../../../types/db/horarios/plantilla-horario-row-type.js";
+
+type Executor = Pool | PoolConnection;
 
 /**
  * Busca una plantilla de horario por su ID.
@@ -59,14 +61,47 @@ export async function findAllPlantillasHorarioByDepartmentId(
 }
 
 /**
+ * Actualiza los datos editables de una plantilla de horario.
+ *
+ * Devuelve true si se modificó alguna fila.
+ */
+export async function updatePlantillaHorario(
+  templateId: number,
+  data: CreatePlantillaHorarioRow,
+  executor: Executor = pool,
+): Promise<boolean> {
+  const [result] = await executor.query<ResultSetHeader>(
+    `UPDATE plantillas_horario
+     SET department_id = ?,
+         name = ?,
+         description = ?,
+         weekly_minutes = ?,
+         is_active = ?
+     WHERE id = ?
+     LIMIT 1`,
+    [
+      data.department_id,
+      data.name,
+      data.description,
+      data.weekly_minutes,
+      data.is_active,
+      templateId,
+    ],
+  );
+
+  return result.affectedRows > 0;
+}
+
+/**
  * Crea una nueva plantilla de horario.
- * 
+ *
  * Devuelve el ID de la plantilla creada.
  */
 export async function createPlantillaHorario(
   data: CreatePlantillaHorarioRow,
+  executor: Executor = pool,
 ): Promise<number> {
-  const [result] = await pool.query<ResultSetHeader>(
+  const [result] = await executor.query<ResultSetHeader>(
     `INSERT INTO plantillas_horario (
       department_id,
       name,

@@ -1,4 +1,4 @@
-import { createCompany, findCompanyByCifNif } from "../../database/repositories/company-repository.js";
+import { createCompany, findCompanyByCifNif, setCompanyOwner } from "../../database/repositories/company-repository.js";
 import { createDepartment } from "../../database/repositories/department-repository.js";
 import { createUser, findUserByEmail } from "../../database/repositories/user-repository.js";
 import { PostRegisterBody } from "../../types/dto/auth/post-register-body.js";
@@ -58,6 +58,8 @@ export async function registerCompany(body: PostRegisterBody): Promise<PostRegis
     is_active: true,
     must_change_password: false,
   });
+
+  await setCompanyOwner(companyId, userId);
 
   return {
     company: {

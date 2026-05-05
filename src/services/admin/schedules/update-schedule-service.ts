@@ -1,37 +1,60 @@
 import { findDepartmentById } from "../../../database/repositories/department-repository.js";
-import { createPlantillaHorario } from "../../../database/repositories/horarios/plantilla-horario-repository.js";
-import { createDiaPlantilla } from "../../../database/repositories/horarios/dia-plantilla-repository.js";
+import {
+  findPlantillaHorarioById,
+  updatePlantillaHorario,
+} from "../../../database/repositories/horarios/plantilla-horario-repository.js";
+import {
+  createDiaPlantilla,
+  deleteDiasPlantillaByPlantillaId,
+} from "../../../database/repositories/horarios/dia-plantilla-repository.js";
 import { pool } from "../../../database/pool.js";
-import { CreateScheduleBody } from "../../../types/dto/admin/schedules/create-schedule-body.js";
-import { CreateScheduleResponse } from "../../../types/dto/admin/schedules/create-schedule-response.js";
+import { UpdateScheduleBody } from "../../../types/dto/admin/schedules/update-schedule-body.js";
+import { UpdateScheduleResponse } from "../../../types/dto/admin/schedules/update-schedule-response.js";
 import { JwtClaims } from "../../../types/dto/jwt/jwt-claims-dto.js";
 import { ResponseError } from "../../../types/express/response-type.js";
 
 /**
- * Crea una plantilla de horario completa con sus días.
+ * Actualiza una plantilla de horario completa con sus días.
  *
  * Reglas:
- * - El departamento debe existir.
- * - El departamento debe pertenecer a la empresa del admin.
- * - ADMINISTRATOR solo puede crear horarios en su propio departamento.
+ * - La plantilla debe existir.
+ * - El departamento de la plantilla debe pertenecer a la empresa del admin.
+ * - ADMINISTRATOR solo puede editar horarios en su propio departamento.
  * - Los días laborables deben tener horario válido.
- * - Se calculan automáticamente los minutos semanales.
+ * - Se recalculan automáticamente los minutos semanales.
+ *
+ * Estrategia: dentro de una transacción, se actualiza la cabecera de la
+ * plantilla, se borran los 7 días previos y se vuelven a insertar.
  */
-export async function createScheduleService(
-  body: CreateScheduleBody,
+export async function updateScheduleService(
+  templateId: number,
+  body: UpdateScheduleBody,
   claims: JwtClaims,
-): Promise<CreateScheduleResponse> {
-  const department = await findDepartmentById(body.department_id);
+): Promise<UpdateScheduleResponse> {
+  const template = await findPlantillaHorarioById(templateId);
 
-  if (!department || department.company_id !== claims.company_id) {
+  if (!template) {
     throw new ResponseError(
-      "Departamento no encontrado",
+      "Plantilla de horario no encontrada",
       404,
-      "DEPARTMENT_NOT_FOUND",
+      "SCHEDULE_TEMPLATE_NOT_FOUND",
     );
   }
 
-  if (claims.role === "ADMINISTRATOR" && claims.department_id !== body.department_id) {
+  const department = await findDepartmentById(template.department_id);
+
+  if (!department || department.company_id !== claims.company_id) {
+    throw new ResponseError(
+      "Plantilla de horario no encontrada",
+      404,
+      "SCHEDULE_TEMPLATE_NOT_FOUND",
+    );
+  }
+
+  if (
+    claims.role === "ADMINISTRATOR" &&
+    claims.department_id !== template.department_id
+  ) {
     throw new ResponseError("No autorizado", 403, "FORBIDDEN");
   }
 
@@ -45,9 +68,10 @@ export async function createScheduleService(
   try {
     await connection.beginTransaction();
 
-    const templateId = await createPlantillaHorario(
+    await updatePlantillaHorario(
+      templateId,
       {
-        department_id: body.department_id,
+        department_id: template.department_id,
         name,
         description,
         weekly_minutes: weeklyMinutes,
@@ -55,6 +79,8 @@ export async function createScheduleService(
       },
       connection,
     );
+
+    await deleteDiasPlantillaByPlantillaId(templateId, connection);
 
     for (const day of sortedDays) {
       await createDiaPlantilla(
@@ -74,7 +100,7 @@ export async function createScheduleService(
 
     return {
       id: templateId,
-      department_id: body.department_id,
+      department_id: template.department_id,
       name,
       description,
       weekly_minutes: weeklyMinutes,
@@ -94,7 +120,7 @@ export async function createScheduleService(
  * Ejemplo:
  * 09:00 - 18:00 con 60 min descanso = 480 minutos.
  */
-function calculateWeeklyMinutes(days: CreateScheduleBody["days"]): number {
+function calculateWeeklyMinutes(days: UpdateScheduleBody["days"]): number {
   let total = 0;
 
   for (const day of days) {

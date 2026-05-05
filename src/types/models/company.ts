@@ -7,6 +7,7 @@ export interface CompanyData {
   address_line: string;
   city: string;
   postal_code: string;
+  owner_id: number | null;
   is_active: boolean;
   created_at: Date;
   updated_at: Date;

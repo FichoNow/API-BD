@@ -54,3 +54,11 @@ export async function updateCompany(
     [...values, companyId],
   );
 }
+
+/** Asigna el owner de la empresa (usado en register tras crear el primer superadmin). */
+export async function setCompanyOwner(companyId: number, userId: number): Promise<void> {
+  await pool.query(
+    "UPDATE companies SET owner_id = ? WHERE id = ?",
+    [userId, companyId],
+  );
+}

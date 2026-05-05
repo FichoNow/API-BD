@@ -29,6 +29,11 @@ let fichajeId    = 0
 let entryId      = 0
 let breakId      = 0
 let userToken    = ''   // token del usuario USER (no admin)
+let createdSuperadminId = 0
+let scheduleTemplateId  = 0
+let scheduleGroupId     = 0
+let userAssignmentId    = 0
+let groupAssignmentId   = 0
 
 // ── Limpieza ───────────────────────────────────────────────
 afterAll(async () => {
@@ -171,6 +176,7 @@ describe('Superadmin — superadmins', () => {
       })
     expect(status).toBe(201)
     expect(body.data.id).toBeGreaterThan(0)
+    createdSuperadminId = body.data.id
   })
 
   it('rechaza email duplicado al crear superadmin (409)', async () => {
@@ -183,6 +189,30 @@ describe('Superadmin — superadmins', () => {
         password: 'SuperPass123!',
       })
     expect(status).toBe(409)
+  })
+
+  it('PATCH /superadmin/superadmin/:id renombra el superadmin creado', async () => {
+    const { status, body } = await request(app)
+      .patch(`/superadmin/superadmin/${createdSuperadminId}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ name: `Super Renombrado ${RUN}` })
+    expect(status).toBe(200)
+    expect(body.data.id).toBe(createdSuperadminId)
+  })
+
+  it('rechaza PATCH /superadmin/superadmin/:id con body vacío (400)', async () => {
+    const { status } = await request(app)
+      .patch(`/superadmin/superadmin/${createdSuperadminId}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({})
+    expect(status).toBe(400)
+  })
+
+  it('DELETE /superadmin/superadmin/:id elimina el superadmin no-owner', async () => {
+    const { status } = await request(app)
+      .delete(`/superadmin/superadmin/${createdSuperadminId}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+    expect(status).toBe(200)
   })
 })
 
@@ -282,6 +312,29 @@ describe('Admin — usuarios', () => {
       .set('Authorization', `Bearer ${accessToken}`)
       .send({ name: 'Usuario Editado' })
     expect(status).toBe(200)
+  })
+
+  it('rechaza POST /admin/users (bulk) con menos de 2 elementos (400)', async () => {
+    const { status } = await request(app)
+      .post('/admin/users')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send([
+        { department_id: departmentId, group_id: null, name: 'Solo', email: `solo_${RUN}@test-e2e.com`, password: 'BulkPass123!', role: 'USER', is_active: true },
+      ])
+    expect(status).toBe(400)
+  })
+
+  it('crea varios usuarios en bulk', async () => {
+    const { status, body } = await request(app)
+      .post('/admin/users')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send([
+        { department_id: departmentId, group_id: null, name: 'Bulk 1', email: `bulk1_${RUN}@test-e2e.com`, password: 'BulkPass123!', role: 'USER', is_active: true },
+        { department_id: departmentId, group_id: null, name: 'Bulk 2', email: `bulk2_${RUN}@test-e2e.com`, password: 'BulkPass123!', role: 'USER', is_active: true },
+      ])
+    expect(status).toBe(201)
+    expect(Array.isArray(body.data)).toBe(true)
+    expect(body.data.length).toBe(2)
   })
 })
 
@@ -445,6 +498,21 @@ describe('Admin — stats', () => {
       .set('Authorization', `Bearer ${accessToken}`)
     expect(status).toBe(200)
   })
+
+  it('GET /admin/stats/user-project-hours', async () => {
+    const { status, body } = await request(app)
+      .get(`/admin/stats/user-project-hours?departmentId=${departmentId}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+    expect(status).toBe(200)
+    expect(Array.isArray(body.data.rows)).toBe(true)
+  })
+
+  it('rechaza GET /admin/stats/user-project-hours sin departmentId (400)', async () => {
+    const { status } = await request(app)
+      .get('/admin/stats/user-project-hours')
+      .set('Authorization', `Bearer ${accessToken}`)
+    expect(status).toBe(400)
+  })
 })
 
 // ══════════════════════════════════════════════════════════
@@ -489,6 +557,142 @@ describe('Admin — grupos', () => {
   it('elimina el grupo', async () => {
     const { status } = await request(app)
       .delete(`/admin/group/${groupId}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+    expect(status).toBe(200)
+  })
+})
+
+// ══════════════════════════════════════════════════════════
+//  ADMIN — Schedules (plantillas y asignaciones)
+// ══════════════════════════════════════════════════════════
+
+describe('Admin — schedules', () => {
+  const sevenDays = [
+    { weekday: 1, is_working_day: true,  start_time: '09:00:00', end_time: '18:00:00', break_minutes: 60 },
+    { weekday: 2, is_working_day: true,  start_time: '09:00:00', end_time: '18:00:00', break_minutes: 60 },
+    { weekday: 3, is_working_day: true,  start_time: '09:00:00', end_time: '18:00:00', break_minutes: 60 },
+    { weekday: 4, is_working_day: true,  start_time: '09:00:00', end_time: '18:00:00', break_minutes: 60 },
+    { weekday: 5, is_working_day: true,  start_time: '09:00:00', end_time: '15:00:00', break_minutes: 0 },
+    { weekday: 6, is_working_day: false, start_time: null,        end_time: null,        break_minutes: 0 },
+    { weekday: 7, is_working_day: false, start_time: null,        end_time: null,        break_minutes: 0 },
+  ]
+
+  it('GET /admin/schedules lista plantillas del departamento', async () => {
+    const { status, body } = await request(app)
+      .get(`/admin/schedules?departmentId=${departmentId}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+    expect(status).toBe(200)
+    expect(Array.isArray(body.data)).toBe(true)
+  })
+
+  it('rechaza POST /admin/schedule con días incompletos (400)', async () => {
+    const { status } = await request(app)
+      .post('/admin/schedule')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ department_id: departmentId, name: 'Bad', is_active: true, days: sevenDays.slice(0, 5) })
+    expect(status).toBe(400)
+  })
+
+  it('crea una plantilla de horario', async () => {
+    const { status, body } = await request(app)
+      .post('/admin/schedule')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        department_id: departmentId,
+        name:          `Plantilla Test ${RUN}`,
+        description:   'Plantilla creada por test',
+        is_active:     true,
+        days:          sevenDays,
+      })
+    expect(status).toBe(201)
+    scheduleTemplateId = body.data.id
+    expect(scheduleTemplateId).toBeGreaterThan(0)
+  })
+
+  it('PUT /admin/schedule/:id edita la plantilla', async () => {
+    const { status } = await request(app)
+      .put(`/admin/schedule/${scheduleTemplateId}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        name:        `Plantilla Renombrada ${RUN}`,
+        description: 'Editada',
+        is_active:   true,
+        days:        sevenDays,
+      })
+    expect(status).toBe(200)
+  })
+
+  it('GET /admin/schedule/assignments devuelve listas vacías iniciales', async () => {
+    const { status, body } = await request(app)
+      .get(`/admin/schedule/assignments?departmentId=${departmentId}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+    expect(status).toBe(200)
+    expect(Array.isArray(body.data.user_assignments)).toBe(true)
+    expect(Array.isArray(body.data.group_assignments)).toBe(true)
+  })
+
+  it('crea grupo y usuario para asignaciones', async () => {
+    const g = await request(app)
+      .post('/admin/group')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ department_id: departmentId, name: `Grupo Sched ${RUN}` })
+    expect(g.status).toBe(201)
+    scheduleGroupId = g.body.data.id
+  })
+
+  it('POST /admin/schedule/group-assignment asigna plantilla a grupo', async () => {
+    const { status, body } = await request(app)
+      .post('/admin/schedule/group-assignment')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        group_id:    scheduleGroupId,
+        template_id: scheduleTemplateId,
+        start_date:  '2099-01-01',
+        end_date:    null,
+      })
+    expect(status).toBe(201)
+    groupAssignmentId = body.data.id
+    expect(groupAssignmentId).toBeGreaterThan(0)
+  })
+
+  it('POST /admin/schedule/user-assignment asigna plantilla a usuario', async () => {
+    const { status, body } = await request(app)
+      .post('/admin/schedule/user-assignment')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        user_id:     userId,
+        template_id: scheduleTemplateId,
+        start_date:  '2099-01-01',
+        end_date:    null,
+      })
+    expect(status).toBe(201)
+    userAssignmentId = body.data.id
+    expect(userAssignmentId).toBeGreaterThan(0)
+  })
+
+  it('rechaza user-assignment con end_date < start_date (400)', async () => {
+    const { status } = await request(app)
+      .post('/admin/schedule/user-assignment')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        user_id:     userId,
+        template_id: scheduleTemplateId,
+        start_date:  '2099-06-01',
+        end_date:    '2099-05-01',
+      })
+    expect(status).toBe(400)
+  })
+
+  it('DELETE /admin/schedule/user-assignment/:id', async () => {
+    const { status } = await request(app)
+      .delete(`/admin/schedule/user-assignment/${userAssignmentId}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+    expect(status).toBe(200)
+  })
+
+  it('DELETE /admin/schedule/group-assignment/:id', async () => {
+    const { status } = await request(app)
+      .delete(`/admin/schedule/group-assignment/${groupAssignmentId}`)
       .set('Authorization', `Bearer ${accessToken}`)
     expect(status).toBe(200)
   })
@@ -708,6 +912,21 @@ describe('User — fichajes', () => {
       .send({ clock_out: new Date().toISOString() })
     expect(status).toBe(200)
   })
+
+  it('DELETE /user/fichajes/:id elimina un fichaje del usuario', async () => {
+    // Crea un fichaje específicamente para borrarlo
+    const created = await request(app)
+      .post('/user/fichajes')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({ clock_in: new Date(Date.now() - 30 * 60 * 1000).toISOString() })
+    expect(created.status).toBe(201)
+    const idToDelete = created.body.data.id
+
+    const { status } = await request(app)
+      .delete(`/user/fichajes/${idToDelete}`)
+      .set('Authorization', `Bearer ${userToken}`)
+    expect(status).toBe(200)
+  })
 })
 
 // ══════════════════════════════════════════════════════════
@@ -743,6 +962,22 @@ describe('User — fichaje entries', () => {
       .set('Authorization', `Bearer ${userToken}`)
     expect(status).toBe(200)
     expect(Array.isArray(body.data)).toBe(true)
+  })
+
+  it('PATCH /user/fichajes/:id/entries/:entryId/start cambia started_at', async () => {
+    const { status } = await request(app)
+      .patch(`/user/fichajes/${openFichajeId}/entries/${entryId}/start`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({ started_at: new Date(Date.now() - 5 * 60 * 1000).toISOString() })
+    expect(status).toBe(200)
+  })
+
+  it('PATCH /user/fichajes/:id/entries/:entryId/project cambia el proyecto', async () => {
+    const { status } = await request(app)
+      .patch(`/user/fichajes/${openFichajeId}/entries/${entryId}/project`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({ project_id: projectId })
+    expect(status).toBe(200)
   })
 
   it('cierra una entry', async () => {

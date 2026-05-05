@@ -39,6 +39,8 @@ tags:
     description: Gestión de grupos de trabajo dentro de un departamento.
   - name: "Admin › Requests"
     description: Solicitudes de ausencia desde el panel admin (revisión, aprobación y rechazo).
+  - name: "Admin › Schedules"
+    description: Plantillas de horario y asignaciones a grupos / usuarios.
   - name: "Admin › Stats"
     description: >
       Estadísticas del panel admin. Todos los endpoints requieren `departmentId` como query param y
@@ -58,6 +60,61 @@ components:
       bearerFormat: JWT
 
   schemas:
+
+    # ── Schedules (plantillas y asignaciones) ──
+
+    ScheduleDay:
+      type: object
+      required: [weekday, is_working_day, start_time, end_time, break_minutes]
+      properties:
+        weekday:
+          type: integer
+          minimum: 1
+          maximum: 7
+          description: 1 = lunes ... 7 = domingo
+        is_working_day:
+          type: boolean
+        start_time:
+          type: string
+          nullable: true
+          pattern: '^\d{2}:\d{2}:\d{2}$'
+          example: "09:00:00"
+        end_time:
+          type: string
+          nullable: true
+          pattern: '^\d{2}:\d{2}:\d{2}$'
+          example: "18:00:00"
+        break_minutes:
+          type: integer
+          minimum: 0
+
+    CreateScheduleRequest:
+      type: object
+      required: [department_id, name, is_active, days]
+      properties:
+        department_id: { type: integer }
+        name:          { type: string, minLength: 1, maxLength: 120 }
+        description:   { type: string, nullable: true, maxLength: 255 }
+        is_active:     { type: boolean }
+        days:
+          type: array
+          minItems: 7
+          maxItems: 7
+          items:
+            $ref: "#/components/schemas/ScheduleDay"
+
+    ScheduleTemplateSummary:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:             { type: integer }
+            department_id:  { type: integer }
+            name:           { type: string }
+            description:    { type: string, nullable: true }
+            weekly_minutes: { type: integer }
+            is_active:      { type: boolean }
 
     # ── Respuestas de error ──────────────────
 
@@ -5620,3 +5677,388 @@ paths:
           description: Sin permisos para consultar este departamento.
         "404":
           description: Proyecto no encontrado en el departamento.
+
+  # ─────────────────────────────────────────
+  # SUPERADMIN › SUPERADMIN BY ID
+  # ─────────────────────────────────────────
+
+  /superadmin/superadmin/{id}:
+    patch:
+      tags: [Superadmin]
+      summary: Editar nombre / email de un superadmin
+      description: |
+        Actualiza el `name` y/o `email` de un superadmin de la empresa del autenticado.
+        Al menos uno de los dos campos debe estar presente.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              minProperties: 1
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                  example: María Pérez
+                email:
+                  type: string
+                  format: email
+                  example: maria@gimbernat.com
+      responses:
+        "200":
+          description: Superadmin actualizado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:    { type: integer }
+                      name:  { type: string }
+                      email: { type: string, format: email }
+        "400":
+          description: Body vacío o `id` inválido.
+        "401":
+          description: Token ausente o inválido.
+        "403":
+          description: Token válido pero el usuario no tiene rol SUPERADMIN.
+        "404":
+          description: Superadmin no encontrado.
+        "409":
+          description: El email ya está registrado en el sistema.
+    delete:
+      tags: [Superadmin]
+      summary: Eliminar un superadmin
+      description: |
+        Elimina un superadmin de la empresa del autenticado.
+
+        **Restricciones:**
+        - No se puede eliminar a uno mismo.
+        - No se puede eliminar al *owner* de la empresa.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Superadmin eliminado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      deleted: { type: boolean, example: true }
+        "400":
+          description: `id` inválido o intento de auto-eliminación.
+        "401":
+          description: Token ausente o inválido.
+        "403":
+          description: Sin permisos o intento de eliminar al owner de la empresa.
+        "404":
+          description: Superadmin no encontrado.
+
+  # ─────────────────────────────────────────
+  # ADMIN › SCHEDULES
+  # ─────────────────────────────────────────
+
+  /admin/schedules:
+    get:
+      tags: ["Admin › Schedules"]
+      summary: Listar plantillas de horario de un departamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: departmentId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Lista de plantillas con sus 7 días.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:              { type: integer }
+                        department_id:   { type: integer }
+                        name:            { type: string }
+                        description:     { type: string, nullable: true }
+                        weekly_minutes:  { type: integer }
+                        is_active:       { type: boolean }
+                        created_at:      { type: string, format: date-time }
+                        updated_at:      { type: string, format: date-time }
+                        days:
+                          type: array
+                          items:
+                            $ref: "#/components/schemas/ScheduleDay"
+        "400":
+          description: `departmentId` ausente o inválido.
+
+  /admin/schedule:
+    post:
+      tags: ["Admin › Schedules"]
+      summary: Crear plantilla de horario semanal
+      description: |
+        Crea una plantilla de horario con exactamente 7 días (uno por cada `weekday` del 1 al 7).
+        Los días no laborables deben tener `start_time` y `end_time` a `null`.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateScheduleRequest"
+      responses:
+        "201":
+          description: Plantilla creada.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScheduleTemplateSummary"
+        "400":
+          description: Body inválido (días incompletos, weekdays duplicados o incoherencia is_working_day).
+
+  /admin/schedule/{id}:
+    put:
+      tags: ["Admin › Schedules"]
+      summary: Editar plantilla de horario
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, is_active, days]
+              properties:
+                name:        { type: string, minLength: 1, maxLength: 120 }
+                description: { type: string, nullable: true, maxLength: 255 }
+                is_active:   { type: boolean }
+                days:
+                  type: array
+                  minItems: 7
+                  maxItems: 7
+                  items:
+                    $ref: "#/components/schemas/ScheduleDay"
+      responses:
+        "200":
+          description: Plantilla actualizada.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScheduleTemplateSummary"
+        "400":
+          description: `id` inválido o body inválido.
+
+  /admin/schedule/assignments:
+    get:
+      tags: ["Admin › Schedules"]
+      summary: Listar asignaciones de horario (usuarios y grupos) de un departamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: departmentId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Asignaciones del departamento.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      user_assignments:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:             { type: integer }
+                            user_id:        { type: integer }
+                            user_name:      { type: string }
+                            user_email:     { type: string, format: email }
+                            template_id:    { type: integer }
+                            template_name:  { type: string }
+                            start_date:     { type: string, format: date }
+                            end_date:       { type: string, format: date, nullable: true }
+                      group_assignments:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:             { type: integer }
+                            group_id:       { type: integer }
+                            group_name:     { type: string }
+                            template_id:    { type: integer }
+                            template_name:  { type: string }
+                            start_date:     { type: string, format: date }
+                            end_date:       { type: string, format: date, nullable: true }
+        "400":
+          description: `departmentId` ausente o inválido.
+
+  /admin/schedule/group-assignment:
+    post:
+      tags: ["Admin › Schedules"]
+      summary: Asignar plantilla de horario a un grupo
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [group_id, template_id, start_date]
+              properties:
+                group_id:    { type: integer }
+                template_id: { type: integer }
+                start_date:  { type: string, format: date, example: "2026-05-01" }
+                end_date:    { type: string, format: date, nullable: true }
+      responses:
+        "201":
+          description: Asignación creada.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:          { type: integer }
+                      group_id:    { type: integer }
+                      template_id: { type: integer }
+                      start_date:  { type: string, format: date }
+                      end_date:    { type: string, format: date, nullable: true }
+        "400":
+          description: Body inválido o `end_date` anterior a `start_date`.
+
+  /admin/schedule/user-assignment:
+    post:
+      tags: ["Admin › Schedules"]
+      summary: Asignar plantilla de horario a un usuario
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id, template_id, start_date]
+              properties:
+                user_id:     { type: integer }
+                template_id: { type: integer }
+                start_date:  { type: string, format: date, example: "2026-05-01" }
+                end_date:    { type: string, format: date, nullable: true }
+      responses:
+        "201":
+          description: Asignación creada.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:          { type: integer }
+                      user_id:     { type: integer }
+                      template_id: { type: integer }
+                      start_date:  { type: string, format: date }
+                      end_date:    { type: string, format: date, nullable: true }
+        "400":
+          description: Body inválido o `end_date` anterior a `start_date`.
+
+  /admin/schedule/user-assignment/{id}:
+    delete:
+      tags: ["Admin › Schedules"]
+      summary: Borrar asignación de horario de usuario
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Asignación eliminada.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id: { type: integer }
+        "400":
+          description: `id` inválido.
+
+  /admin/schedule/group-assignment/{id}:
+    delete:
+      tags: ["Admin › Schedules"]
+      summary: Borrar asignación de horario de grupo
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Asignación eliminada.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id: { type: integer }
+        "400":
+          description: `id` inválido.
