@@ -107,9 +107,9 @@ export async function updateProjectById(
 
 /**
  * Busca todos los proyectos de un departamento.
- * 
+ *
  * Se usa desde el panel admin para listar proyectos del departamento seleccionado.
- * 
+ *
  * @param departmentId ID del departamento.
  * @returns Lista de proyectos ordenados por fecha de creación descendente.
  */
@@ -122,4 +122,18 @@ export async function findProjectsByDepartmentId(
   );
 
   return rows;
+}
+
+/**
+ * Elimina un proyecto por su ID.
+ * @param projectId ID del proyecto a eliminar.
+ * @returns true si se eliminó, false si no existía.
+ */
+export async function deleteProjectById(projectId: number): Promise<boolean> {
+  const [result] = await pool.query<ResultSetHeader>(
+    "DELETE FROM projects WHERE id = ? LIMIT 1",
+    [projectId],
+  );
+
+  return result.affectedRows > 0;
 }
