@@ -1,7 +1,7 @@
 openapi: 3.0.3
 
 info:
-  title: FichajeApp API
+  title: FichoNow API
   version: 1.0.0
   description: API REST para la gestión de fichajes y usuarios.
 

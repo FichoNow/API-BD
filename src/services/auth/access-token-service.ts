@@ -20,7 +20,7 @@ export function issueJwt(jwtClaims: JwtClaims): string {
     subject: jwtClaims.id.toString(),
     expiresIn: env.JWT_ACCESS_EXPIRES_IN,
     issuer: "Api-Fran-Jan",
-    audience: "FichajeApp-client",
+    audience: "FichoNow-client",
   });
 }
 
@@ -35,7 +35,7 @@ export function validateAccessToken(token: string): JwtClaims {
   try {
     const decoded = jwt.verify(token, env.JWT_SECRET, {
       issuer: "Api-Fran-Jan",
-      audience: "FichajeApp-client",
+      audience: "FichoNow-client",
     });
 
     if (typeof decoded === "string" || !decoded.jwtClaims) {
