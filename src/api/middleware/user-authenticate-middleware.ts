@@ -31,7 +31,5 @@ export async function requireAuth(
   const claims = validateAccessToken(token);
   req.jwtClaims = claims;
 
-  console.log(claims);
-
   return next();
 }

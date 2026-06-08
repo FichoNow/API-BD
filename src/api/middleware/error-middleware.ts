@@ -18,9 +18,10 @@ export function errorMiddleware(
   res: Response<BodyResponse>,
   next: NextFunction,
 ) {
-  console.error(err);
-
   if (err instanceof ResponseError) {
+    // Error operacional esperado (4xx): es una respuesta controlada (validación,
+    // credenciales, conflicto...), no un fallo del servidor. No se vuelca al log
+    // de errores para no ensuciarlo con cosas que no son bugs.
     return res.status(err.statusCode).json({
       data: null,
       error: {
@@ -29,6 +30,9 @@ export function errorMiddleware(
       },
     });
   }
+
+  // Error inesperado (bug real / 5xx): esto sí se registra para poder diagnosticarlo.
+  console.error(err);
 
   return res.status(500).json({
     data: null,

@@ -31,7 +31,5 @@ export async function refreshUser(
     role: userData.role,
   });
 
-  console.log(`[REFRESH] Token rotado para userId=${userData.id} (${userData.email})`);
-
   return { accessToken, refreshToken: newRefreshToken };
 }

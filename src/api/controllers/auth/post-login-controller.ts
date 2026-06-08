@@ -18,7 +18,6 @@ export async function loginController(
   req: Request<unknown, unknown, PostLoginBody>,
   res: Response<BodyResponse<PostLoginResponse>>,
 ) {
-  console.log("[LOGIN] Body recibido:", req.body);
   const parsed = PostLoginBodySchema.safeParse(req.body);
 
   if (!parsed.success) {
