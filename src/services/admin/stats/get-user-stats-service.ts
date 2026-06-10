@@ -57,10 +57,12 @@ export async function getUserStatsService(
     date:             groupBy === "date" ? fmtDate(d.day_label) : undefined,
     regular_minutes:  Number(d.regular_minutes),
     overtime_minutes: Number(d.overtime_minutes),
+    edited_count:     Number(d.edited_count),
   }))
 
   const totalMinutes    = parsedDaily.reduce((s,d) => s + d.regular_minutes + d.overtime_minutes, 0)
   const overtimeMinutes = parsedDaily.reduce((s,d) => s + d.overtime_minutes, 0)
+  const editedFichajes  = parsedDaily.reduce((s,d) => s + d.edited_count, 0)
   const prevTotal       = prevDaily.reduce((s,d) => s + Number(d.regular_minutes) + Number(d.overtime_minutes), 0)
   const prevOT          = prevDaily.reduce((s,d) => s + Number(d.overtime_minutes), 0)
 
@@ -77,6 +79,7 @@ export async function getUserStatsService(
     punctuality_rate:      Number(punctuality),
     active_absences:       Number(activeAbsences),
     pending_requests:      Number(pendingRequests),
+    edited_fichajes:       editedFichajes,
     daily:                 parsedDaily,
     total_minutes_prev:    prevTotal,
     overtime_minutes_prev: prevOT,

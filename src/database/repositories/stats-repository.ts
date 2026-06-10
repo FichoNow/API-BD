@@ -9,6 +9,7 @@ interface RangeStatsRow extends RowDataPacket {
   day_label: string | Date
   regular_minutes: number
   overtime_minutes: number
+  edited_count: number
 }
 
 interface EmployeeRankRow extends RowDataPacket {
@@ -44,7 +45,8 @@ export async function getRangeStats(
   const [rows] = await pool.query<RangeStatsRow[]>(
     `SELECT ${groupSql} AS day_label,
        SUM(LEAST(540, TIMESTAMPDIFF(MINUTE, f.clock_in, f.clock_out))) AS regular_minutes,
-       SUM(GREATEST(0, TIMESTAMPDIFF(MINUTE, f.clock_in, f.clock_out) - 540)) AS overtime_minutes
+       SUM(GREATEST(0, TIMESTAMPDIFF(MINUTE, f.clock_in, f.clock_out) - 540)) AS overtime_minutes,
+       SUM(CASE WHEN f.clock_in_modified OR f.clock_out_modified THEN 1 ELSE 0 END) AS edited_count
      FROM fichajes f JOIN users u ON f.user_id = u.id
      WHERE u.department_id = ? AND f.clock_in >= ? AND f.clock_in < ?
        AND f.clock_out IS NOT NULL ${userClause} ${groupClause}
