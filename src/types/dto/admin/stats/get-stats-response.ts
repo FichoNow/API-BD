@@ -4,6 +4,7 @@ export interface DayStats {
   regular_minutes: number
   overtime_minutes: number
   edited_count?: number
+  outside_schedule_count?: number
 }
 
 export interface EmployeeRank {
@@ -133,6 +134,7 @@ export interface UserStatsResponse {
   active_absences: number
   pending_requests: number
   edited_fichajes: number
+  outside_schedule_fichajes: number
   daily: DayStats[]
   total_minutes_prev: number
   overtime_minutes_prev: number

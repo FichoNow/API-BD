@@ -10,6 +10,7 @@ interface RangeStatsRow extends RowDataPacket {
   regular_minutes: number
   overtime_minutes: number
   edited_count: number
+  outside_schedule_count: number
 }
 
 interface EmployeeRankRow extends RowDataPacket {
@@ -46,8 +47,16 @@ export async function getRangeStats(
     `SELECT ${groupSql} AS day_label,
        SUM(LEAST(540, TIMESTAMPDIFF(MINUTE, f.clock_in, f.clock_out))) AS regular_minutes,
        SUM(GREATEST(0, TIMESTAMPDIFF(MINUTE, f.clock_in, f.clock_out) - 540)) AS overtime_minutes,
-       SUM(CASE WHEN f.clock_in_modified OR f.clock_out_modified THEN 1 ELSE 0 END) AS edited_count
+       SUM(CASE WHEN f.clock_in_modified OR f.clock_out_modified THEN 1 ELSE 0 END) AS edited_count,
+       SUM(CASE WHEN dp.template_id IS NULL THEN 1 ELSE 0 END) AS outside_schedule_count
      FROM fichajes f JOIN users u ON f.user_id = u.id
+     LEFT JOIN asignaciones_usuario au ON au.user_id = u.id
+       AND DATE(f.clock_in) BETWEEN au.start_date AND COALESCE(au.end_date,'9999-12-31')
+     LEFT JOIN asignaciones_grupo ag ON ag.group_id = u.group_id
+       AND DATE(f.clock_in) BETWEEN ag.start_date AND COALESCE(ag.end_date,'9999-12-31')
+       AND au.user_id IS NULL
+     LEFT JOIN dias_plantilla dp ON dp.template_id = COALESCE(au.template_id, ag.template_id)
+       AND dp.weekday = WEEKDAY(f.clock_in)+1 AND dp.is_working_day = TRUE
      WHERE u.department_id = ? AND f.clock_in >= ? AND f.clock_in < ?
        AND f.clock_out IS NOT NULL ${userClause} ${groupClause}
      GROUP BY ${groupSql} ORDER BY day_label`,
